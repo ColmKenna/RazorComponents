@@ -1,0 +1,22 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+    <PropertyGroup>
+        <TargetFramework>net9.0</TargetFramework>
+        <Nullable>enable</Nullable>
+        <ImplicitUsings>enable</ImplicitUsings>
+    </PropertyGroup>
+
+
+
+    <ItemGroup>
+      <Folder Include="wwwroot\css\components\" />
+    </ItemGroup>
+
+
+
+    <ItemGroup>
+      <None Include="wwwroot\components\ArrayEditor\array-editor.css" />
+      <None Include="wwwroot\components\ArrayEditor\array-editor.js" />
+    </ItemGroup>
+
+</Project>

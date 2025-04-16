@@ -1,0 +1,24 @@
+﻿@page
+@model Edit
+@{
+    ViewData["Title"] = "Array Editor Sample";
+}
+
+<h1>Array Editor Sample</h1>
+
+@if (TempData["Message"] != null)
+{
+    <div class="alert alert-success">@TempData["Message"]</div>
+}
+
+<form method="post">
+    @* @await Component.InvokeAsync("ArrayEditor", new { items = Model.Form.Items, name = "Form.Items", deleteName = "Form.DeletedItems" })  *@
+    
+    
+    <vc:array-editor items="@Model.Form.Items"
+                     name="Form.Items"
+                     delete-name="Form.DeletedItems"
+                     id="Form.Items" />
+
+    <button type="submit">Save</button>
+</form>

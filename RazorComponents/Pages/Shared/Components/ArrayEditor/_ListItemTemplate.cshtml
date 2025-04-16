@@ -1,0 +1,12 @@
+@model (string Name, string DeletedName, string Value, int Index)
+
+<span class="item-label">@Model.Value</span>
+<input type="text" name="@($"{Model.Name}[{Model.Index}]")" value="@Model.Value" class="item-input" style="display:none;" />
+<input type="hidden" name="@($"{Model.DeletedName}[{Model.Index}]")" value="" />
+<button type="button" class="edit-btn" onclick="toggleEdit(this)">
+    <i class="fas fa-edit"></i> Edit
+</button>
+<button type="button" class="remove-btn" onclick="markAsRemoved(this)">
+    <i class="fas fa-trash"></i> Remove
+</button>
+
