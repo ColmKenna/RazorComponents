@@ -1,0 +1,39 @@
+@page
+@model RazorComponents.Pages.SampleUses.Dialog.ExampleModel
+
+/// <reference path="~/components/dialog/dialog.js" />
+
+<h1>DialogViewComponent Example</h1>
+
+<vc:dialog 
+    dialog-id="@Model.DialogId" 
+    title="@Model.Title" 
+    inputs="@Model.Inputs" 
+    button-text="@Model.ButtonTitle"> </vc:dialog>
+
+<div id="dialog-values-output"></div>
+
+@section Scripts {
+    <script>
+        // Use the same event name constants as dialog.js
+        document.addEventListener('DOMContentLoaded', function () {
+            var dialog = document.getElementById('@Model.DialogId');
+            if (dialog) {
+                dialog.addEventListener(DIALOG_CONFIRMED_EVENT, handleDialogResult('Confirmed'));
+                dialog.addEventListener(DIALOG_CANCELLED_EVENT, handleDialogResult('Cancelled'));
+            }
+        });
+        function handleDialogResult(action) {
+            return function (e) {
+                appendDialogValues(action, e.detail.values);
+            };
+        }
+
+        function appendDialogValues(action, values) {
+            var output = document.getElementById('dialog-values-output');
+            var pre = document.createElement('pre');
+            pre.textContent = action + ': ' + JSON.stringify(values, null, 2);
+            output.appendChild(pre);
+        }
+    </script>
+}

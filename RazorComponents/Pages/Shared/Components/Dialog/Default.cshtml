@@ -1,0 +1,30 @@
+@model RazorComponents.Pages.Shared.Components.Dialog.DialogViewComponent
+
+@{
+    var DialogId = Model.DialogId;
+    var Title = Model.Title;
+    var Inputs = Model.Inputs;
+}
+
+<div>
+    <button id="openDialog" data-dialog-id="@DialogId">@Model.ButtonText</button>
+
+    <dialog id="@DialogId">
+        <div class="dialog-content">
+            <h2>@Title</h2>
+
+            @foreach (var input in Inputs)
+            {
+                <label for="@input.Id">@input.Id</label>
+                <input type="@input.Type" id="@input.Id" name="@input.Id">
+            }
+
+            <p>Are you sure you want to continue?</p>
+            <div class="dialog-buttons">
+                <button id="@($"{DialogId}-confirm")" class="confirmBtn" data-input-ids="@string.Join(",", Inputs.Select(i => i.Id))">Confirm</button>
+                <button type="button" class="cancelBtn" data-input-ids="@string.Join(",", Inputs.Select(i => i.Id))">Cancel</button>
+            </div>
+        </div>
+    </dialog>
+</div>
+

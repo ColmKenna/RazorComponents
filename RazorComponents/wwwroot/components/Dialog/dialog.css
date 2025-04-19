@@ -1,0 +1,84 @@
+/* Dialog styles extracted from dialog.html */
+dialog {
+  border: none;
+  border-radius: 12px;
+  padding: 30px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+  background: linear-gradient(135deg, #ffffff, #f0f0f0);
+  max-width: 400px;
+  width: 100%;
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: scale(0.95); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+.dialog-content {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+h2 {
+  margin: 0;
+  font-size: 1.5em;
+  color: #333;
+}
+
+label {
+  font-weight: 600;
+  color: #555;
+}
+
+input[type="text"], input[type="email"] {
+  padding: 10px;
+  border-radius: 8px;
+  border: 1px solid #bbb;
+  font-size: 1em;
+}
+
+input[type="text"]:focus, input[type="email"]:focus {
+  outline: none;
+  border-color: #007BFF;
+  box-shadow: 0 0 3px rgba(0, 123, 255, 0.5);
+}
+
+.dialog-buttons {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.dialog-buttons button:first-child {
+  justify-self: start;
+}
+
+.dialog-buttons button:last-child {
+  justify-self: end;
+}
+
+button {
+  padding: 10px 16px;
+  border: none;
+  border-radius: 6px;
+  background-color: #007BFF;
+  color: white;
+  font-size: 1em;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+button:hover {
+  background-color: #0056b3;
+}
+
+button.cancelBtn {
+  background-color: #6c757d;
+}
+
+button.cancelBtn:hover {
+  background-color: #5a6268;
+}
