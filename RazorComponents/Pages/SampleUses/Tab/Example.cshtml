@@ -1,0 +1,22 @@
+@page
+@model RazorComponents.Pages.SampleUses.Tab.ExampleModel
+
+<h1>TabTagHelper Example</h1>
+
+<link rel="stylesheet" href="~/components/Tabs/tabs.css" />
+
+<tab>
+    <tab-item heading="First Tab" selected="true">
+        <p>This is the content of the first tab.</p>
+    </tab-item>
+    <tab-item heading="Second Tab">
+        <p>This is the content of the second tab.</p>
+    </tab-item>
+    <tab-item heading="Third Tab">
+        <p>This is the content of the third tab.</p>
+    </tab-item>
+</tab>
+
+@section Scripts {
+    <!-- Optionally add custom JS for tabs here -->
+}
