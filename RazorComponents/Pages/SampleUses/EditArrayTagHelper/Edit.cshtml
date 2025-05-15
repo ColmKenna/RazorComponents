@@ -1,0 +1,31 @@
+@page
+@model RazorComponents.Pages.SampleUses.EditArrayTagHelper.Edit
+
+<h2>Edit Person</h2>
+
+<form method="post">
+    <div class="form-group">
+        <label asp-for="Person.FirstName">First Name</label>
+        <input asp-for="Person.FirstName" class="form-control" />
+    </div>
+    <div class="form-group">
+        <label asp-for="Person.LastName">Last Name</label>
+        <input asp-for="Person.LastName" class="form-control" />
+    </div>
+
+    <h3>Addresses</h3>
+    <edit-array 
+        asp-items="@Model.Person.Addresses" 
+        asp-view-name="~/Pages/Shared/EditorTemplates/Address.cshtml" 
+        asp-display-view-name="~/Pages/Shared/DisplayTemplates/Address.cshtml"
+        asp-for="Person.Addresses" 
+        asp-template="true" 
+        asp-add-button="true"
+        asp-display-mode="true">
+    </edit-array>
+
+    <div class="form-group mt-4">
+        <button type="submit" class="btn btn-primary">Save</button>
+    </div>
+</form>
+

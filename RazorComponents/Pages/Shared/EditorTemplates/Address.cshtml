@@ -1,0 +1,28 @@
+﻿@model RazorComponents.SampleModels.Address
+
+<div class="address-card">
+    <div class="address-card-body">
+        <div class="address-form-group">
+            <label asp-for="Street" class="address-label">Street</label>
+            <input asp-for="Street" class="address-input" />
+            <span asp-validation-for="Street" class="address-validation"></span>
+        </div>
+        <div class="address-form-row">
+            <div class="address-form-group address-col-md-6">
+                <label asp-for="City" class="address-label">City</label>
+                <input asp-for="City" class="address-input" />
+                <span asp-validation-for="City" class="address-validation"></span>
+            </div>
+            <div class="address-form-group address-col-md-3">
+                <label asp-for="State" class="address-label">State</label>
+                <input asp-for="State" class="address-input" />
+                <span asp-validation-for="State" class="address-validation"></span>
+            </div>
+            <div class="address-form-group address-col-md-3">
+                <label asp-for="Code" class="address-label">Zip Code</label>
+                <input asp-for="Code" class="address-input" />
+                <span asp-validation-for="Code" class="address-validation"></span>
+            </div>
+        </div>
+    </div>
+</div>

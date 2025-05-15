@@ -25,7 +25,7 @@ function addItem(button) {
     var inputs = templateContent.querySelectorAll('input');
     // Set the name attributes for the inputs
     inputs.forEach(function (input) {
-        var name = input.name.replace(/\[0\]/g, `[${index}]`);
+        var name = input.name.replace(/\[0]/g, `[${index}]`);
         input.name = name;
         input.value = newValue;
     });

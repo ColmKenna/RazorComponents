@@ -1,0 +1,24 @@
+@model RazorComponents.SampleModels.Address
+
+<div class="address-card">
+    <div class="address-card-body">
+        <div class="address-form-group ">
+            <label class="address-label">Street</label>
+            <div class="address-plaintext">@Model.Street</div>
+        </div>
+        <div class="address-form-row">
+            <div class="address-form-group address-col-md-6">
+                <label class="address-label">City</label>
+                <div class="address-plaintext">@Model.City</div>
+            </div>
+            <div class="address-form-group address-col-md-3">
+                <label class="address-label">State</label>
+                <div class="address-plaintext">@Model.State</div>
+            </div>
+            <div class="address-form-group address-col-md-3">
+                <label class="address-label">Zip Code</label>
+                <div class="address-plaintext">@Model.Code</div>
+            </div>
+        </div>
+    </div>
+</div>
