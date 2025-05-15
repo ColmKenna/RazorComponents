@@ -7,10 +7,10 @@ function addNewItem(containerId, templateId) {
     const container = document.getElementById(containerId + '-items');
     const template = document.getElementById(templateId);
     const clone = template.content.cloneNode(true);
-    
+
     // Get current count of items to use as new index
     const newIndex = container.children.length;
-    
+
     // Replace '__index__' with the actual index in all input names and ids
     const allInputs = clone.querySelectorAll('input, select, textarea');
     allInputs.forEach(input => {
@@ -21,7 +21,7 @@ function addNewItem(containerId, templateId) {
             input.id = input.id.replace('__index__', newIndex);
         }
     });
-    
+
     // Replace '__index__' in labels' for attribute
     const allLabels = clone.querySelectorAll('label[for]');
     allLabels.forEach(label => {
@@ -29,7 +29,7 @@ function addNewItem(containerId, templateId) {
             label.htmlFor = label.htmlFor.replace('__index__', newIndex);
         }
     });
-    
+
     // Replace '__index__' in validation message elements
     const allValidationElements = clone.querySelectorAll('[data-valmsg-for]');
     allValidationElements.forEach(element => {
@@ -38,35 +38,45 @@ function addNewItem(containerId, templateId) {
             element.setAttribute('data-valmsg-for', newValue);
         }
     });
+
     
+
     // Set the ID for the new item
     const itemDiv = clone.querySelector('.edit-array-item');
     if (itemDiv) {
         const itemId = `${containerId}-item-${newIndex}`;
         itemDiv.id = itemId;
-        
+
         // Update onclick handlers with the new ID
         const editBtn = itemDiv.querySelector('.edit-item-btn');
         if (editBtn) {
             editBtn.setAttribute('onclick', `toggleEditMode('${itemId}')`);
         }
-        
+
         const doneBtn = itemDiv.querySelector('.done-edit-btn');
         if (doneBtn) {
             doneBtn.setAttribute('onclick', `toggleEditMode('${itemId}')`);
         }
-        
+
+        const deleteBtn = itemDiv.querySelector('.delete-item-btn');
+        if (deleteBtn) {
+            deleteBtn.setAttribute('onclick', `markForDeletion('${itemId}')`);
+        }
+
         // For newly added items in display mode, show edit container first and hide display container
         const displayContainer = itemDiv.querySelector('.display-container');
+        // set the id on the displayContainer
+        displayContainer.id = `${itemId}-display`;
         const editContainer = itemDiv.querySelector('.edit-container');
+        editContainer.id = `${itemId}-edit`;
         if (displayContainer && editContainer) {
             displayContainer.style.display = 'none';
             editContainer.style.display = 'block';
         }
     }
-    
+
     container.appendChild(clone);
-    
+
     // Re-parse validation for the new elements if jQuery validation is available
     if (typeof $.validator !== 'undefined' && $.validator.unobtrusive) {
         $.validator.unobtrusive.parse(container);
@@ -80,15 +90,15 @@ function addNewItem(containerId, templateId) {
 function toggleEditMode(itemId) {
     const item = document.getElementById(itemId);
     if (!item) return;
-    
+
     const displayContainer = document.getElementById(`${itemId}-display`);
     const editContainer = document.getElementById(`${itemId}-edit`);
-    
+
     if (displayContainer && editContainer) {
         if (displayContainer.style.display === 'none') {
             // Update display with current values
             updateDisplayFromForm(itemId);
-            
+
             // Switch from edit to display
             displayContainer.style.display = 'block';
             editContainer.style.display = 'none';
@@ -96,6 +106,43 @@ function toggleEditMode(itemId) {
             // Switch from display to edit
             displayContainer.style.display = 'none';
             editContainer.style.display = 'block';
+        }
+    }
+}
+
+function markForDeletion(itemId) {
+    const item = document.getElementById(itemId);
+    const deleteButton = item.querySelector('.delete-item-btn');
+    const editButton = item.querySelector('.edit-item-btn');
+    const isDeletedInput = item.querySelector('input[data-is-deleted-marker]');
+
+    if (item) {
+        if (item.getAttribute('data-deleted') === 'true') {
+            // Undo deletion
+            item.removeAttribute('data-deleted');
+            item.classList.remove('deleted');
+            if (isDeletedInput) {
+                isDeletedInput.value = 'false';
+            }
+            if (deleteButton) {
+                deleteButton.textContent = 'Delete';
+            }
+            if (editButton) {
+                editButton.disabled = false;
+            }
+        } else {
+            // Mark as deleted
+            item.setAttribute('data-deleted', 'true');
+            item.classList.add('deleted');
+            if (isDeletedInput) {
+                isDeletedInput.value = 'true';
+            }
+            if (deleteButton) {
+                deleteButton.textContent = 'Undelete';
+            }
+            if (editButton) {
+                editButton.disabled = true;
+            }
         }
     }
 }
@@ -108,3 +155,4 @@ function updateDisplayFromForm(itemId) {
     // This function can be expanded to update specific display elements
     // based on the form input values if needed
 }
+

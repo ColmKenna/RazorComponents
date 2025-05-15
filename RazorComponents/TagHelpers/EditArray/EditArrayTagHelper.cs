@@ -38,6 +38,9 @@ public class EditArrayTagHelper : TagHelper
 
     [ViewContext]
     public required ViewContext ViewContext { get; set; }
+    
+    [HtmlAttributeName("id")]
+    public string Id { get; set; } 
 
     private readonly IHtmlHelper _htmlHelper;
 
@@ -51,7 +54,7 @@ public class EditArrayTagHelper : TagHelper
         output.Attributes.SetAttribute("class", "edit-array-container");
         
         // Create an ID for the container to use with JavaScript
-        string containerId = $"edit-array-{Guid.NewGuid():N}";
+        string containerId = $"edit-array-{Id}";
         output.Attributes.SetAttribute("id", containerId);
         
         // Setup HtmlHelper to be used in our views
@@ -69,6 +72,9 @@ public class EditArrayTagHelper : TagHelper
         // Create a wrapper div for the items
         sb.Append($"<div class=\"edit-array-items\" id=\"{containerId}-items\">");
         
+        
+        // get the type
+        
         // Process each item
         int index = 0;
         foreach (var item in Items)
@@ -80,6 +86,15 @@ public class EditArrayTagHelper : TagHelper
             // Create a wrapper for this item
             sb.Append($"<div class=\"edit-array-item\" id=\"{itemId}\">");
             
+            // Check if IsDeleted property is present in the model and add a hidden input if not
+            var isDeletedProperty = item.GetType().GetProperty("IsDeleted");            
+            
+            if (isDeletedProperty == null )
+            {                
+                // Add hidden input for IsDeleted with default value (false)
+                sb.Append($"<input type=\"hidden\" name=\"{fieldName}.IsDeleted\" value=\"false\" data-is-deleted-marker />");
+            }
+
             // Store the original prefix
             var originalPrefix = ViewContext.ViewData.TemplateInfo.HtmlFieldPrefix;
             
@@ -108,10 +123,16 @@ public class EditArrayTagHelper : TagHelper
                 }
                 
                 // Move the edit button inside the display-container div
-                sb.Append($"<button type=\"button\" class=\"btn btn-sm btn-primary edit-item-btn mt-2\" " +
-                           $"onclick=\"toggleEditMode('{itemId}')\">");
+                sb.Append($"<button type=\"button\" class=\"btn btn-sm btn-primary edit-item-btn mt-2\" ");
+                sb.Append($" onclick=\"toggleEditMode('{itemId}')\">");
                 sb.Append("Edit");
                 sb.Append("</button>");
+                
+                sb.Append($"<button type=\"button\" class=\"btn btn-sm btn-danger delete-item-btn mt-2\" ");
+                sb.Append($" onclick=\"markForDeletion('{itemId}')\">");
+                sb.Append("Delete");
+                sb.Append("</button>");
+                
                 
                 sb.Append("</div>");
                 
@@ -166,18 +187,25 @@ public class EditArrayTagHelper : TagHelper
         {
             string templateId = $"{containerId}-template";
             sb.Append($"<template id=\"{templateId}\">");
-            
+
             // Generate template with a special index
             var templateFieldName = GetFieldName(modelExpressionPrefix, collectionName, "__index__");
-            
-            // Store the original prefix
+
+
+
+        // Store the original prefix
             var originalPrefix = ViewContext.ViewData.TemplateInfo.HtmlFieldPrefix;
             
             // Set the new prefix for the template
             ViewContext.ViewData.TemplateInfo.HtmlFieldPrefix = templateFieldName;
             
             // Create a default model instance for the template
-            object? templateModel = Activator.CreateInstance(Items.GetType().GetGenericArguments()[0]);
+            object? templateModel = null;
+            var itemType = Items.GetType().GetGenericArguments().FirstOrDefault();
+            if (itemType != null)
+            {
+                templateModel = Activator.CreateInstance(itemType);
+            }
             
             // Create a new ViewDataDictionary with the template model
             var viewData = new ViewDataDictionary<object>(ViewContext.ViewData)
@@ -187,7 +215,10 @@ public class EditArrayTagHelper : TagHelper
             
             // Create a wrapper for the template item
             sb.Append("<div class=\"edit-array-item\">");
-            
+
+            var name = $"{templateFieldName}.IsDeleted";
+
+
             if (DisplayMode && !string.IsNullOrEmpty(DisplayViewName))
             {
                 // In display mode, we include both the display and edit templates
@@ -208,6 +239,12 @@ public class EditArrayTagHelper : TagHelper
                 sb.Append("</button>");
                 sb.Append("</div>");
                 
+                sb.Append($"<button type=\"button\" class=\"btn btn-sm btn-danger delete-item-btn mt-2\" ");
+                sb.Append($" onclick=\"markForDeletion(this.closest('.edit-array-item').id)\">");
+                sb.Append("Delete");
+                sb.Append("</button>");   
+                
+                
                 // Edit template
                 sb.Append("<div class=\"edit-container\">");
             }
@@ -219,7 +256,12 @@ public class EditArrayTagHelper : TagHelper
                 using (var writer = new StringWriter())
                 {
                     viewContent.WriteTo(writer, HtmlEncoder.Default);
-                    sb.Append(writer.ToString());
+                    var templateContent = writer.ToString();
+                    sb.Append(templateContent);
+                    if (!templateContent.Contains($"name=\"{name}\"", StringComparison.OrdinalIgnoreCase ))
+                    {
+                        sb.Append($"<input type=\"hidden\" name=\"{name}\" value=\"false\" data-is-deleted-marker />");
+                    }
                 }
             }
             
@@ -230,6 +272,8 @@ public class EditArrayTagHelper : TagHelper
                 sb.Append("Done");
                 sb.Append("</button>");
                 sb.Append("</div>");
+                
+                
             }
             
             // Close the template item wrapper
@@ -267,4 +311,3 @@ public class EditArrayTagHelper : TagHelper
             : $"{prefix}.{collectionName}[{index}]";
     }
 }
-

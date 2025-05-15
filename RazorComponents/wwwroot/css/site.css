@@ -126,3 +126,13 @@ body {
   box-shadow: 0 1px 4px rgba(60,180,100,0.06);
   position: relative;
 }
+
+.edit-array-item.deleted *:not(button) {
+    background: #f8d7da;
+    border-color: #f5c6cb;
+    color: #721c24;
+}
+
+.edit-array-item.deleted > *{
+  text-decoration: line-through;
+}
