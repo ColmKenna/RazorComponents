@@ -237,13 +237,13 @@ public class EditArrayTagHelper : TagHelper
                           "onclick=\"toggleEditMode(this.closest('.edit-array-item').id)\">");
                 sb.Append("Edit");
                 sb.Append("</button>");
-                sb.Append("</div>");
                 
                 sb.Append($"<button type=\"button\" class=\"btn btn-sm btn-danger delete-item-btn mt-2\" ");
                 sb.Append($" onclick=\"markForDeletion(this.closest('.edit-array-item').id)\">");
                 sb.Append("Delete");
                 sb.Append("</button>");   
                 
+                sb.Append("</div>");
                 
                 // Edit template
                 sb.Append("<div class=\"edit-container\">");
