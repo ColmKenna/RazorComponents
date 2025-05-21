@@ -3,21 +3,26 @@
 <div class="address-card">
     <div class="address-card-body">
         <div class="address-form-group ">
-            <label class="address-label">Street</label>
-            <div class="address-plaintext">@Model.Street</div>
+            
+            <display asp-for="Street" label-class="address-label" display-class="address-plaintext"></display>
+            <span asp-validation-for="Street" class="address-validation"></span>
         </div>
         <div class="address-form-row">
             <div class="address-form-group address-col-md-6">
-                <label class="address-label">City</label>
-                <div class="address-plaintext">@Model.City</div>
+                <display 
+                    asp-for="City" 
+                    label-class="address-label" 
+                    display-class="address-plaintext"
+                     ></display>
+                <span asp-validation-for="City" class="address-validation"></span>
             </div>
             <div class="address-form-group address-col-md-3">
-                <label class="address-label">State</label>
-                <div class="address-plaintext">@Model.State</div>
+                <display asp-for="State" label-class="address-label" display-class="address-plaintext"></display>
+                <span asp-validation-for="State" class="address-validation"></span>
             </div>
             <div class="address-form-group address-col-md-3">
-                <label class="address-label">Zip Code</label>
-                <div class="address-plaintext">@Model.Code</div>
+                <display asp-for="Code" label-class="address-label" display-class="address-plaintext"></display>
+                <span asp-validation-for="Code" class="address-validation"></span>
             </div>
         </div>
     </div>
