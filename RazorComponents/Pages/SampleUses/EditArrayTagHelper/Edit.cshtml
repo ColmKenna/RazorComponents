@@ -22,11 +22,40 @@
         asp-template="true" 
         asp-add-button="true"
         asp-display-mode="true"
-        id="addresses">
+        id="addresses"
+        asp-on-update="onUpdate">
     </edit-array>
 
     <div class="form-group mt-4">
         <button type="submit" class="btn btn-primary">Save</button>
     </div>
 </form>
+
+@section Scripts {
+    <script>
+        function onUpdate(itemId) {
+            const item = document.getElementById(itemId);
+            if (!item) return;
+
+            const editContainer = document.getElementById(`${itemId}-edit`);
+
+            // Handle the update event here
+            const inputs = editContainer.querySelectorAll('input, select, textarea');
+            // create a string with all the values
+            let values = '';
+            inputs.forEach(input => {
+                if (input.type === 'checkbox') {
+                    values += `${input.name}: ${input.checked}\n`;
+                } else {
+                    values += `${input.name}: ${input.value}\n`;
+                }
+            });
+            // log the values to the console
+            console.log(`Updated item ${itemId} with values:\n${values}`);
+
+            
+        }
+    </script>
+}
+
 

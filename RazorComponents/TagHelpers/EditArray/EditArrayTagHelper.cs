@@ -15,7 +15,10 @@ public class EditArrayTagHelper : TagHelper
     private const string ModelExpAttributeName = "asp-for";
     private const string TemplateAttributeName = "asp-template";
     private const string AddButtonAttributeName = "asp-add-button";
-    private const string DisplayModeAttributeName = "asp-display-mode";    [HtmlAttributeName(ViewNameAttributeName)]
+    private const string DisplayModeAttributeName = "asp-display-mode";    
+    private const string OnUpdateAttributeName = "asp-on-update";
+    
+    [HtmlAttributeName(ViewNameAttributeName)]
     public required string ViewName { get; set; }
     
     [HtmlAttributeName(DisplayViewNameAttributeName)]
@@ -36,6 +39,9 @@ public class EditArrayTagHelper : TagHelper
     [HtmlAttributeName(DisplayModeAttributeName)]
     public bool DisplayMode { get; set; } = false;
 
+    [HtmlAttributeName(OnUpdateAttributeName)]
+    public string? OnUpdate { get; set; }
+
     [ViewContext]
     public required ViewContext ViewContext { get; set; }
     
@@ -47,7 +53,9 @@ public class EditArrayTagHelper : TagHelper
     public EditArrayTagHelper(IHtmlHelper htmlHelper)
     {
         _htmlHelper = htmlHelper;
-    }    public override async Task ProcessAsync(TagHelperContext context, TagHelperOutput output)
+    }    
+
+    public override async Task ProcessAsync(TagHelperContext context, TagHelperOutput output)
     {
         // Reset the TagHelper output
         output.TagName = "div";
@@ -149,9 +157,9 @@ public class EditArrayTagHelper : TagHelper
                     sb.Append(writer.ToString());
                 }
                 
-                // Add done button
+                // Add done button with update handler
                 sb.Append($"<button type=\"button\" class=\"btn btn-sm btn-success done-edit-btn mt-2\" " +
-                           $"onclick=\"toggleEditMode('{itemId}')\">");
+                           $"onclick=\"toggleEditMode('{itemId}'); {(string.IsNullOrEmpty(OnUpdate) ? "" : $"{OnUpdate}('{itemId}');")}\">");
                 sb.Append("Done");
                 sb.Append("</button>");
                 
@@ -268,7 +276,8 @@ public class EditArrayTagHelper : TagHelper
             if (DisplayMode && !string.IsNullOrEmpty(DisplayViewName))
             {
                 sb.Append("<button type=\"button\" class=\"btn btn-sm btn-success done-edit-btn mt-2\" " +
-                          "onclick=\"toggleEditMode(this.closest('.edit-array-item').id)\">");
+                          "onclick=\"toggleEditMode(this.closest('.edit-array-item').id); " +
+                          $"{(string.IsNullOrEmpty(OnUpdate) ? "" : $"{OnUpdate}(this.closest('.edit-array-item').id);")}\">"); 
                 sb.Append("Done");
                 sb.Append("</button>");
                 sb.Append("</div>");
@@ -287,7 +296,9 @@ public class EditArrayTagHelper : TagHelper
             // Add button to create new entry if requested
             if (ShowAddButton)
             {
-                sb.Append($"<button type=\"button\" class=\"btn btn-primary mt-2\" onclick=\"addNewItem('{containerId}', '{templateId}')\">");
+                
+                // button should have and id containerId + '-add'
+                sb.Append($"<button type=\"button\" class=\"btn btn-primary mt-2\" id=\"{containerId}-add\" onclick=\"addNewItem('{containerId}', '{templateId}')\">");
                 sb.Append("Add New Item");
                 sb.Append("</button>");
             }
