@@ -14,12 +14,12 @@
     </div>
 
     <h3>Addresses</h3>
-    <edit-array 
-        asp-items="@Model.Person.Addresses" 
-        asp-view-name="~/Pages/Shared/EditorTemplates/Address.cshtml" 
+    <edit-array
+        asp-items="@Model.Person.Addresses"
+        asp-view-name="~/Pages/Shared/EditorTemplates/Address.cshtml"
         asp-display-view-name="~/Pages/Shared/DisplayTemplates/Address.cshtml"
-        asp-for="Person.Addresses" 
-        asp-template="true" 
+        asp-for="Person.Addresses"
+        asp-template="true"
         asp-add-button="true"
         asp-display-mode="true"
         id="addresses">
@@ -29,4 +29,9 @@
         <button type="submit" class="btn btn-primary">Save</button>
     </div>
 </form>
+
+
+<template id="address-template">
+    <partial name="EditorTemplates/Address" model="@(new RazorComponents.SampleModels.Address())" />
+</template>
 
