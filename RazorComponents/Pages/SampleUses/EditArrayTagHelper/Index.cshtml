@@ -85,6 +85,30 @@
             </div>
         </div>
 
+        <!-- Empty Placeholder Example Card -->
+        <div class="col-md-6">
+            <div class="card h-100 shadow-sm">
+                <div class="card-header bg-danger text-white">
+                    <h5 class="mb-0">Empty Placeholder</h5>
+                </div>
+                <div class="card-body">
+                    <p class="card-text">
+                        Shows a user-friendly message when no items are available. Great for improving UX when collections are empty.
+                    </p>
+                    <h6 class="mt-3 mb-2">Features:</h6>
+                    <ul class="small">
+                        <li>Empty state messaging</li>
+                        <li>Conditional placeholder display</li>
+                        <li>HTML encoding for safety</li>
+                        <li>Clean empty state UX</li>
+                    </ul>
+                </div>
+                <div class="card-footer bg-light">
+                    <a asp-page="EmptyPlaceholderExample" class="btn btn-danger btn-sm">View Example</a>
+                </div>
+            </div>
+        </div>
+
         <!-- Advanced Features Card -->
         <div class="col-md-6">
             <div class="card h-100 shadow-sm">
@@ -192,6 +216,12 @@
                             <td>Custom CSS class for buttons</td>
                             <td><span class="badge bg-success">No</span></td>
                             <td>btn</td>
+                        </tr>
+                        <tr>
+                            <td><code>asp-empty-placeholder</code></td>
+                            <td>Placeholder text to display when Items collection is empty</td>
+                            <td><span class="badge bg-success">No</span></td>
+                            <td>null</td>
                         </tr>
                         <tr>
                             <td><code>id</code></td>

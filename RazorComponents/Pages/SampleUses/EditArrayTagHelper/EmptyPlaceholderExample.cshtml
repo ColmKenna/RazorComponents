@@ -1,0 +1,299 @@
+@page
+@model RazorComponents.Pages.SampleUses.EditArrayTagHelper.EmptyPlaceholderExample
+@{
+    ViewData["Title"] = "Empty Placeholder Example";
+}
+
+<div class="container mt-5">
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <h1 class="mb-2">Empty Placeholder Example</h1>
+            <p class="lead text-muted">Demonstrates how to show user-friendly messages when item collections are empty</p>
+        </div>
+        <div class="col-md-4 text-end">
+            <a asp-page="Index" class="btn btn-outline-secondary">Back to Examples</a>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <!-- Example 1: Basic Empty Placeholder -->
+        <div class="col-md-6">
+            <div class="card h-100 shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">Basic Empty Placeholder</h5>
+                </div>
+                <div class="card-body">
+                    <p class="small text-muted mb-3">Shows a simple message when there are no items</p>
+                    
+                    <form method="post" asp-page-handler="BasicExample">
+                        <edit-array asp-items="Model.BasicItems" 
+                                    asp-view-name="~/Pages/Shared/EditorTemplates/Address.cshtml"
+                                    asp-display-view-name="~/Pages/Shared/DisplayTemplates/Address.cshtml"
+                                    asp-empty-placeholder="No addresses added yet. Add one using the form below!"
+                                    id="basicExample">
+                        </edit-array>
+                        
+                        <div class="mt-3">
+                            <button type="submit" name="handler" value="AddBasicItem" class="btn btn-success btn-sm">Add Sample Address</button>
+                        </div>
+                    </form>
+
+                    <div class="mt-4 p-3 bg-light rounded">
+                        <h6 class="mb-2">HTML Markup:</h6>
+                        <pre class="small mb-0"><code>&lt;edit-array asp-items="Model.BasicItems" 
+            asp-view-name="~/Pages/Shared/EditorTemplates/Address.cshtml"
+            asp-empty-placeholder="No addresses added yet..."&gt;
+&lt;/edit-array&gt;</code></pre>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Example 2: Empty Placeholder with Template and Add Button -->
+        <div class="col-md-6">
+            <div class="card h-100 shadow-sm">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0">Placeholder with Template & Add Button</h5>
+                </div>
+                <div class="card-body">
+                    <p class="small text-muted mb-3">Combines empty placeholder with add button for better UX</p>
+                    
+                    <form method="post" asp-page-handler="TemplateExample">
+                        <edit-array asp-items="Model.TemplateItems" 
+                                    asp-view-name="~/Pages/Shared/EditorTemplates/Address.cshtml" 
+                                    asp-empty-placeholder="👋 Get started! Click 'Add New Item' to create your first address."
+                                    asp-template="true"
+                                    asp-add-button="true"
+                                    id="templateExample">
+                        </edit-array>
+                        
+                        <div class="mt-3">
+                            <button type="submit" name="handler" value="AddTemplateItem" class="btn btn-success btn-sm">Add Sample Address</button>
+                        </div>
+                    </form>
+
+                    <div class="mt-4 p-3 bg-light rounded">
+                        <h6 class="mb-2">HTML Markup:</h6>
+                        <pre class="small mb-0"><code>&lt;edit-array asp-items="Model.TemplateItems" 
+            asp-view-name="~/Pages/Shared/EditorTemplates/Address.cshtml"
+            asp-empty-placeholder="👋 Get started!..."
+            asp-template="true"
+            asp-add-button="true"&gt;
+&lt;/edit-array&gt;</code></pre>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Example 3: Empty Placeholder with Custom Styling -->
+        <div class="col-md-6">
+            <div class="card h-100 shadow-sm">
+                <div class="card-header bg-info text-white">
+                    <h5 class="mb-0">Styled Empty Placeholder</h5>
+                </div>
+                <div class="card-body">
+                    <p class="small text-muted mb-3">Custom styled placeholder with CSS classes</p>
+                    
+                    <form method="post" asp-page-handler="StyledExample">
+                        <edit-array asp-items="Model.StyledItems" 
+                                    asp-view-name="~/Pages/Shared/EditorTemplates/Address.cshtml" 
+                                    asp-empty-placeholder="No items in your collection. Start by adding a new address!"
+                                    asp-container-class="custom-container"
+                                    id="styledExample">
+                        </edit-array>
+                        
+                        <div class="mt-3">
+                            <button type="submit" name="handler" value="AddStyledItem" class="btn btn-success btn-sm">Add Sample Address</button>
+                        </div>
+                    </form>
+
+                    <div class="mt-4 p-3 bg-light rounded">
+                        <h6 class="mb-2">HTML Markup:</h6>
+                        <pre class="small mb-0"><code>&lt;edit-array asp-items="Model.StyledItems" 
+            asp-view-name="~/Pages/Shared/EditorTemplates/Address.cshtml"
+            asp-empty-placeholder="No items..."
+            asp-container-class="custom-container"&gt;
+&lt;/edit-array&gt;</code></pre>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Example 4: Placeholder Behavior -->
+        <div class="col-md-6">
+            <div class="card h-100 shadow-sm">
+                <div class="card-header bg-warning text-dark">
+                    <h5 class="mb-0">Placeholder Behavior</h5>
+                </div>
+                <div class="card-body">
+                    <p class="small text-muted mb-3">See when placeholder appears/disappears as items are added</p>
+                    
+                    <div class="alert alert-info small">
+                        <strong>Note:</strong> This example shows the behavior dynamically.
+                    </div>
+
+                    <h6 class="mb-2">Key Points:</h6>
+                    <ul class="small">
+                        <li><strong>Appears when:</strong> Items collection is empty AND placeholder is set</li>
+                        <li><strong>Disappears when:</strong> At least one item is added to the collection</li>
+                        <li><strong>Content:</strong> Placeholder text is HTML-encoded for security</li>
+                        <li><strong>Styling:</strong> Wrapped in a div with class <code>edit-array-placeholder</code></li>
+                    </ul>
+
+                    <h6 class="mt-3 mb-2">CSS Styling Example:</h6>
+                    <pre class="small bg-light p-2 rounded"><code>.edit-array-placeholder {
+    padding: 2rem;
+    text-align: center;
+    color: #999;
+    font-style: italic;
+}</code></pre>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Documentation Section -->
+    <div class="row mt-5">
+        <div class="col-md-12">
+            <hr class="my-4" />
+            <h2 class="mb-4">Feature Details</h2>
+            
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="card-header bg-light">
+                            <h6 class="mb-0">When to Use</h6>
+                        </div>
+                        <div class="card-body small">
+                            <ul class="mb-0">
+                                <li>Display helpful messages in empty states</li>
+                                <li>Guide users on how to add their first item</li>
+                                <li>Show contextual information about the collection</li>
+                                <li>Improve overall user experience and clarity</li>
+                                <li>Explain what type of items can be added</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="card-header bg-light">
+                            <h6 class="mb-0">Important Notes</h6>
+                        </div>
+                        <div class="card-body small">
+                            <ul class="mb-0">
+                                <li>Placeholder only shows when <code>Items</code> is empty</li>
+                                <li>Text is automatically HTML-encoded for security</li>
+                                <li>No placeholder shown if property is null or whitespace</li>
+                                <li>Works with all other EditArrayTagHelper features</li>
+                                <li>Placeholder div has class <code>edit-array-placeholder</code></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Code Examples Section -->
+    <div class="row mt-5">
+        <div class="col-md-12">
+            <hr class="my-4" />
+            <h2 class="mb-4">Code Examples</h2>
+
+            <div class="card">
+                <div class="card-header bg-light">
+                    <h6 class="mb-0">Razor Markup</h6>
+                </div>
+                <div class="card-body">
+                    <pre><code>&lt;!-- Simple placeholder --&gt;
+&lt;edit-array asp-items="Model.Items" 
+            asp-view-name="EditorTemplate"
+            asp-empty-placeholder="No items. Click 'Add New Item' to get started."&gt;
+&lt;/edit-array&gt;
+
+&lt;!-- With template and add button --&gt;
+&lt;edit-array asp-items="Model.Items" 
+            asp-view-name="EditorTemplate"
+            asp-empty-placeholder="Your collection is empty. Add items to get started!"
+            asp-template="true"
+            asp-add-button="true"&gt;
+&lt;/edit-array&gt;</code></pre>
+                </div>
+            </div>
+
+            <div class="card mt-3">
+                <div class="card-header bg-light">
+                    <h6 class="mb-0">C# Page Model</h6>
+                </div>
+                <div class="card-body">
+                    <pre><code>public class MyPage : PageModel
+{
+    [BindProperty]
+    public List&lt;Address&gt; Items { get; set; } = new List&lt;Address&gt;();
+    
+    public void OnGet()
+    {
+        // Load items, or leave empty to show placeholder
+        Items = GetAddresses();
+    }
+    
+    public void OnPostAddItem()
+    {
+        // Placeholder disappears after first item is added
+        Items.Add(new Address { Street = "123 Main St", City = "Anytown" });
+    }
+}</code></pre>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mt-5 mb-5">
+        <div class="col-md-12">
+            <a asp-page="Index" class="btn btn-secondary">Back to Examples</a>
+        </div>
+    </div>
+</div>
+
+<style>
+    .custom-container {
+        border: 2px dashed #007bff;
+        border-radius: 0.5rem;
+        padding: 1rem;
+        background-color: #f8f9fa;
+    }
+
+    .edit-array-placeholder {
+        padding: 2rem;
+        text-align: center;
+        color: #6c757d;
+        font-style: italic;
+        background-color: #f8f9fa;
+        border: 1px solid #dee2e6;
+        border-radius: 0.25rem;
+    }
+
+    pre {
+        background-color: #f5f5f5;
+        border: 1px solid #ddd;
+        border-radius: 0.25rem;
+        padding: 0.75rem;
+        overflow-x: auto;
+    }
+
+    code {
+        font-family: 'Courier New', monospace;
+        font-size: 0.875rem;
+    }
+
+    .card {
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+</style>
