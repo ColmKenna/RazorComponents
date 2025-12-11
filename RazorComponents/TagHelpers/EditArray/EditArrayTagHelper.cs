@@ -17,6 +17,9 @@ public class EditArrayTagHelper : TagHelper
     private const string AddButtonAttributeName = "asp-add-button";
     private const string DisplayModeAttributeName = "asp-display-mode";    
     private const string OnUpdateAttributeName = "asp-on-update";
+    private const string ContainerCssClassAttributeName = "asp-container-class";
+    private const string ItemCssClassAttributeName = "asp-item-class";
+    private const string ButtonCssClassAttributeName = "asp-button-class";
     
     [HtmlAttributeName(ViewNameAttributeName)]
     public required string ViewName { get; set; }
@@ -42,6 +45,15 @@ public class EditArrayTagHelper : TagHelper
     [HtmlAttributeName(OnUpdateAttributeName)]
     public string? OnUpdate { get; set; }
 
+    [HtmlAttributeName(ContainerCssClassAttributeName)]
+    public string ContainerCssClass { get; set; } = "edit-array-container";
+
+    [HtmlAttributeName(ItemCssClassAttributeName)]
+    public string ItemCssClass { get; set; } = "edit-array-item";
+
+    [HtmlAttributeName(ButtonCssClassAttributeName)]
+    public string ButtonCssClass { get; set; } = "btn";
+
     [ViewContext]
     public required ViewContext ViewContext { get; set; }
     
@@ -59,7 +71,7 @@ public class EditArrayTagHelper : TagHelper
     {
         // Reset the TagHelper output
         output.TagName = "div";
-        output.Attributes.SetAttribute("class", "edit-array-container");
+        output.Attributes.SetAttribute("class", ContainerCssClass);
         
         // Create an ID for the container to use with JavaScript
         string containerId = $"edit-array-{Id}";
@@ -92,7 +104,7 @@ public class EditArrayTagHelper : TagHelper
             var itemId = $"{containerId}-item-{index}";
             
             // Create a wrapper for this item
-            sb.Append($"<div class=\"edit-array-item\" id=\"{itemId}\">");
+            sb.Append($"<div class=\"{ItemCssClass}\" id=\"{itemId}\">");
             
             // Check if IsDeleted property is present in the model and add a hidden input if not
             var isDeletedProperty = item.GetType().GetProperty("IsDeleted");            
@@ -131,12 +143,12 @@ public class EditArrayTagHelper : TagHelper
                 }
                 
                 // Move the edit button inside the display-container div
-                sb.Append($"<button type=\"button\" class=\"btn btn-sm btn-primary edit-item-btn mt-2\" ");
+                sb.Append($"<button type=\"button\" class=\"{ButtonCssClass} btn-sm btn-primary edit-item-btn mt-2\" ");
                 sb.Append($" onclick=\"toggleEditMode('{itemId}')\">");
                 sb.Append("Edit");
                 sb.Append("</button>");
                 
-                sb.Append($"<button type=\"button\" class=\"btn btn-sm btn-danger delete-item-btn mt-2\" ");
+                sb.Append($"<button type=\"button\" class=\"{ButtonCssClass} btn-sm btn-danger delete-item-btn mt-2\" ");
                 sb.Append($" onclick=\"markForDeletion('{itemId}')\">");
                 sb.Append("Delete");
                 sb.Append("</button>");
@@ -158,7 +170,7 @@ public class EditArrayTagHelper : TagHelper
                 }
                 
                 // Add done button with update handler
-                sb.Append($"<button type=\"button\" class=\"btn btn-sm btn-success done-edit-btn mt-2\" " +
+                sb.Append($"<button type=\"button\" class=\"{ButtonCssClass} btn-sm btn-success done-edit-btn mt-2\" " +
                            $"onclick=\"toggleEditMode('{itemId}'); {(string.IsNullOrEmpty(OnUpdate) ? "" : $"{OnUpdate}('{itemId}');")}\">");
                 sb.Append("Done");
                 sb.Append("</button>");
@@ -222,7 +234,7 @@ public class EditArrayTagHelper : TagHelper
             };
             
             // Create a wrapper for the template item
-            sb.Append("<div class=\"edit-array-item\">");
+            sb.Append($"<div class=\"{ItemCssClass}\">");
 
             var name = $"{templateFieldName}.IsDeleted";
 
@@ -241,12 +253,12 @@ public class EditArrayTagHelper : TagHelper
                         sb.Append(writer.ToString());
                     }
                 }
-                sb.Append("<button type=\"button\" class=\"btn btn-sm btn-primary edit-item-btn mt-2\" " +
+                sb.Append($"<button type=\"button\" class=\"{ButtonCssClass} btn-sm btn-primary edit-item-btn mt-2\" " +
                           "onclick=\"toggleEditMode(this.closest('.edit-array-item').id)\">");
                 sb.Append("Edit");
                 sb.Append("</button>");
                 
-                sb.Append($"<button type=\"button\" class=\"btn btn-sm btn-danger delete-item-btn mt-2\" ");
+                sb.Append($"<button type=\"button\" class=\"{ButtonCssClass} btn-sm btn-danger delete-item-btn mt-2\" ");
                 sb.Append($" onclick=\"markForDeletion(this.closest('.edit-array-item').id)\">");
                 sb.Append("Delete");
                 sb.Append("</button>");   
@@ -275,9 +287,9 @@ public class EditArrayTagHelper : TagHelper
             
             if (DisplayMode && !string.IsNullOrEmpty(DisplayViewName))
             {
-                sb.Append("<button type=\"button\" class=\"btn btn-sm btn-success done-edit-btn mt-2\" " +
+                sb.Append($"<button type=\"button\" class=\"{ButtonCssClass} btn-sm btn-success done-edit-btn mt-2\" " +
                           "onclick=\"toggleEditMode(this.closest('.edit-array-item').id); " +
-                          $"{(string.IsNullOrEmpty(OnUpdate) ? "" : $"{OnUpdate}(this.closest('.edit-array-item').id);")}\">"); 
+                          $"{(string.IsNullOrEmpty(OnUpdate) ? "" : $"{OnUpdate}(this.closest('.edit-array-item').id);")}\" >");
                 sb.Append("Done");
                 sb.Append("</button>");
                 sb.Append("</div>");
@@ -298,7 +310,7 @@ public class EditArrayTagHelper : TagHelper
             {
                 
                 // button should have and id containerId + '-add'
-                sb.Append($"<button type=\"button\" class=\"btn btn-primary mt-2\" id=\"{containerId}-add\" onclick=\"addNewItem('{containerId}', '{templateId}')\">");
+                sb.Append($"<button type=\"button\" class=\"{ButtonCssClass} btn-primary mt-2\" id=\"{containerId}-add\" onclick=\"addNewItem('{containerId}', '{templateId}')\">");
                 sb.Append("Add New Item");
                 sb.Append("</button>");
             }

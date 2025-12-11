@@ -1,0 +1,322 @@
+@page
+@model RazorComponents.Pages.SampleUses.EditArrayTagHelper.Index
+@{
+    ViewData["Title"] = "EditArrayTagHelper Examples";
+}
+
+<div class="container mt-5">
+    <div class="row mb-5">
+        <div class="col-md-8">
+            <h1 class="mb-2">EditArrayTagHelper Examples</h1>
+            <p class="lead text-muted">Comprehensive examples showing different features and use cases</p>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <!-- Basic Example Card -->
+        <div class="col-md-6">
+            <div class="card h-100 shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">Basic Example</h5>
+                </div>
+                <div class="card-body">
+                    <p class="card-text">
+                        Simple array editor with add/remove functionality. Perfect for getting started with the EditArrayTagHelper.
+                    </p>
+                    <h6 class="mt-3 mb-2">Features:</h6>
+                    <ul class="small">
+                        <li>Inline editing</li>
+                        <li>Add new items with template</li>
+                        <li>Remove items</li>
+                        <li>Form binding and validation</li>
+                    </ul>
+                </div>
+                <div class="card-footer bg-light">
+                    <a asp-page="BasicExample" class="btn btn-primary btn-sm">View Example</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- DisplayMode Example Card -->
+        <div class="col-md-6">
+            <div class="card h-100 shadow-sm">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0">DisplayMode Example</h5>
+                </div>
+                <div class="card-body">
+                    <p class="card-text">
+                        Shows items in display mode by default with ability to toggle to edit mode. Great UX for read-heavy scenarios.
+                    </p>
+                    <h6 class="mt-3 mb-2">Features:</h6>
+                    <ul class="small">
+                        <li>Display and edit views</li>
+                        <li>Toggle between modes</li>
+                        <li>Update callbacks</li>
+                        <li>Delete with confirmation visual</li>
+                    </ul>
+                </div>
+                <div class="card-footer bg-light">
+                    <a asp-page="DisplayModeExample" class="btn btn-success btn-sm">View Example</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Custom CSS Example Card -->
+        <div class="col-md-6">
+            <div class="card h-100 shadow-sm">
+                <div class="card-header bg-info text-white">
+                    <h5 class="mb-0">Custom CSS Classes</h5>
+                </div>
+                <div class="card-body">
+                    <p class="card-text">
+                        Demonstrates how to customize styling using custom CSS classes for containers, items, and buttons.
+                    </p>
+                    <h6 class="mt-3 mb-2">Features:</h6>
+                    <ul class="small">
+                        <li>Custom container class</li>
+                        <li>Custom item class</li>
+                        <li>Custom button class</li>
+                        <li>Advanced styling examples</li>
+                    </ul>
+                </div>
+                <div class="card-footer bg-light">
+                    <a asp-page="CustomCssExample" class="btn btn-info btn-sm">View Example</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Advanced Features Card -->
+        <div class="col-md-6">
+            <div class="card h-100 shadow-sm">
+                <div class="card-header bg-warning text-dark">
+                    <h5 class="mb-0">Advanced Features</h5>
+                </div>
+                <div class="card-body">
+                    <p class="card-text">
+                        Combines multiple features with JavaScript callbacks and advanced styling. Shows what's possible with EditArrayTagHelper.
+                    </p>
+                    <h6 class="mt-3 mb-2">Features:</h6>
+                    <ul class="small">
+                        <li>All of the above combined</li>
+                        <li>Update notifications</li>
+                        <li>Enhanced styling</li>
+                        <li>JavaScript integration</li>
+                    </ul>
+                </div>
+                <div class="card-footer bg-light">
+                    <a asp-page="AdvancedFeaturesExample" class="btn btn-warning btn-sm">View Example</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Documentation Section -->
+    <div class="row mt-5">
+        <div class="col-md-12">
+            <hr class="my-5" />
+            <h2 class="mb-4">TagHelper Attributes Reference</h2>
+            
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Attribute</th>
+                            <th>Description</th>
+                            <th>Required</th>
+                            <th>Default</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><code>asp-items</code></td>
+                            <td>The collection of items to display and edit</td>
+                            <td><span class="badge bg-danger">Yes</span></td>
+                            <td>-</td>
+                        </tr>
+                        <tr>
+                            <td><code>asp-view-name</code></td>
+                            <td>Path to the editor template view</td>
+                            <td><span class="badge bg-danger">Yes</span></td>
+                            <td>-</td>
+                        </tr>
+                        <tr>
+                            <td><code>asp-for</code></td>
+                            <td>ModelExpression for the property being edited</td>
+                            <td><span class="badge bg-success">No</span></td>
+                            <td>null</td>
+                        </tr>
+                        <tr>
+                            <td><code>asp-display-view-name</code></td>
+                            <td>Path to the display template view (enables DisplayMode)</td>
+                            <td><span class="badge bg-success">No</span></td>
+                            <td>null</td>
+                        </tr>
+                        <tr>
+                            <td><code>asp-display-mode</code></td>
+                            <td>Show items in display mode by default</td>
+                            <td><span class="badge bg-success">No</span></td>
+                            <td>false</td>
+                        </tr>
+                        <tr>
+                            <td><code>asp-template</code></td>
+                            <td>Render template for adding new items</td>
+                            <td><span class="badge bg-success">No</span></td>
+                            <td>false</td>
+                        </tr>
+                        <tr>
+                            <td><code>asp-add-button</code></td>
+                            <td>Show "Add New Item" button</td>
+                            <td><span class="badge bg-success">No</span></td>
+                            <td>false</td>
+                        </tr>
+                        <tr>
+                            <td><code>asp-on-update</code></td>
+                            <td>JavaScript function to call on item update</td>
+                            <td><span class="badge bg-success">No</span></td>
+                            <td>null</td>
+                        </tr>
+                        <tr>
+                            <td><code>asp-container-class</code></td>
+                            <td>Custom CSS class for the main container</td>
+                            <td><span class="badge bg-success">No</span></td>
+                            <td>edit-array-container</td>
+                        </tr>
+                        <tr>
+                            <td><code>asp-item-class</code></td>
+                            <td>Custom CSS class for each item wrapper</td>
+                            <td><span class="badge bg-success">No</span></td>
+                            <td>edit-array-item</td>
+                        </tr>
+                        <tr>
+                            <td><code>asp-button-class</code></td>
+                            <td>Custom CSS class for buttons</td>
+                            <td><span class="badge bg-success">No</span></td>
+                            <td>btn</td>
+                        </tr>
+                        <tr>
+                            <td><code>id</code></td>
+                            <td>HTML id attribute for the container</td>
+                            <td><span class="badge bg-success">No</span></td>
+                            <td>-</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Required JavaScript Functions -->
+    <div class="row mt-5">
+        <div class="col-md-12">
+            <hr class="my-5" />
+            <h2 class="mb-4">Required JavaScript Functions</h2>
+            <p>The EditArrayTagHelper requires the following JavaScript functions to be defined in your page:</p>
+            
+            <div class="row g-4">
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="card-header bg-light">
+                            <code>toggleEditMode(itemId)</code>
+                        </div>
+                        <div class="card-body">
+                            <p class="small">Toggles between display and edit mode for an item</p>
+                            <pre class="bg-light p-2 rounded"><code>function toggleEditMode(itemId) {
+    const item = document.getElementById(itemId);
+    const display = item.querySelector('.display-container');
+    const edit = item.querySelector('.edit-container');
+    display.style.display = display.style.display === 'none' ? 'block' : 'none';
+    edit.style.display = edit.style.display === 'none' ? 'block' : 'none';
+}</code></pre>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="card-header bg-light">
+                            <code>markForDeletion(itemId)</code>
+                        </div>
+                        <div class="card-body">
+                            <p class="small">Marks an item for deletion</p>
+                            <pre class="bg-light p-2 rounded"><code>function markForDeletion(itemId) {
+    const item = document.getElementById(itemId);
+    const isDeletedInput = item.querySelector('[data-is-deleted-marker]');
+    if (isDeletedInput) {
+        isDeletedInput.value = 'true';
+        item.style.opacity = '0.5';
+    }
+}</code></pre>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="card-header bg-light">
+                            <code>addNewItem(containerId, templateId)</code>
+                        </div>
+                        <div class="card-body">
+                            <p class="small">Adds a new item from the template</p>
+                            <pre class="bg-light p-2 rounded"><code>function addNewItem(containerId, templateId) {
+    const container = document.getElementById(containerId);
+    const template = document.getElementById(templateId);
+    const itemsContainer = container.querySelector('.edit-array-items');
+    const newItem = template.content.cloneNode(true);
+    itemsContainer.appendChild(newItem);
+}</code></pre>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="card-header bg-light">
+                            <code>updateFieldNames(element, oldIndex, newIndex)</code>
+                        </div>
+                        <div class="card-body">
+                            <p class="small">Updates field names when cloning template items</p>
+                            <pre class="bg-light p-2 rounded"><code>function updateFieldNames(element, oldIndex, newIndex) {
+    const inputs = element.querySelectorAll('[name*="' + oldIndex + '"]');
+    inputs.forEach(input => {
+        input.name = input.name.replace('[' + oldIndex + ']', '[' + newIndex + ']');
+    });
+}</code></pre>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mt-5">
+        <div class="col-md-12">
+            <a asp-page="/Index" class="btn btn-secondary">Back to Main Page</a>
+        </div>
+    </div>
+</div>
+
+<style>
+    .card {
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    
+    .card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+    }
+
+    code {
+        background-color: #f4f4f4;
+        padding: 2px 6px;
+        border-radius: 3px;
+        color: #d63384;
+    }
+
+    pre code {
+        color: #333;
+    }
+
+    .table-hover tbody tr:hover {
+        background-color: #f5f5f5;
+    }
+</style>

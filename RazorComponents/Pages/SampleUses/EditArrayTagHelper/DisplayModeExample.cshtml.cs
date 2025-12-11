@@ -1,11 +1,10 @@
-﻿using Microsoft.AspNetCore.Mvc.RazorPages;
-using RazorComponents.SampleModels;
-using System.Collections.Generic;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.RazorPages;
+using RazorComponents.SampleModels;
 
 namespace RazorComponents.Pages.SampleUses.EditArrayTagHelper;
 
-public class Edit : PageModel
+public class DisplayModeExample : PageModel
 {
     [BindProperty]
     public Person Person { get; set; } = new Person
@@ -21,26 +20,20 @@ public class Edit : PageModel
 
     public void OnGet()
     {
-        // Page initialization - data comes from BindProperty default
+        // Initialize if needed
     }
-    
+
     public IActionResult OnPost()
     {
         if (!ModelState.IsValid)
         {
             return Page();
         }
-        
+
         // Remove items marked for deletion
-        Person.Addresses = Person.Addresses
-            .Where(a => !a.IsDeleted)
-            .ToList();
-        
-        // In a real application, you would save data to database here
-        TempData["Message"] = $"Successfully saved! Person has {Person.Addresses.Count} address(es).";
-        
-        // Redirect to the same page to show the updated data
+        Person.Addresses = Person.Addresses.Where(a => !a.IsDeleted).ToList();
+
+        TempData["Message"] = "Person data saved successfully!";
         return RedirectToPage();
     }
 }
-

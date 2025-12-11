@@ -1,0 +1,133 @@
+@page
+@model RazorComponents.Pages.SampleUses.EditArrayTagHelper.CustomCssExample
+@{
+    ViewData["Title"] = "Custom CSS Classes Example";
+}
+
+<div class="container mt-5">
+    <h1>Custom CSS Classes Example</h1>
+    <p class="lead">Customize the styling of the array editor with CSS classes</p>
+
+    <form method="post">
+        <div class="row">
+            <div class="col-md-8">
+                <div class="form-group mb-4">
+                    <label asp-for="Person.FirstName" class="form-label">First Name</label>
+                    <input asp-for="Person.FirstName" class="form-control" />
+                </div>
+
+                <div class="form-group mb-4">
+                    <label asp-for="Person.LastName" class="form-label">Last Name</label>
+                    <input asp-for="Person.LastName" class="form-control" />
+                </div>
+
+                <hr class="my-5" />
+
+                <h3 class="mb-4">Addresses (Custom Styling)</h3>
+                <p class="text-muted">Using custom CSS classes for container, items, and buttons</p>
+
+                <edit-array
+                    asp-items="@Model.Person.Addresses"
+                    asp-view-name="~/Pages/Shared/EditorTemplates/Address.cshtml"
+                    asp-display-view-name="~/Pages/Shared/DisplayTemplates/Address.cshtml"
+                    asp-for="Person.Addresses"
+                    asp-template="true"
+                    asp-add-button="true"
+                    asp-display-mode="true"
+                    asp-container-class="custom-address-editor"
+                    asp-item-class="address-card"
+                    asp-button-class="btn btn-sm"
+                    id="addresses-custom">
+                </edit-array>
+
+                <div class="mt-4">
+                    <button type="submit" class="btn btn-primary">Save Changes</button>
+                    <a asp-page="Index" class="btn btn-secondary">Back to Examples</a>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+
+<style>
+    .custom-address-editor {
+        border: 2px solid #007bff;
+        border-radius: 8px;
+        padding: 20px;
+        background-color: #f8f9fa;
+    }
+
+    .address-card {
+        border: 1px solid #dee2e6;
+        border-radius: 6px;
+        padding: 15px;
+        margin-bottom: 15px;
+        background-color: white;
+        transition: all 0.3s ease;
+    }
+
+    .address-card:hover {
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        border-color: #007bff;
+    }
+
+    .address-card.edit-array-item {
+        border-left: 4px solid #007bff;
+    }
+</style>
+
+@section Scripts {
+    <script>
+        function toggleEditMode(itemId) {
+            const item = document.getElementById(itemId);
+            const displayContainer = item.querySelector('.display-container');
+            const editContainer = item.querySelector('.edit-container');
+            
+            if (displayContainer && editContainer) {
+                displayContainer.style.display = displayContainer.style.display === 'none' ? 'block' : 'none';
+                editContainer.style.display = editContainer.style.display === 'none' ? 'block' : 'none';
+            }
+        }
+
+        function markForDeletion(itemId) {
+            const item = document.getElementById(itemId);
+            const isDeletedInput = item.querySelector('[data-is-deleted-marker]');
+            
+            if (isDeletedInput) {
+                isDeletedInput.value = 'true';
+                item.style.opacity = '0.5';
+                item.style.textDecoration = 'line-through';
+            }
+        }
+
+        function addNewItem(containerId, templateId) {
+            const container = document.getElementById(containerId);
+            const template = document.getElementById(templateId);
+            const itemsContainer = container.querySelector('.edit-array-items');
+            
+            if (!template) {
+                console.error('Template not found');
+                return;
+            }
+            
+            const newItem = template.content.cloneNode(true);
+            const itemCount = itemsContainer.children.length;
+            const newIndex = itemCount;
+            
+            updateFieldNames(newItem, '__index__', newIndex);
+            itemsContainer.appendChild(newItem);
+        }
+        
+        function updateFieldNames(element, oldIndex, newIndex) {
+            const inputs = element.querySelectorAll('[name*="' + oldIndex + '"]');
+            inputs.forEach(input => {
+                input.name = input.name.replace('[' + oldIndex + ']', '[' + newIndex + ']');
+            });
+            
+            const elementsWithId = element.querySelectorAll('[id*="' + oldIndex + '"]');
+            elementsWithId.forEach(el => {
+                el.id = el.id.replace('[' + oldIndex + ']', '[' + newIndex + ']');
+            });
+        }
+    </script>
+}

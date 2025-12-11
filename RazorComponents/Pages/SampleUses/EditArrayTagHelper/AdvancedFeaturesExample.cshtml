@@ -1,0 +1,179 @@
+@page
+@model RazorComponents.Pages.SampleUses.EditArrayTagHelper.AdvancedFeaturesExample
+@{
+    ViewData["Title"] = "Advanced Features Example";
+}
+
+<div class="container mt-5">
+    <h1>Advanced Features</h1>
+    <p class="lead">Combining multiple features: DisplayMode, Custom CSS, and JavaScript callbacks</p>
+
+    <form method="post">
+        <div class="row">
+            <div class="col-md-8">
+                <div class="alert alert-info" id="updateAlert" style="display:none;">
+                    <strong>Update:</strong> <span id="updateMessage"></span>
+                </div>
+
+                <div class="form-group mb-4">
+                    <label asp-for="Person.FirstName" class="form-label">First Name</label>
+                    <input asp-for="Person.FirstName" class="form-control" />
+                </div>
+
+                <div class="form-group mb-4">
+                    <label asp-for="Person.LastName" class="form-label">Last Name</label>
+                    <input asp-for="Person.LastName" class="form-control" />
+                </div>
+
+                <hr class="my-5" />
+
+                <h3 class="mb-4">Addresses (Advanced Configuration)</h3>
+                <p class="text-muted">
+                    DisplayMode enabled, custom styling, and callback handlers
+                </p>
+
+                <edit-array
+                    asp-items="@Model.Person.Addresses"
+                    asp-view-name="~/Pages/Shared/EditorTemplates/Address.cshtml"
+                    asp-display-view-name="~/Pages/Shared/DisplayTemplates/Address.cshtml"
+                    asp-for="Person.Addresses"
+                    asp-template="true"
+                    asp-add-button="true"
+                    asp-display-mode="true"
+                    asp-container-class="advanced-container"
+                    asp-item-class="advanced-item"
+                    asp-button-class="btn btn-outline-primary"
+                    id="addresses-advanced"
+                    asp-on-update="onAddressUpdate">
+                </edit-array>
+
+                <div class="mt-4">
+                    <button type="submit" class="btn btn-primary btn-lg">Save All Changes</button>
+                    <a asp-page="Index" class="btn btn-secondary btn-lg">Back to Examples</a>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="card">
+                    <div class="card-header bg-info text-white">
+                        <h5 class="mb-0">Features Demonstrated</h5>
+                    </div>
+                    <div class="card-body">
+                        <ul class="list-unstyled">
+                            <li><i class="bi bi-check-circle text-success"></i> Display/Edit Mode Toggle</li>
+                            <li><i class="bi bi-check-circle text-success"></i> Add New Items</li>
+                            <li><i class="bi bi-check-circle text-success"></i> Delete Items</li>
+                            <li><i class="bi bi-check-circle text-success"></i> Custom CSS Classes</li>
+                            <li><i class="bi bi-check-circle text-success"></i> Update Callbacks</li>
+                            <li><i class="bi bi-check-circle text-success"></i> Form Binding</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+
+<style>
+    .advanced-container {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border-radius: 10px;
+        padding: 25px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+    }
+
+    .advanced-item {
+        background-color: white;
+        border-radius: 8px;
+        padding: 20px;
+        margin-bottom: 15px;
+        border-left: 5px solid #667eea;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .advanced-item:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    }
+
+    .display-container, .edit-container {
+        margin: 10px 0;
+    }
+</style>
+
+@section Scripts {
+    <script>
+        let updateCount = 0;
+
+        function toggleEditMode(itemId) {
+            const item = document.getElementById(itemId);
+            const displayContainer = item.querySelector('.display-container');
+            const editContainer = item.querySelector('.edit-container');
+            
+            if (displayContainer && editContainer) {
+                displayContainer.style.display = displayContainer.style.display === 'none' ? 'block' : 'none';
+                editContainer.style.display = editContainer.style.display === 'none' ? 'block' : 'none';
+            }
+        }
+
+        function markForDeletion(itemId) {
+            const item = document.getElementById(itemId);
+            const isDeletedInput = item.querySelector('[data-is-deleted-marker]');
+            
+            if (isDeletedInput) {
+                isDeletedInput.value = 'true';
+                item.style.opacity = '0.5';
+                item.style.textDecoration = 'line-through';
+                showUpdateAlert('Address marked for deletion');
+            }
+        }
+
+        function onAddressUpdate(itemId) {
+            updateCount++;
+            showUpdateAlert('Address #' + itemId.replace(/\D/g, '') + ' was updated');
+        }
+
+        function showUpdateAlert(message) {
+            const alert = document.getElementById('updateAlert');
+            const messageSpan = document.getElementById('updateMessage');
+            messageSpan.textContent = message + ' (Update #' + updateCount + ')';
+            alert.style.display = 'block';
+            
+            setTimeout(() => {
+                alert.style.display = 'none';
+            }, 3000);
+        }
+
+        function addNewItem(containerId, templateId) {
+            const container = document.getElementById(containerId);
+            const template = document.getElementById(templateId);
+            const itemsContainer = container.querySelector('.edit-array-items');
+            
+            if (!template) {
+                console.error('Template not found');
+                return;
+            }
+            
+            const newItem = template.content.cloneNode(true);
+            const itemCount = itemsContainer.children.length;
+            const newIndex = itemCount;
+            
+            updateFieldNames(newItem, '__index__', newIndex);
+            itemsContainer.appendChild(newItem);
+            showUpdateAlert('New address item added');
+        }
+        
+        function updateFieldNames(element, oldIndex, newIndex) {
+            const inputs = element.querySelectorAll('[name*="' + oldIndex + '"]');
+            inputs.forEach(input => {
+                input.name = input.name.replace('[' + oldIndex + ']', '[' + newIndex + ']');
+            });
+            
+            const elementsWithId = element.querySelectorAll('[id*="' + oldIndex + '"]');
+            elementsWithId.forEach(el => {
+                el.id = el.id.replace('[' + oldIndex + ']', '[' + newIndex + ']');
+            });
+        }
+    </script>
+}

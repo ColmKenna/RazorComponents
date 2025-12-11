@@ -1,33 +1,178 @@
 @page
 @model RazorComponents.Pages.SampleUses.EditArrayTagHelper.Edit
+@{
+    ViewData["Title"] = "Complete EditArrayTagHelper Example";
+}
 
-<h2>Edit Person</h2>
+<div class="container mt-5">
+    <h1 class="mb-2">EditArrayTagHelper - Complete Example</h1>
+    <p class="lead text-muted mb-4">Full-featured array editor with display mode, templates, and callbacks</p>
 
-<form method="post">
-    <div class="form-group">
-        <label asp-for="Person.FirstName">First Name</label>
-        <input asp-for="Person.FirstName" class="form-control" />
-    </div>
-    <div class="form-group">
-        <label asp-for="Person.LastName">Last Name</label>
-        <input asp-for="Person.LastName" class="form-control" />
-    </div>
+    <form method="post">
+        <div class="row">
+            <div class="col-md-8">
+                <!-- Person Information Section -->
+                <div class="card mb-4 shadow-sm">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="mb-0">Person Information</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="form-group mb-3">
+                            <label asp-for="Person.FirstName" class="form-label">First Name</label>
+                            <input asp-for="Person.FirstName" class="form-control" />
+                            <span asp-validation-for="Person.FirstName" class="text-danger"></span>
+                        </div>
 
-    <h3>Addresses</h3>
-    <edit-array
-        asp-items="@Model.Person.Addresses"
-        asp-view-name="~/Pages/Shared/EditorTemplates/Address.cshtml"
-        asp-display-view-name="~/Pages/Shared/DisplayTemplates/Address.cshtml"
-        asp-for="Person.Addresses"
-        asp-template="true"
-        asp-add-button="true"
-        asp-display-mode="true"
-        id="addresses"
-        asp-on-update="onUpdate">
-    </edit-array>
+                        <div class="form-group mb-3">
+                            <label asp-for="Person.LastName" class="form-label">Last Name</label>
+                            <input asp-for="Person.LastName" class="form-control" />
+                            <span asp-validation-for="Person.LastName" class="text-danger"></span>
+                        </div>
+                    </div>
+                </div>
 
-    <div class="form-group mt-4">
-        <button type="submit" class="btn btn-primary">Save</button>
-    </div>
-</form>
+                <!-- Addresses Section -->
+                <div class="card mb-4 shadow-sm">
+                    <div class="card-header bg-success text-white">
+                        <h5 class="mb-0">Addresses</h5>
+                    </div>
+                    <div class="card-body">
+                        <p class="text-muted mb-3">
+                            Click <strong>Edit</strong> to modify an address, or <strong>Delete</strong> to remove it. 
+                            Use <strong>Add New Item</strong> to add a new address.
+                        </p>
 
+                        <edit-array
+                            asp-items="@Model.Person.Addresses"
+                            asp-view-name="~/Pages/Shared/EditorTemplates/Address.cshtml"
+                            asp-display-view-name="~/Pages/Shared/DisplayTemplates/Address.cshtml"
+                            asp-for="Person.Addresses"
+                            asp-template="true"
+                            asp-add-button="true"
+                            asp-display-mode="true"
+                            id="addresses"
+                            asp-on-update="onAddressUpdate">
+                        </edit-array>
+                    </div>
+                </div>
+
+                <!-- Form Actions -->
+                <div class="d-flex gap-2">
+                    <button type="submit" class="btn btn-primary btn-lg">
+                        <i class="bi bi-check-circle"></i> Save Changes
+                    </button>
+                    <a asp-page="/SampleUses/EditArrayTagHelper/Index" class="btn btn-outline-secondary btn-lg">
+                        <i class="bi bi-arrow-left"></i> View All Examples
+                    </a>
+                </div>
+            </div>
+
+            <!-- Sidebar - Information -->
+            <div class="col-md-4">
+                <div class="card mb-4 shadow-sm">
+                    <div class="card-header bg-info text-white">
+                        <h5 class="mb-0">How It Works</h5>
+                    </div>
+                    <div class="card-body small">
+                        <h6 class="mt-0">Display Mode</h6>
+                        <p>Items are shown in display view first. Click <code>Edit</code> to switch to edit mode.</p>
+
+                        <h6>Add New Items</h6>
+                        <p>Click <code>Add New Item</code> to create a new address from the template.</p>
+
+                        <h6>Delete Items</h6>
+                        <p>Click <code>Delete</code> to mark an item for removal (removed on save).</p>
+
+                        <h6>Validation</h6>
+                        <p>Form validation works as normal. Invalid items prevent submission.</p>
+                    </div>
+                </div>
+
+                @if (TempData["Message"] != null)
+                {
+                    <div class="alert alert-success alert-dismissible fade show" role="alert">
+                        @TempData["Message"]
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                }
+
+                <div class="card shadow-sm">
+                    <div class="card-header bg-light">
+                        <h5 class="mb-0">Tips</h5>
+                    </div>
+                    <div class="card-body small">
+                        <ul class="list-unstyled">
+                            <li><i class="bi bi-info-circle text-info"></i> Try editing an address and clicking Done</li>
+                            <li><i class="bi bi-info-circle text-info"></i> Add multiple new addresses</li>
+                            <li><i class="bi bi-info-circle text-info"></i> Check the browser console for event logs</li>
+                            <li><i class="bi bi-info-circle text-info"></i> Open browser DevTools to inspect the HTML</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+
+@section Scripts {
+    <script>
+        function toggleEditMode(itemId) {
+            const item = document.getElementById(itemId);
+            const displayContainer = item.querySelector('.display-container');
+            const editContainer = item.querySelector('.edit-container');
+            
+            if (displayContainer && editContainer) {
+                displayContainer.style.display = displayContainer.style.display === 'none' ? 'block' : 'none';
+                editContainer.style.display = editContainer.style.display === 'none' ? 'block' : 'none';
+                console.log('Toggled edit mode for:', itemId);
+            }
+        }
+
+        function markForDeletion(itemId) {
+            const item = document.getElementById(itemId);
+            const isDeletedInput = item.querySelector('[data-is-deleted-marker]');
+            
+            if (isDeletedInput) {
+                isDeletedInput.value = 'true';
+                item.style.opacity = '0.5';
+                item.style.textDecoration = 'line-through';
+                console.log('Marked for deletion:', itemId);
+            }
+        }
+
+        function onAddressUpdate(itemId) {
+            console.log('Address updated:', itemId);
+        }
+
+        function addNewItem(containerId, templateId) {
+            const container = document.getElementById(containerId);
+            const template = document.getElementById(templateId);
+            const itemsContainer = container.querySelector('.edit-array-items');
+            
+            if (!template) {
+                console.error('Template not found');
+                return;
+            }
+            
+            const newItem = template.content.cloneNode(true);
+            const itemCount = itemsContainer.children.length;
+            const newIndex = itemCount;
+            
+            updateFieldNames(newItem, '__index__', newIndex);
+            itemsContainer.appendChild(newItem);
+            console.log('Added new item with index:', newIndex);
+        }
+        
+        function updateFieldNames(element, oldIndex, newIndex) {
+            const inputs = element.querySelectorAll('[name*="' + oldIndex + '"]');
+            inputs.forEach(input => {
+                input.name = input.name.replace('[' + oldIndex + ']', '[' + newIndex + ']');
+            });
+            
+            const elementsWithId = element.querySelectorAll('[id*="' + oldIndex + '"]');
+            elementsWithId.forEach(el => {
+                el.id = el.id.replace('[' + oldIndex + ']', '[' + newIndex + ']');
+            });
+        }
+    </script>
+}
