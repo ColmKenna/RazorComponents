@@ -454,4 +454,169 @@ public partial class EditArrayTagHelperTests
     }
 
     #endregion
+    
+    #region ProcessAsync - Validation Tests
+    
+    [Fact]
+    public async Task ProcessAsync_WithNullViewName_ThrowsInvalidOperationException()
+    {
+        // Arrange
+        var tagHelper = new EditArrayTagHelper(CreateMockHtmlHelper().Object)
+        {
+            ViewName = "temp",
+            Items = new List<object>(),
+            ViewContext = CreateViewContext()
+        };
+        
+        // Use reflection to set ViewName to null (bypassing required property validation)
+        var viewNameProperty = typeof(EditArrayTagHelper).GetProperty(nameof(EditArrayTagHelper.ViewName));
+        viewNameProperty?.SetValue(tagHelper, null);
+        
+        var context = CreateContext();
+        var output = CreateOutput();
+        
+        // Act & Assert
+        var exception = await Assert.ThrowsAsync<InvalidOperationException>(() =>
+            tagHelper.ProcessAsync(context, output));
+        
+        Assert.Contains("ViewName", exception.Message);
+        Assert.Contains("required", exception.Message);
+    }
+    
+    [Fact]
+    public async Task ProcessAsync_WithEmptyViewName_ThrowsInvalidOperationException()
+    {
+        // Arrange
+        var tagHelper = new EditArrayTagHelper(CreateMockHtmlHelper().Object)
+        {
+            ViewName = string.Empty,
+            Items = new List<object>(),
+            ViewContext = CreateViewContext()
+        };
+        var context = CreateContext();
+        var output = CreateOutput();
+        
+        // Act & Assert
+        var exception = await Assert.ThrowsAsync<InvalidOperationException>(() =>
+            tagHelper.ProcessAsync(context, output));
+        
+        Assert.Contains("ViewName", exception.Message);
+        Assert.Contains("required", exception.Message);
+    }
+    
+    [Fact]
+    public async Task ProcessAsync_WithWhitespaceViewName_ThrowsInvalidOperationException()
+    {
+        // Arrange
+        var tagHelper = new EditArrayTagHelper(CreateMockHtmlHelper().Object)
+        {
+            ViewName = "   ",
+            Items = new List<object>(),
+            ViewContext = CreateViewContext()
+        };
+        var context = CreateContext();
+        var output = CreateOutput();
+        
+        // Act & Assert
+        var exception = await Assert.ThrowsAsync<InvalidOperationException>(() =>
+            tagHelper.ProcessAsync(context, output));
+        
+        Assert.Contains("ViewName", exception.Message);
+        Assert.Contains("required", exception.Message);
+    }
+    
+    [Fact]
+    public async Task ProcessAsync_WithNullItems_ThrowsInvalidOperationException()
+    {
+        // Arrange
+        var tagHelper = new EditArrayTagHelper(CreateMockHtmlHelper().Object)
+        {
+            ViewName = "EditorTemplate",
+            Items = new List<object>(),
+            ViewContext = CreateViewContext()
+        };
+        
+        // Use reflection to set Items to null (bypassing required property validation)
+        var itemsProperty = typeof(EditArrayTagHelper).GetProperty(nameof(EditArrayTagHelper.Items));
+        itemsProperty?.SetValue(tagHelper, null);
+        
+        var context = CreateContext();
+        var output = CreateOutput();
+        
+        // Act & Assert
+        var exception = await Assert.ThrowsAsync<InvalidOperationException>(() =>
+            tagHelper.ProcessAsync(context, output));
+        
+        Assert.Contains("Items", exception.Message);
+        Assert.Contains("required", exception.Message);
+    }
+    
+    [Fact]
+    public async Task ProcessAsync_WithNullViewContext_ThrowsInvalidOperationException()
+    {
+        // Arrange
+        var tagHelper = new EditArrayTagHelper(CreateMockHtmlHelper().Object)
+        {
+            ViewName = "EditorTemplate",
+            Items = new List<object>(),
+            ViewContext = CreateViewContext()
+        };
+        
+        // Use reflection to set ViewContext to null (bypassing required property validation)
+        var viewContextProperty = typeof(EditArrayTagHelper).GetProperty(nameof(EditArrayTagHelper.ViewContext));
+        viewContextProperty?.SetValue(tagHelper, null);
+        
+        var context = CreateContext();
+        var output = CreateOutput();
+        
+        // Act & Assert
+        var exception = await Assert.ThrowsAsync<InvalidOperationException>(() =>
+            tagHelper.ProcessAsync(context, output));
+        
+        Assert.Contains("ViewContext", exception.Message);
+        Assert.Contains("required", exception.Message);
+    }
+    
+    [Fact]
+    public async Task ProcessAsync_WithNullViewData_ThrowsInvalidOperationException()
+    {
+        // Arrange
+        var viewContext = CreateViewContext();
+        viewContext.ViewData = null!; // Force null ViewData
+        
+        var tagHelper = new EditArrayTagHelper(CreateMockHtmlHelper().Object)
+        {
+            ViewName = "EditorTemplate",
+            Items = new List<object>(),
+            ViewContext = viewContext
+        };
+        var context = CreateContext();
+        var output = CreateOutput();
+        
+        // Act & Assert
+        var exception = await Assert.ThrowsAsync<InvalidOperationException>(() =>
+            tagHelper.ProcessAsync(context, output));
+        
+        Assert.Contains("ViewData", exception.Message);
+    }
+    
+    
+    [Fact]
+    public async Task ProcessAsync_WithEmptyItems_DoesNotThrow()
+    {
+        // Arrange
+        var tagHelper = CreateTagHelper(items: new List<object>());
+        var context = CreateContext();
+        var output = CreateOutput();
+        
+        // Act & Assert - Should not throw, empty collection is valid
+        await tagHelper.ProcessAsync(context, output);
+        
+        // Verify it rendered successfully
+        Assert.Equal("div", output.TagName);
+        Assert.Equal("edit-array-container", output.Attributes["class"].Value);
+    }
+    
+    
+    #endregion
 }

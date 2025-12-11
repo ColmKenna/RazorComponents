@@ -64,11 +64,14 @@ public class EditArrayTagHelper : TagHelper
 
     public EditArrayTagHelper(IHtmlHelper htmlHelper)
     {
-        _htmlHelper = htmlHelper;
+        _htmlHelper = htmlHelper ?? throw new ArgumentNullException(nameof(htmlHelper));
     }    
 
     public override async Task ProcessAsync(TagHelperContext context, TagHelperOutput output)
     {
+        // Validate required configuration
+        ValidateConfiguration();
+        
         // Reset the TagHelper output
         output.TagName = "div";
         output.Attributes.SetAttribute("class", ContainerCssClass);
@@ -332,5 +335,41 @@ public class EditArrayTagHelper : TagHelper
         return string.IsNullOrEmpty(prefix)
             ? $"{collectionName}[{index}]"
             : $"{prefix}.{collectionName}[{index}]";
+    }
+    
+    /// <summary>
+    /// Validates that all required configuration properties are properly set.
+    /// </summary>
+    /// <exception cref="InvalidOperationException">Thrown when any required property is not properly configured.</exception>
+    private void ValidateConfiguration()
+    {
+        // Validate ViewName
+        if (string.IsNullOrWhiteSpace(ViewName))
+        {
+            throw new InvalidOperationException(
+                $"The '{nameof(ViewName)}' property is required and must not be null or empty. " +
+                "Please specify the name of the partial view to render for each item.");
+        }
+        
+        // Validate Items
+        if (Items == null)
+        {
+            throw new InvalidOperationException(
+                $"The '{nameof(Items)}' property is required and must not be null. " +
+                "Use an empty collection if there are no items to render.");
+        }
+        
+        // Validate ViewContext and nested properties
+        if (ViewContext == null)
+        {
+            throw new InvalidOperationException(
+                $"The '{nameof(ViewContext)}' property is required and must not be null.");
+        }
+        
+        if (ViewContext.ViewData == null)
+        {
+            throw new InvalidOperationException(
+                "ViewContext.ViewData must not be null. Ensure ViewContext is properly initialized.");
+        }
     }
 }
