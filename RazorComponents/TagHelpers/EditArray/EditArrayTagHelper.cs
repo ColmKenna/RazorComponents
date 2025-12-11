@@ -17,6 +17,7 @@ public class EditArrayTagHelper : TagHelper
     private const string AddButtonAttributeName = "asp-add-button";
     private const string DisplayModeAttributeName = "asp-display-mode";    
     private const string OnUpdateAttributeName = "asp-on-update";
+    private const string OnDeleteAttributeName = "asp-on-delete";
     private const string ContainerCssClassAttributeName = "asp-container-class";
     private const string ItemCssClassAttributeName = "asp-item-class";
     private const string ButtonCssClassAttributeName = "asp-button-class";
@@ -45,6 +46,35 @@ public class EditArrayTagHelper : TagHelper
 
     [HtmlAttributeName(OnUpdateAttributeName)]
     public string? OnUpdate { get; set; }
+
+    /// <summary>
+    /// Gets or sets the JavaScript function name to invoke after an item is marked for deletion.
+    /// The function receives the item's DOM element ID as a parameter.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// When set, delete buttons will invoke both the markForDeletion function and this custom callback.
+    /// The callback is executed after markForDeletion completes. If null or empty, only markForDeletion is called.
+    /// </para>
+    /// <para>
+    /// The callback value is HTML-encoded to prevent XSS vulnerabilities. Only specify the function name;
+    /// do not include quotes, parentheses, or other JavaScript code beyond the function identifier.
+    /// </para>
+    /// </remarks>
+    /// <example>
+    /// &lt;edit-array asp-items="Model.Items" asp-view-name="ItemEditor" 
+    ///              asp-display-mode="true" asp-display-view-name="ItemDisplay"
+    ///              asp-on-delete="handleItemDeleted" /&gt;
+    /// 
+    /// &lt;script&gt;
+    ///     function handleItemDeleted(itemId) {
+    ///         console.log('Item deleted: ' + itemId);
+    ///         // Perform custom logic like AJAX calls, animations, etc.
+    ///     }
+    /// &lt;/script&gt;
+    /// </example>
+    [HtmlAttributeName(OnDeleteAttributeName)]
+    public string? OnDelete { get; set; }
 
     [HtmlAttributeName(ContainerCssClassAttributeName)]
     public string ContainerCssClass { get; set; } = "edit-array-container";
@@ -155,8 +185,13 @@ public class EditArrayTagHelper : TagHelper
                 sb.Append("</button>");
                 
                 sb.Append($"<button type=\"button\" class=\"{ButtonCssClass} btn-sm btn-danger delete-item-btn mt-2\" ");
-                sb.Append($" onclick=\"markForDeletion('{itemId}')\">");
-                sb.Append("Delete");
+                sb.Append($" onclick=\"markForDeletion('{itemId}');");
+                if (!string.IsNullOrEmpty(OnDelete))
+                {
+                    var encodedCallback = HtmlEncoder.Default.Encode(OnDelete);
+                    sb.Append($" {encodedCallback}('{itemId}');");
+                }
+                sb.Append("\">Delete");
                 sb.Append("</button>");
                 
                 
@@ -271,8 +306,13 @@ public class EditArrayTagHelper : TagHelper
                 sb.Append("</button>");
                 
                 sb.Append($"<button type=\"button\" class=\"{ButtonCssClass} btn-sm btn-danger delete-item-btn mt-2\" ");
-                sb.Append($" onclick=\"markForDeletion(this.closest('.edit-array-item').id)\">");
-                sb.Append("Delete");
+                sb.Append($" onclick=\"markForDeletion(this.closest('.edit-array-item').id);");
+                if (!string.IsNullOrEmpty(OnDelete))
+                {
+                    var encodedCallback = HtmlEncoder.Default.Encode(OnDelete);
+                    sb.Append($" {encodedCallback}(this.closest('.edit-array-item').id);");
+                }
+                sb.Append("\">Delete");
                 sb.Append("</button>");   
                 
                 sb.Append("</div>");

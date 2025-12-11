@@ -679,6 +679,194 @@ public partial class EditArrayTagHelperTests
         Assert.Equal("edit-array-container", output.Attributes["class"].Value);
     }
     
+    #endregion
+    
+    #region ProcessAsync - OnDelete Callback Tests
+    
+    [Fact]
+    public async Task ProcessAsync_WithOnDeleteInDisplayMode_IncludesCallbackInDeleteButton()
+    {
+        // Arrange
+        var items = new List<object> { new TestModel { Name = "Test" } };
+        var tagHelper = CreateTagHelper(items: items);
+        tagHelper.DisplayMode = true;
+        tagHelper.DisplayViewName = "DisplayView";
+        tagHelper.OnDelete = "myDeleteFunction";
+        
+        var context = CreateContext();
+        var output = CreateOutput();
+        
+        // Act
+        await tagHelper.ProcessAsync(context, output);
+        
+        // Assert
+        var content = GetOutputContent(output);
+        Assert.Contains("onclick=\"markForDeletion('edit-array-test-item-0'); myDeleteFunction('edit-array-test-item-0');\"", content);
+    }
+    
+    [Fact]
+    public async Task ProcessAsync_WithOnDeleteInTemplate_IncludesCallbackInTemplateDeleteButton()
+    {
+        // Arrange
+        var items = new List<object> { new TestModel { Name = "Test" } };
+        var tagHelper = CreateTagHelper(items: items);
+        tagHelper.DisplayMode = true;
+        tagHelper.DisplayViewName = "DisplayView";
+        tagHelper.RenderTemplate = true;
+        tagHelper.OnDelete = "handleDelete";
+        
+        var context = CreateContext();
+        var output = CreateOutput();
+        
+        // Act
+        await tagHelper.ProcessAsync(context, output);
+        
+        // Assert
+        var content = GetOutputContent(output);
+        // Template should use this.closest pattern
+        Assert.Contains("onclick=\"markForDeletion(this.closest('.edit-array-item').id); handleDelete(this.closest('.edit-array-item').id);\"", content);
+    }
+    
+    [Fact]
+    public async Task ProcessAsync_WithNullOnDelete_OnlyCallsMarkForDeletion()
+    {
+        // Arrange
+        var items = new List<object> { new TestModel { Name = "Test" } };
+        var tagHelper = CreateTagHelper(items: items);
+        tagHelper.DisplayMode = true;
+        tagHelper.DisplayViewName = "DisplayView";
+        tagHelper.OnDelete = null;
+        
+        var context = CreateContext();
+        var output = CreateOutput();
+        
+        // Act
+        await tagHelper.ProcessAsync(context, output);
+        
+        // Assert
+        var content = GetOutputContent(output);
+        Assert.Contains("onclick=\"markForDeletion('edit-array-test-item-0')\"", content);
+        Assert.DoesNotContain("myDeleteFunction", content);
+    }
+    
+    [Fact]
+    public async Task ProcessAsync_WithEmptyOnDelete_OnlyCallsMarkForDeletion()
+    {
+        // Arrange
+        var items = new List<object> { new TestModel { Name = "Test" } };
+        var tagHelper = CreateTagHelper(items: items);
+        tagHelper.DisplayMode = true;
+        tagHelper.DisplayViewName = "DisplayView";
+        tagHelper.OnDelete = "";
+        
+        var context = CreateContext();
+        var output = CreateOutput();
+        
+        // Act
+        await tagHelper.ProcessAsync(context, output);
+        
+        // Assert
+        var content = GetOutputContent(output);
+        Assert.Contains("onclick=\"markForDeletion('edit-array-test-item-0')\"", content);
+        Assert.DoesNotContain("(); ", content); // No empty callback invocation
+    }
+    
+    [Fact]
+    public async Task ProcessAsync_WithOnDeleteAndSpecialCharacters_EncodesCallback()
+    {
+        // Arrange
+        var items = new List<object> { new TestModel { Name = "Test" } };
+        var tagHelper = CreateTagHelper(items: items);
+        tagHelper.DisplayMode = true;
+        tagHelper.DisplayViewName = "DisplayView";
+        tagHelper.OnDelete = "alert('deleted')"; // Contains quotes
+        
+        var context = CreateContext();
+        var output = CreateOutput();
+        
+        // Act
+        await tagHelper.ProcessAsync(context, output);
+        
+        // Assert
+        var content = GetOutputContent(output);
+        // Should encode the single quotes to prevent breaking HTML attributes
+        // HtmlEncoder encodes single quotes as &#x27;
+        Assert.Contains("alert(&#x27;deleted&#x27;)", content);
+        // Should not contain unescaped quotes
+        Assert.DoesNotContain("alert('deleted')", content);
+    }
+    
+    [Fact]
+    public async Task ProcessAsync_WithOnDeleteWithoutDisplayMode_DoesNotRenderDeleteButton()
+    {
+        // Arrange
+        var items = new List<object> { new TestModel { Name = "Test" } };
+        var tagHelper = CreateTagHelper(items: items);
+        tagHelper.DisplayMode = false;
+        tagHelper.OnDelete = "myDeleteFunction";
+        
+        var context = CreateContext();
+        var output = CreateOutput();
+        
+        // Act
+        await tagHelper.ProcessAsync(context, output);
+        
+        // Assert
+        var content = GetOutputContent(output);
+        Assert.DoesNotContain("delete-item-btn", content);
+        Assert.DoesNotContain("myDeleteFunction", content);
+    }
+    
+    [Fact]
+    public async Task ProcessAsync_WithBothOnDeleteAndOnUpdate_IncludesBothCallbacks()
+    {
+        // Arrange
+        var items = new List<object> { new TestModel { Name = "Test" } };
+        var tagHelper = CreateTagHelper(items: items);
+        tagHelper.DisplayMode = true;
+        tagHelper.DisplayViewName = "DisplayView";
+        tagHelper.OnDelete = "handleDelete";
+        tagHelper.OnUpdate = "handleUpdate";
+        
+        var context = CreateContext();
+        var output = CreateOutput();
+        
+        // Act
+        await tagHelper.ProcessAsync(context, output);
+        
+        // Assert
+        var content = GetOutputContent(output);
+        Assert.Contains("handleDelete", content);
+        Assert.Contains("handleUpdate", content);
+        Assert.Contains("markForDeletion", content);
+    }
+    
+    [Fact]
+    public async Task ProcessAsync_WithOnDeleteAndMultipleItems_AppliesCallbackToAllDeleteButtons()
+    {
+        // Arrange
+        var items = new List<object> 
+        { 
+            new TestModel { Name = "Test1" },
+            new TestModel { Name = "Test2" }
+        };
+        var tagHelper = CreateTagHelper(items: items);
+        tagHelper.DisplayMode = true;
+        tagHelper.DisplayViewName = "DisplayView";
+        tagHelper.OnDelete = "deleteCallback";
+        
+        var context = CreateContext();
+        var output = CreateOutput();
+        
+        // Act
+        await tagHelper.ProcessAsync(context, output);
+        
+        // Assert
+        var content = GetOutputContent(output);
+        // Both items should have delete callback
+        Assert.Contains("deleteCallback('edit-array-test-item-0')", content);
+        Assert.Contains("deleteCallback('edit-array-test-item-1')", content);
+    }
     
     #endregion
 }
