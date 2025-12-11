@@ -186,15 +186,32 @@ function markForDeletion(itemId) {
     const deleteButton = item.querySelector('.delete-item-btn');
     const editButton = item.querySelector('.edit-item-btn');
     const isDeletedInput = item.querySelector('input[data-is-deleted-marker]');
-    const containerId = item.closest('.edit-array-container').id;
+    
+    // Find the container by looking for parent with id ending in '-items' or containing 'edit-array'
+    let container = item.closest('.edit-array-container');
+    if (!container) {
+        // Fallback: look for parent with id containing 'items'
+        let current = item.parentElement;
+        while (current) {
+            if (current.id && current.id.includes('-items')) {
+                container = current.parentElement;
+                break;
+            }
+            current = current.parentElement;
+        }
+    }
+    
+    const containerId = container ? container.id : null;
     const newItemInput = item.querySelector('input[data-new-item-marker]');
 
     // don't mark for deletion, remove it all together
     if (newItemInput) {
         item.remove();
-        const addButton = document.getElementById( containerId +'-add');
-        if (addButton) {
-            addButton.disabled = false;
+        if (containerId) {
+            const addButton = document.getElementById(containerId + '-add');
+            if (addButton) {
+                addButton.disabled = false;
+            }
         }
         return;
     }
