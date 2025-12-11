@@ -324,6 +324,29 @@ public partial class EditArrayTagHelperTests
         Assert.Equal("custom-button-class", tagHelper.ButtonCssClass);
     }
 
+    [Fact]
+    public void EmptyPlaceholder_DefaultsToNull()
+    {
+        // Arrange & Act
+        var tagHelper = CreateTagHelper();
+
+        // Assert
+        Assert.Null(tagHelper.EmptyPlaceholder);
+    }
+
+    [Fact]
+    public void EmptyPlaceholder_CanBeSetAndRetrieved()
+    {
+        // Arrange
+        var tagHelper = CreateTagHelper();
+
+        // Act
+        tagHelper.EmptyPlaceholder = "No items";
+
+        // Assert
+        Assert.Equal("No items", tagHelper.EmptyPlaceholder);
+    }
+
     #endregion
 
     #region GetFieldName Tests
@@ -451,6 +474,45 @@ public partial class EditArrayTagHelperTests
         var content = GetOutputContent(output);
         Assert.Contains("<div class=\"edit-array-item\"", content);
         Assert.Contains("Test Content", content);
+    }
+
+    #endregion
+    
+    #region ProcessAsync - Empty Placeholder Tests
+
+    [Fact]
+    public async Task ProcessAsync_WithEmptyItemsAndPlaceholder_RendersPlaceholder()
+    {
+        // Arrange
+        var tagHelper = CreateTagHelper(items: new List<object>());
+        tagHelper.EmptyPlaceholder = "No items to display";
+        var context = CreateContext();
+        var output = CreateOutput();
+
+        // Act
+        await tagHelper.ProcessAsync(context, output);
+
+        // Assert
+        var content = GetOutputContent(output);
+        Assert.Contains("No items to display", content);
+    }
+
+    [Fact]
+    public async Task ProcessAsync_WithItemsAndPlaceholder_DoesNotRenderPlaceholder()
+    {
+        // Arrange
+        var items = new List<object> { new TestModel { Name = "Test1" } };
+        var tagHelper = CreateTagHelper(items: items);
+        tagHelper.EmptyPlaceholder = "No items to display";
+        var context = CreateContext();
+        var output = CreateOutput();
+
+        // Act
+        await tagHelper.ProcessAsync(context, output);
+
+        // Assert
+        var content = GetOutputContent(output);
+        Assert.DoesNotContain("No items to display", content);
     }
 
     #endregion

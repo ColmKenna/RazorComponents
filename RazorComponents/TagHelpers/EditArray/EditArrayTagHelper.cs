@@ -20,6 +20,7 @@ public class EditArrayTagHelper : TagHelper
     private const string ContainerCssClassAttributeName = "asp-container-class";
     private const string ItemCssClassAttributeName = "asp-item-class";
     private const string ButtonCssClassAttributeName = "asp-button-class";
+    private const string EmptyPlaceholderAttributeName = "asp-empty-placeholder";
     
     [HtmlAttributeName(ViewNameAttributeName)]
     public required string ViewName { get; set; }
@@ -53,6 +54,9 @@ public class EditArrayTagHelper : TagHelper
 
     [HtmlAttributeName(ButtonCssClassAttributeName)]
     public string ButtonCssClass { get; set; } = "btn";
+
+    [HtmlAttributeName(EmptyPlaceholderAttributeName)]
+    public string? EmptyPlaceholder { get; set; }
 
     [ViewContext]
     public required ViewContext ViewContext { get; set; }
@@ -95,13 +99,12 @@ public class EditArrayTagHelper : TagHelper
         // Create a wrapper div for the items
         sb.Append($"<div class=\"edit-array-items\" id=\"{containerId}-items\">");
         
-        
-        // get the type
-        
         // Process each item
+        var hasItems = false;
         int index = 0;
         foreach (var item in Items)
         {
+            hasItems = true;
             // Create a unique ID for this item based on its index and collection name
             var fieldName = GetFieldName(modelExpressionPrefix, collectionName, index);
             var itemId = $"{containerId}-item-{index}";
@@ -200,6 +203,12 @@ public class EditArrayTagHelper : TagHelper
             sb.Append("</div>");
             
             index++;
+        }
+        
+        // Render placeholder when no items are available
+        if (!hasItems && !string.IsNullOrWhiteSpace(EmptyPlaceholder))
+        {
+            sb.Append($"<div class=\"edit-array-placeholder\">{HtmlEncoder.Default.Encode(EmptyPlaceholder)}</div>");
         }
         
         // Close the items wrapper
