@@ -116,63 +116,8 @@
 
 @section Scripts {
     <script>
-        function toggleEditMode(itemId) {
-            const item = document.getElementById(itemId);
-            const displayContainer = item.querySelector('.display-container');
-            const editContainer = item.querySelector('.edit-container');
-            
-            if (displayContainer && editContainer) {
-                displayContainer.style.display = displayContainer.style.display === 'none' ? 'block' : 'none';
-                editContainer.style.display = editContainer.style.display === 'none' ? 'block' : 'none';
-                console.log('Toggled edit mode for:', itemId);
-            }
-        }
-
-        function markForDeletion(itemId) {
-            const item = document.getElementById(itemId);
-            const isDeletedInput = item.querySelector('[data-is-deleted-marker]');
-            
-            if (isDeletedInput) {
-                isDeletedInput.value = 'true';
-                item.style.opacity = '0.5';
-                item.style.textDecoration = 'line-through';
-                console.log('Marked for deletion:', itemId);
-            }
-        }
-
         function onAddressUpdate(itemId) {
             console.log('Address updated:', itemId);
-        }
-
-        function addNewItem(containerId, templateId) {
-            const container = document.getElementById(containerId);
-            const template = document.getElementById(templateId);
-            const itemsContainer = container.querySelector('.edit-array-items');
-            
-            if (!template) {
-                console.error('Template not found');
-                return;
-            }
-            
-            const newItem = template.content.cloneNode(true);
-            const itemCount = itemsContainer.children.length;
-            const newIndex = itemCount;
-            
-            updateFieldNames(newItem, '__index__', newIndex);
-            itemsContainer.appendChild(newItem);
-            console.log('Added new item with index:', newIndex);
-        }
-        
-        function updateFieldNames(element, oldIndex, newIndex) {
-            const inputs = element.querySelectorAll('[name*="' + oldIndex + '"]');
-            inputs.forEach(input => {
-                input.name = input.name.replace('[' + oldIndex + ']', '[' + newIndex + ']');
-            });
-            
-            const elementsWithId = element.querySelectorAll('[id*="' + oldIndex + '"]');
-            elementsWithId.forEach(el => {
-                el.id = el.id.replace('[' + oldIndex + ']', '[' + newIndex + ']');
-            });
         }
     </script>
 }

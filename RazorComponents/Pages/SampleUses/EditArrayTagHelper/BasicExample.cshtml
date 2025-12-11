@@ -46,44 +46,4 @@
     </form>
 </div>
 
-@section Scripts {
-    <script>
-        function addNewItem(containerId, templateId) {
-            const container = document.getElementById(containerId);
-            const template = document.getElementById(templateId);
-            const itemsContainer = container.querySelector('.edit-array-items');
-            
-            if (!template) {
-                console.error('Template not found');
-                return;
-            }
-            
-            // Clone the template content
-            const newItem = template.content.cloneNode(true);
-            
-            // Generate a unique index based on current items
-            const itemCount = itemsContainer.children.length;
-            const newIndex = itemCount;
-            
-            // Update all name attributes in the cloned content
-            updateFieldNames(newItem, '__index__', newIndex);
-            
-            // Add the new item to the container
-            itemsContainer.appendChild(newItem);
-        }
-        
-        function updateFieldNames(element, oldIndex, newIndex) {
-            // Update name attributes
-            const inputs = element.querySelectorAll('[name*="' + oldIndex + '"]');
-            inputs.forEach(input => {
-                input.name = input.name.replace('[' + oldIndex + ']', '[' + newIndex + ']');
-            });
-            
-            // Update id attributes if they exist
-            const elementsWithId = element.querySelectorAll('[id*="' + oldIndex + '"]');
-            elementsWithId.forEach(el => {
-                el.id = el.id.replace('[' + oldIndex + ']', '[' + newIndex + ']');
-            });
-        }
-    </script>
-}
+

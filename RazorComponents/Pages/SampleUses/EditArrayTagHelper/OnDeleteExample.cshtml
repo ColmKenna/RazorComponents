@@ -1,0 +1,234 @@
+@page
+@model RazorComponents.Pages.SampleUses.EditArrayTagHelper.OnDeleteExample
+@{
+    ViewData["Title"] = "OnDelete Callback EditArrayTagHelper Example";
+}
+
+<div class="container mt-5">
+    <h1>OnDelete Callback Example</h1>
+    <p class="lead">Execute custom JavaScript when items are deleted using the OnDelete callback</p>
+
+    <form method="post">
+        <div class="row">
+            <div class="col-md-8">
+                <div class="form-group mb-4">
+                    <label asp-for="Person.FirstName" class="form-label">First Name</label>
+                    <input asp-for="Person.FirstName" class="form-control" />
+                </div>
+
+                <div class="form-group mb-4">
+                    <label asp-for="Person.LastName" class="form-label">Last Name</label>
+                    <input asp-for="Person.LastName" class="form-control" />
+                </div>
+
+                <hr class="my-5" />
+
+                <h3 class="mb-4">Addresses with Delete Callbacks</h3>
+                <p class="text-muted">
+                    Delete an address to see the OnDelete callback in action. 
+                    The callback will show a notification and animate the deletion.
+                </p>
+
+                <!-- Notification Area -->
+                <div id="notification-area" class="mb-3">
+                    <div id="notification" class="alert alert-info" role="alert" style="display: none;">
+                        <strong id="notification-title">Info:</strong>
+                        <span id="notification-message"></span>
+                    </div>
+                </div>
+
+                <edit-array
+                    asp-items="@Model.Person.Addresses"
+                    asp-view-name="~/Pages/Shared/EditorTemplates/Address.cshtml"
+                    asp-display-view-name="~/Pages/Shared/DisplayTemplates/Address.cshtml"
+                    asp-for="Person.Addresses"
+                    asp-template="true"
+                    asp-add-button="true"
+                    asp-display-mode="true"
+                    id="addresses-delete"
+                    asp-on-delete="onAddressDelete">
+                </edit-array>
+
+                <div class="mt-4">
+                    <button type="submit" class="btn btn-primary">Save Changes</button>
+                    <a asp-page="Index" class="btn btn-secondary">Back to Examples</a>
+                </div>
+            </div>
+
+            <!-- Info Panel -->
+            <div class="col-md-4">
+                <div class="card bg-light">
+                    <div class="card-header bg-info text-white">
+                        <h5 class="mb-0">OnDelete Callback Info</h5>
+                    </div>
+                    <div class="card-body">
+                        <h6>Usage</h6>
+                        <p class="small">
+                            The <code>asp-on-delete</code> attribute specifies a JavaScript function 
+                            to call when an item is deleted.
+                        </p>
+
+                        <h6 class="mt-3">Callback Signature</h6>
+                        <pre class="bg-white p-2 rounded small"><code>function onAddressDelete(itemId) {
+  // itemId: DOM element ID of deleted item
+}</code></pre>
+
+                        <h6 class="mt-3">When It Fires</h6>
+                        <ul class="small">
+                            <li>After the delete button is clicked</li>
+                            <li>After markForDeletion() completes</li>
+                            <li>Receives the item's DOM ID</li>
+                        </ul>
+
+                        <h6 class="mt-3">Use Cases</h6>
+                        <ul class="small">
+                            <li>Show notifications/toasts</li>
+                            <li>Trigger animations</li>
+                            <li>Send analytics events</li>
+                            <li>Update page state</li>
+                            <li>Make AJAX calls</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="card mt-3 bg-light">
+                    <div class="card-header bg-success text-white">
+                        <h5 class="mb-0">Features Demonstrated</h5>
+                    </div>
+                    <div class="card-body small">
+                        <ul>
+                            <li>✓ Display/Edit mode toggle</li>
+                            <li>✓ Delete with callback</li>
+                            <li>✓ Toast notifications</li>
+                            <li>✓ Fade-out animation</li>
+                            <li>✓ Item counter</li>
+                            <li>✓ Add new items</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+
+@section Scripts {
+    <script>
+        let deletedCount = 0;
+
+        // OnDelete callback - called after an item is marked for deletion
+        function onAddressDelete(itemId) {
+            const item = document.getElementById(itemId);
+            if (!item) return;
+            
+            // Check if this is a delete or restore action based on data-deleted attribute
+            const isDeleted = item.getAttribute('data-deleted') === 'true';
+            
+            if (isDeleted) {
+                // Item was deleted - apply visual styling
+                deletedCount++;
+                showNotification('success', `Address deleted! (${deletedCount} deleted)`);
+                
+                
+            } else {
+                // Item was restored - just show notification, don't apply any styling
+                showNotification('info', `Address restored!`);
+                // Don't modify opacity or any styles on restore
+            }
+            
+            console.log('Address ' + (isDeleted ? 'deleted' : 'restored') + ' via callback:', itemId);
+        }
+
+        function showNotification(type, message) {
+            const notification = document.getElementById('notification');
+            const title = document.getElementById('notification-title');
+            const text = document.getElementById('notification-message');
+            
+            // Determine alert class
+            notification.className = 'alert';
+            switch(type) {
+                case 'success':
+                    notification.classList.add('alert-success');
+                    title.textContent = 'Success:';
+                    break;
+                case 'info':
+                    notification.classList.add('alert-info');
+                    title.textContent = 'Info:';
+                    break;
+                case 'warning':
+                    notification.classList.add('alert-warning');
+                    title.textContent = 'Warning:';
+                    break;
+                case 'error':
+                    notification.classList.add('alert-danger');
+                    title.textContent = 'Error:';
+                    break;
+            }
+            
+            text.textContent = message;
+            notification.style.display = 'block';
+            
+            // Auto-hide after 5 seconds
+            setTimeout(() => {
+                notification.style.display = 'none';
+            }, 5000);
+        }
+
+        function addNewItem(containerId, templateId) {
+            const container = document.getElementById(containerId);
+            const template = document.getElementById(templateId);
+            const itemsContainer = container.querySelector('.edit-array-items');
+            
+            if (!template) {
+                showNotification('error', 'Template not found');
+                return;
+            }
+            
+            const newItem = template.content.cloneNode(true);
+            const itemCount = itemsContainer.children.length;
+            const newIndex = itemCount;
+            
+            updateFieldNames(newItem, '__index__', newIndex);
+            itemsContainer.appendChild(newItem);
+            
+            showNotification('info', 'New address template added');
+        }
+        
+        function updateFieldNames(element, oldIndex, newIndex) {
+            const inputs = element.querySelectorAll('[name*="' + oldIndex + '"]');
+            inputs.forEach(input => {
+                input.name = input.name.replace('[' + oldIndex + ']', '[' + newIndex + ']');
+            });
+            
+            const elementsWithId = element.querySelectorAll('[id*="' + oldIndex + '"]');
+            elementsWithId.forEach(el => {
+                el.id = el.id.replace('[' + oldIndex + ']', '[' + newIndex + ']');
+            });
+        }
+
+        // Initialize - show initial message
+        document.addEventListener('DOMContentLoaded', function() {
+            showNotification('info', 'Try deleting an address to see the OnDelete callback in action!');
+        });
+    </script>
+}
+
+<style>
+    #notification {
+        animation: slideDown 0.3s ease;
+    }
+
+    @@keyframes slideDown {
+        from {
+            opacity: 0;
+            transform: translateY(-10px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .edit-array-item {
+        transition: all 0.3s ease;
+    }
+</style>
