@@ -869,4 +869,111 @@ public partial class EditArrayTagHelperTests
     }
     
     #endregion
+
+    #region ProcessAsync - Reordering Tests
+
+    [Fact]
+    public void EnableReordering_DefaultsToFalse()
+    {
+        // Arrange & Act
+        var tagHelper = CreateTagHelper();
+
+        // Assert
+        Assert.False(tagHelper.EnableReordering);
+    }
+
+    [Fact]
+    public async Task ProcessAsync_WithReorderingDisabled_DoesNotRenderReorderButtons()
+    {
+        // Arrange
+        var items = new List<object> { new TestModel { Name = "Test" } };
+        var tagHelper = CreateTagHelper(items: items);
+        tagHelper.DisplayMode = true;
+        tagHelper.DisplayViewName = "DisplayView";
+        var context = CreateContext();
+        var output = CreateOutput();
+
+        // Act
+        await tagHelper.ProcessAsync(context, output);
+
+        // Assert
+        var content = GetOutputContent(output);
+        Assert.DoesNotContain("reorder-btn", content);
+        Assert.DoesNotContain("data-reorder-direction", content);
+        Assert.False(output.Attributes.ContainsName("data-reorder-enabled"));
+    }
+
+    [Fact]
+    public async Task ProcessAsync_WithReorderingEnabled_RendersReorderButtons()
+    {
+        // Arrange
+        var items = new List<object> { new TestModel { Name = "Test" } };
+        var tagHelper = CreateTagHelper(items: items);
+        tagHelper.EnableReordering = true;
+        tagHelper.DisplayMode = true;
+        tagHelper.DisplayViewName = "DisplayView";
+        var context = CreateContext();
+        var output = CreateOutput();
+
+        // Act
+        await tagHelper.ProcessAsync(context, output);
+
+        // Assert
+        Assert.Equal("true", output.Attributes["data-reorder-enabled"].Value);
+        var content = GetOutputContent(output);
+        Assert.Contains("data-reorder-direction=\"up\"", content);
+        Assert.Contains("data-reorder-direction=\"down\"", content);
+        Assert.Contains("moveItem('edit-array-test','edit-array-test-item-0',-1)", content);
+        Assert.Contains("moveItem('edit-array-test','edit-array-test-item-0',1)", content);
+    }
+
+    [Fact]
+    public async Task ProcessAsync_WithCustomReorderSettings_UsesCustomTextAndClass()
+    {
+        // Arrange
+        var items = new List<object> { new TestModel { Name = "Test" } };
+        var tagHelper = CreateTagHelper(items: items);
+        tagHelper.EnableReordering = true;
+        tagHelper.ReorderButtonCssClass = "theme-button";
+        tagHelper.MoveUpButtonText = "Up!";
+        tagHelper.MoveDownButtonText = "Down!";
+        tagHelper.DisplayMode = true;
+        tagHelper.DisplayViewName = "DisplayView";
+        var context = CreateContext();
+        var output = CreateOutput();
+
+        // Act
+        await tagHelper.ProcessAsync(context, output);
+
+        // Assert
+        var content = GetOutputContent(output);
+        Assert.Contains("class=\"theme-button reorder-btn reorder-up-btn", content);
+        Assert.Contains(">Up!</button>", content);
+        Assert.Contains(">Down!</button>", content);
+    }
+
+    [Fact]
+    public async Task ProcessAsync_WithTemplateAndReordering_RendersTemplateButtons()
+    {
+        // Arrange
+        var items = new List<object> { new TestModel { Name = "Test" } };
+        var tagHelper = CreateTagHelper(items: items);
+        tagHelper.EnableReordering = true;
+        tagHelper.RenderTemplate = true;
+        tagHelper.DisplayMode = true;
+        tagHelper.DisplayViewName = "DisplayView";
+        var context = CreateContext();
+        var output = CreateOutput();
+
+        // Act
+        await tagHelper.ProcessAsync(context, output);
+
+        // Assert
+        var content = GetOutputContent(output);
+        Assert.Contains("template", content, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("data-reorder-direction=\"up\"", content);
+        Assert.Contains("moveItem('edit-array-test', this.closest('.edit-array-item').id, -1)", content);
+    }
+
+    #endregion
 }

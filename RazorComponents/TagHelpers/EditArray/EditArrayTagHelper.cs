@@ -22,6 +22,10 @@ public class EditArrayTagHelper : TagHelper
     private const string ItemCssClassAttributeName = "asp-item-class";
     private const string ButtonCssClassAttributeName = "asp-button-class";
     private const string EmptyPlaceholderAttributeName = "asp-empty-placeholder";
+    private const string EnableReorderAttributeName = "asp-enable-reordering";
+    private const string ReorderButtonCssClassAttributeName = "asp-reorder-button-class";
+    private const string MoveUpButtonTextAttributeName = "asp-move-up-text";
+    private const string MoveDownButtonTextAttributeName = "asp-move-down-text";
     
     [HtmlAttributeName(ViewNameAttributeName)]
     public required string ViewName { get; set; }
@@ -46,6 +50,18 @@ public class EditArrayTagHelper : TagHelper
 
     [HtmlAttributeName(OnUpdateAttributeName)]
     public string? OnUpdate { get; set; }
+
+    [HtmlAttributeName(EnableReorderAttributeName)]
+    public bool EnableReordering { get; set; } = false;
+
+    [HtmlAttributeName(ReorderButtonCssClassAttributeName)]
+    public string ReorderButtonCssClass { get; set; } = "btn btn-outline-secondary";
+
+    [HtmlAttributeName(MoveUpButtonTextAttributeName)]
+    public string MoveUpButtonText { get; set; } = "Move Up";
+
+    [HtmlAttributeName(MoveDownButtonTextAttributeName)]
+    public string MoveDownButtonText { get; set; } = "Move Down";
 
     /// <summary>
     /// Gets or sets the JavaScript function name to invoke after an item is marked for deletion.
@@ -113,6 +129,10 @@ public class EditArrayTagHelper : TagHelper
         // Create an ID for the container to use with JavaScript
         string containerId = $"edit-array-{Id}";
         output.Attributes.SetAttribute("id", containerId);
+        if (EnableReordering)
+        {
+            output.Attributes.SetAttribute("data-reorder-enabled", "true");
+        }
         
         // Setup HtmlHelper to be used in our views
         (_htmlHelper as IViewContextAware)?.Contextualize(ViewContext);
@@ -185,11 +205,11 @@ public class EditArrayTagHelper : TagHelper
                 sb.Append("</button>");
                 
                 sb.Append($"<button type=\"button\" class=\"{ButtonCssClass} btn-sm btn-danger delete-item-btn mt-2\" ");
-                sb.Append($" onclick=\"markForDeletion('{itemId}');");
+                sb.Append($" onclick=\"markForDeletion('{itemId}')");
                 if (!string.IsNullOrEmpty(OnDelete))
                 {
                     var encodedCallback = HtmlEncoder.Default.Encode(OnDelete);
-                    sb.Append($" {encodedCallback}('{itemId}');");
+                    sb.Append($"; {encodedCallback}('{itemId}');");
                 }
                 sb.Append("\">Delete");
                 sb.Append("</button>");
@@ -230,6 +250,8 @@ public class EditArrayTagHelper : TagHelper
                     sb.Append(writer.ToString());
                 }
             }
+
+            AppendReorderButtons(sb, containerId, itemId);
             
             // Restore original prefix
             ViewContext.ViewData.TemplateInfo.HtmlFieldPrefix = originalPrefix;
@@ -348,6 +370,8 @@ public class EditArrayTagHelper : TagHelper
                 
                 
             }
+
+            AppendTemplateReorderButtons(sb, containerId);
             
             // Close the template item wrapper
             sb.Append("</div>");
@@ -370,6 +394,58 @@ public class EditArrayTagHelper : TagHelper
         
         // Set the output content
         output.Content.SetHtmlContent(sb.ToString());
+    }
+
+    private void AppendReorderButtons(StringBuilder sb, string containerId, string itemId)
+    {
+        if (!EnableReordering)
+        {
+            return;
+        }
+
+        var upText = EncodeButtonText(MoveUpButtonText, "Move Up");
+        var downText = EncodeButtonText(MoveDownButtonText, "Move Down");
+        var cssClass = GetReorderButtonCssClass();
+
+        sb.Append("<div class=\"reorder-controls\">");
+        sb.Append($"<button type=\"button\" class=\"{cssClass} reorder-btn reorder-up-btn\" data-reorder-direction=\"up\" onclick=\"moveItem('{containerId}','{itemId}',-1)\">");
+        sb.Append(upText);
+        sb.Append("</button>");
+        sb.Append($"<button type=\"button\" class=\"{cssClass} reorder-btn reorder-down-btn\" data-reorder-direction=\"down\" onclick=\"moveItem('{containerId}','{itemId}',1)\">");
+        sb.Append(downText);
+        sb.Append("</button>");
+        sb.Append("</div>");
+    }
+
+    private void AppendTemplateReorderButtons(StringBuilder sb, string containerId)
+    {
+        if (!EnableReordering)
+        {
+            return;
+        }
+
+        var upText = EncodeButtonText(MoveUpButtonText, "Move Up");
+        var downText = EncodeButtonText(MoveDownButtonText, "Move Down");
+        var cssClass = GetReorderButtonCssClass();
+
+        sb.Append("<div class=\"reorder-controls\">");
+        sb.Append($"<button type=\"button\" class=\"{cssClass} reorder-btn reorder-up-btn\" data-reorder-direction=\"up\" onclick=\"moveItem('{containerId}', this.closest('.edit-array-item').id, -1)\">");
+        sb.Append(upText);
+        sb.Append("</button>");
+        sb.Append($"<button type=\"button\" class=\"{cssClass} reorder-btn reorder-down-btn\" data-reorder-direction=\"down\" onclick=\"moveItem('{containerId}', this.closest('.edit-array-item').id, 1)\">");
+        sb.Append(downText);
+        sb.Append("</button>");
+        sb.Append("</div>");
+    }
+
+    private string GetReorderButtonCssClass()
+    {
+        return string.IsNullOrWhiteSpace(ReorderButtonCssClass) ? ButtonCssClass : ReorderButtonCssClass;
+    }
+
+    private string EncodeButtonText(string text, string fallback)
+    {
+        return HtmlEncoder.Default.Encode(string.IsNullOrWhiteSpace(text) ? fallback : text);
     }
     
     private string GetFieldName(string? prefix, string collectionName, object index)

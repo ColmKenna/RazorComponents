@@ -1,0 +1,58 @@
+@page
+@model RazorComponents.Pages.SampleUses.EditArrayTagHelper.ReorderExample
+@{
+    ViewData["Title"] = "Reordering Example";
+}
+
+<div class="container mt-5">
+    <h1>Reordering Items with EditArrayTagHelper</h1>
+    <p class="lead">Demonstrates optional reordering with themed buttons and index-aware renumbering.</p>
+
+    <div class="alert alert-info">
+        <strong>Tip:</strong> Drag-free reordering is handled with the built-in up/down controls. After moving, input names/ids are renumbered to match the new order.
+    </div>
+
+    <form method="post">
+        <div class="row">
+            <div class="col-md-8">
+                <div class="form-group mb-4">
+                    <label asp-for="Person.FirstName" class="form-label">First Name</label>
+                    <input asp-for="Person.FirstName" class="form-control" />
+                    <span asp-validation-for="Person.FirstName" class="text-danger"></span>
+                </div>
+
+                <div class="form-group mb-4">
+                    <label asp-for="Person.LastName" class="form-label">Last Name</label>
+                    <input asp-for="Person.LastName" class="form-control" />
+                    <span asp-validation-for="Person.LastName" class="text-danger"></span>
+                </div>
+
+                <hr class="my-5" />
+
+                <h3 class="mb-3">Addresses with Reordering</h3>
+                <p class="text-muted mb-4">Use the Up/Down buttons to reorder items. Button style/text are themeable.</p>
+
+                <edit-array
+                    asp-items="@Model.Person.Addresses"
+                    asp-view-name="~/Pages/Shared/EditorTemplates/Address.cshtml"
+                    asp-display-view-name="~/Pages/Shared/DisplayTemplates/Address.cshtml"
+                    asp-display-mode="true"
+                    asp-for="Person.Addresses"
+                    asp-template="true"
+                    asp-add-button="true"
+                    asp-enable-reordering="true"
+                    asp-reorder-button-class="btn btn-outline-dark btn-sm"
+                    asp-move-up-text="Up"
+                    asp-move-down-text="Down"
+                    asp-button-class="btn btn-primary"
+                    id="addresses-reorder">
+                </edit-array>
+
+                <div class="mt-4">
+                    <button type="submit" class="btn btn-success">Save Changes</button>
+                    <a asp-page="Index" class="btn btn-secondary">Back to Examples</a>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
