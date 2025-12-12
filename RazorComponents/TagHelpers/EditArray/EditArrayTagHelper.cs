@@ -128,7 +128,7 @@ public class EditArrayTagHelper : TagHelper
     /// </para>
     /// </remarks>
     [HtmlAttributeName(DisplayModeAttributeName)]
-    public bool DisplayMode { get; set; } = false;
+    public bool DisplayMode { get; set; }
 
     /// <summary>
     /// Gets or sets the name of the partial view used to render each item in display mode.
@@ -168,7 +168,7 @@ public class EditArrayTagHelper : TagHelper
     /// </para>
     /// </remarks>
     [HtmlAttributeName(TemplateAttributeName)]
-    public bool RenderTemplate { get; set; } = false;
+    public bool RenderTemplate { get; set; }
 
     /// <summary>
     /// Gets or sets a value indicating whether to render an "Add New Item" button.
@@ -187,7 +187,7 @@ public class EditArrayTagHelper : TagHelper
     /// </para>
     /// </remarks>
     [HtmlAttributeName(AddButtonAttributeName)]
-    public bool ShowAddButton { get; set; } = false;
+    public bool ShowAddButton { get; set; }
 
     /// <summary>
     /// Gets or sets a value indicating whether to enable item reordering functionality.
@@ -201,7 +201,7 @@ public class EditArrayTagHelper : TagHelper
     /// The container element will also have a <c>data-reorder-enabled="true"</c> attribute.
     /// </remarks>
     [HtmlAttributeName(EnableReorderAttributeName)]
-    public bool EnableReordering { get; set; } = false;
+    public bool EnableReordering { get; set; }
 
     /// <summary>
     /// Gets or sets the text to display when the collection is empty.
