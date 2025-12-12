@@ -347,18 +347,18 @@ public class EditArrayTagHelper : TagHelper
         ViewContext.ViewData.TemplateInfo.HtmlFieldPrefix = originalPrefix;
         sb.Append("</template>");
 
-                if (ShowAddButton)
-                {
-                        sb.Append("<button type=\"button\" class=\"")
-                            .Append(GetEncodedButtonCssClass())
-                            .Append(" btn-primary mt-2\" id=\"")
-                            .Append(containerId)
-                            .Append("-add\" onclick=\"addNewItem('")
-                            .Append(containerId)
-                            .Append("', '")
-                            .Append(templateId)
-                            .Append("')\">Add New Item</button>");
-                }
+        if (ShowAddButton)
+        {
+            sb.Append("<button type=\"button\" class=\"")
+              .Append(GetEncodedButtonCssClass())
+              .Append(" btn-primary mt-2\" id=\"")
+              .Append(containerId)
+              .Append("-add\" onclick=\"addNewItem('")
+              .Append(containerId)
+              .Append("', '")
+              .Append(templateId)
+              .Append("')\">Add New Item</button>");
+        }
     }
 
     private void RenderEmptyPlaceholder(StringBuilder sb)
@@ -385,10 +385,22 @@ public class EditArrayTagHelper : TagHelper
         var encodedCssClass = GetEncodedReorderButtonCssClass();
 
         sb.Append("<div class=\"reorder-controls\">");
-        sb.Append($"<button type=\"button\" class=\"{encodedCssClass} reorder-btn reorder-up-btn\" data-reorder-direction=\"up\" onclick=\"moveItem('{containerId}','{itemId}',-1)\">");
+        sb.Append("<button type=\"button\" class=\"")
+            .Append(encodedCssClass)
+            .Append(" reorder-btn reorder-up-btn\" data-reorder-direction=\"up\" onclick=\"moveItem('")
+            .Append(containerId)
+            .Append("','")
+            .Append(itemId)
+            .Append("',-1)\">");
         sb.Append(upText);
         sb.Append("</button>");
-        sb.Append($"<button type=\"button\" class=\"{encodedCssClass} reorder-btn reorder-down-btn\" data-reorder-direction=\"down\" onclick=\"moveItem('{containerId}','{itemId}',1)\">");
+        sb.Append("<button type=\"button\" class=\"")
+            .Append(encodedCssClass)
+            .Append(" reorder-btn reorder-down-btn\" data-reorder-direction=\"down\" onclick=\"moveItem('")
+            .Append(containerId)
+            .Append("','")
+            .Append(itemId)
+            .Append("',1)\">");
         sb.Append(downText);
         sb.Append("</button>");
         sb.Append("</div>");
@@ -406,10 +418,18 @@ public class EditArrayTagHelper : TagHelper
         var encodedCssClass = GetEncodedReorderButtonCssClass();
 
         sb.Append("<div class=\"reorder-controls\">");
-        sb.Append($"<button type=\"button\" class=\"{encodedCssClass} reorder-btn reorder-up-btn\" data-reorder-direction=\"up\" onclick=\"moveItem('{containerId}', this.closest('.edit-array-item').id, -1)\">");
+        sb.Append("<button type=\"button\" class=\"")
+            .Append(encodedCssClass)
+            .Append(" reorder-btn reorder-up-btn\" data-reorder-direction=\"up\" onclick=\"moveItem('")
+            .Append(containerId)
+            .Append("', this.closest('.edit-array-item').id, -1)\">");
         sb.Append(upText);
         sb.Append("</button>");
-        sb.Append($"<button type=\"button\" class=\"{encodedCssClass} reorder-btn reorder-down-btn\" data-reorder-direction=\"down\" onclick=\"moveItem('{containerId}', this.closest('.edit-array-item').id, 1)\">");
+        sb.Append("<button type=\"button\" class=\"")
+            .Append(encodedCssClass)
+            .Append(" reorder-btn reorder-down-btn\" data-reorder-direction=\"down\" onclick=\"moveItem('")
+            .Append(containerId)
+            .Append("', this.closest('.edit-array-item').id, 1)\">");
         sb.Append(downText);
         sb.Append("</button>");
         sb.Append("</div>");
@@ -535,17 +555,29 @@ public class EditArrayTagHelper : TagHelper
         }
 
         // Build the button HTML
-        sb.Append($"<button type=\"button\" class=\"{GetEncodedButtonCssClass()} {cssModifier}\" ");
+        sb.Append("<button type=\"button\" class=\"")
+          .Append(GetEncodedButtonCssClass())
+          .Append(' ')
+          .Append(cssModifier)
+          .Append("\" ");
 
         // Build onclick handler
         var targetId = isTemplate ? "this.closest('.edit-array-item').id" : $"'{itemId}'";
-        sb.Append($" onclick=\"{primaryAction}({targetId})");
+        sb.Append(" onclick=\"")
+          .Append(primaryAction)
+          .Append('(')
+          .Append(targetId)
+          .Append(')');
 
         // Add callback for delete buttons (OnDelete callback)
         if (string.Equals(buttonType, "delete", StringComparison.OrdinalIgnoreCase) && !string.IsNullOrEmpty(OnDelete))
         {
             var encodedCallback = HtmlEncoder.Default.Encode(OnDelete);
-            sb.Append($"; {encodedCallback}({targetId});");
+            sb.Append("; ")
+              .Append(encodedCallback)
+              .Append('(')
+              .Append(targetId)
+              .Append(");");
         }
 
         // Add callback for done buttons (OnUpdate callback)
@@ -554,11 +586,17 @@ public class EditArrayTagHelper : TagHelper
             if (!string.IsNullOrEmpty(OnUpdate))
             {
                 var encodedCallback = HtmlEncoder.Default.Encode(OnUpdate);
-                sb.Append($"; {encodedCallback}({targetId});");
+                sb.Append("; ")
+                  .Append(encodedCallback)
+                  .Append('(')
+                  .Append(targetId)
+                  .Append(");");
             }
         }
 
-        sb.Append($"\">{buttonText}</button>");
+        sb.Append("\">")
+          .Append(buttonText)
+          .Append("</button>");
 
         return sb.ToString();
     }
