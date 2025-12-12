@@ -976,4 +976,179 @@ public partial class EditArrayTagHelperTests
     }
 
     #endregion
+
+    #region OnUpdate Encoding Tests
+
+    [Fact]
+    public async Task ProcessAsync_WithOnUpdateAndSpecialCharacters_EncodesCallback()
+    {
+        // Arrange
+        var items = new List<object> { new TestModel { Name = "Test" } };
+        var tagHelper = CreateTagHelper(items: items);
+        tagHelper.DisplayMode = true;
+        tagHelper.DisplayViewName = "DisplayView";
+        tagHelper.OnUpdate = "alert('updated')"; // Contains quotes that need encoding
+
+        var context = CreateContext();
+        var output = CreateOutput();
+
+        // Act
+        await tagHelper.ProcessAsync(context, output);
+
+        // Assert
+        var content = GetOutputContent(output);
+        // HtmlEncoder encodes single quotes as &#x27;
+        Assert.Contains("alert(&#x27;updated&#x27;)", content);
+        // Should NOT contain unescaped quotes in the OnUpdate callback specifically
+        Assert.DoesNotContain("alert('updated')", content);
+    }
+
+    [Fact]
+    public async Task ProcessAsync_WithOnUpdateInTemplate_EncodesCallback()
+    {
+        // Arrange
+        var items = new List<object> { new TestModel { Name = "Test" } };
+        var tagHelper = CreateTagHelper(items: items);
+        tagHelper.DisplayMode = true;
+        tagHelper.DisplayViewName = "DisplayView";
+        tagHelper.RenderTemplate = true;
+        tagHelper.OnUpdate = "handleUpdate('special')"; // Contains quotes
+
+        var context = CreateContext();
+        var output = CreateOutput();
+
+        // Act
+        await tagHelper.ProcessAsync(context, output);
+
+        // Assert
+        var content = GetOutputContent(output);
+        // Check that template done button has encoded OnUpdate
+        Assert.Contains("<template", content);
+        Assert.Contains("handleUpdate(&#x27;special&#x27;)", content);
+        // Should NOT contain unescaped callback
+        Assert.DoesNotContain("handleUpdate('special')", content);
+    }
+
+    [Fact]
+    public async Task ProcessAsync_WithOnUpdateContainingDoubleQuotes_EncodesProperly()
+    {
+        // Arrange
+        var items = new List<object> { new TestModel { Name = "Test" } };
+        var tagHelper = CreateTagHelper(items: items);
+        tagHelper.DisplayMode = true;
+        tagHelper.DisplayViewName = "DisplayView";
+        tagHelper.OnUpdate = @"onUpdateCallback(param=""value"")"; // Contains escaped double quotes
+
+        var context = CreateContext();
+        var output = CreateOutput();
+
+        // Act
+        await tagHelper.ProcessAsync(context, output);
+
+        // Assert
+        var content = GetOutputContent(output);
+        // Verify the callback is encoded
+        // HtmlEncoder encodes double quotes as &quot;
+        Assert.Contains("onUpdateCallback(param=&quot;value&quot;)", content);
+        // Should not have unescaped double quotes in onclick
+        Assert.DoesNotContain(@"param=""value""", content);
+    }
+
+    [Fact]
+    public async Task ProcessAsync_WithBothOnDeleteAndOnUpdateWithSpecialChars_EncodesConsistently()
+    {
+        // Arrange
+        var items = new List<object> { new TestModel { Name = "Test" } };
+        var tagHelper = CreateTagHelper(items: items);
+        tagHelper.DisplayMode = true;
+        tagHelper.DisplayViewName = "DisplayView";
+        tagHelper.OnDelete = "handleDelete('test')";
+        tagHelper.OnUpdate = "handleUpdate('test')";
+
+        var context = CreateContext();
+        var output = CreateOutput();
+
+        // Act
+        await tagHelper.ProcessAsync(context, output);
+
+        // Assert
+        var content = GetOutputContent(output);
+        // Both should be encoded identically
+        Assert.Contains("handleDelete(&#x27;test&#x27;)", content);
+        Assert.Contains("handleUpdate(&#x27;test&#x27;)", content);
+        // Both should follow the same pattern for encoding
+    }
+
+    [Fact]
+    public async Task ProcessAsync_WithOnUpdateInItemAndTemplateDisplayMode_EncodesBothInstances()
+    {
+        // Arrange
+        var items = new List<object> { new TestModel { Name = "Test" } };
+        var tagHelper = CreateTagHelper(items: items);
+        tagHelper.DisplayMode = true;
+        tagHelper.DisplayViewName = "DisplayView";
+        tagHelper.RenderTemplate = true;
+        tagHelper.OnUpdate = "myUpdate(\"data\")"; // Contains double quotes
+
+        var context = CreateContext();
+        var output = CreateOutput();
+
+        // Act
+        await tagHelper.ProcessAsync(context, output);
+
+        // Assert
+        var content = GetOutputContent(output);
+        // Should have two encoded instances: one in items, one in template
+        var encodedCallback = "myUpdate(&quot;data&quot;)";
+        var count = System.Text.RegularExpressions.Regex.Matches(content, System.Text.RegularExpressions.Regex.Escape(encodedCallback)).Count;
+        Assert.Equal(2, count); // One in item done button, one in template done button
+    }
+
+    [Fact]
+    public async Task ProcessAsync_WithEmptyOnUpdate_DoesNotIncludeCallback()
+    {
+        // Arrange
+        var items = new List<object> { new TestModel { Name = "Test" } };
+        var tagHelper = CreateTagHelper(items: items);
+        tagHelper.DisplayMode = true;
+        tagHelper.DisplayViewName = "DisplayView";
+        tagHelper.OnUpdate = ""; // Empty callback
+
+        var context = CreateContext();
+        var output = CreateOutput();
+
+        // Act
+        await tagHelper.ProcessAsync(context, output);
+
+        // Assert
+        var content = GetOutputContent(output);
+        // Done button should only call toggleEditMode, not any callback
+        var doneButtonMatch = System.Text.RegularExpressions.Regex.Matches(content, @"onclick=""toggleEditMode\('[^']+'\)""");
+        Assert.NotEmpty(doneButtonMatch); // Should find done buttons with only toggleEditMode
+    }
+
+    [Fact]
+    public async Task ProcessAsync_WithNullOnUpdate_DoesNotIncludeCallback()
+    {
+        // Arrange
+        var items = new List<object> { new TestModel { Name = "Test" } };
+        var tagHelper = CreateTagHelper(items: items);
+        tagHelper.DisplayMode = true;
+        tagHelper.DisplayViewName = "DisplayView";
+        tagHelper.OnUpdate = null; // Null callback
+
+        var context = CreateContext();
+        var output = CreateOutput();
+
+        // Act
+        await tagHelper.ProcessAsync(context, output);
+
+        // Assert
+        var content = GetOutputContent(output);
+        // Done button should work fine with null OnUpdate
+        Assert.Contains("done-edit-btn", content);
+        Assert.DoesNotContain("null", content);
+    }
+
+    #endregion
 }

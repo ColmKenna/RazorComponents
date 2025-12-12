@@ -231,8 +231,9 @@ public class EditArrayTagHelper : TagHelper
                 }
                 
                 // Add done button with update handler
+                var onUpdateScript = GetOnUpdateScript(itemId);
                 sb.Append($"<button type=\"button\" class=\"{ButtonCssClass} btn-sm btn-success done-edit-btn mt-2\" " +
-                           $"onclick=\"toggleEditMode('{itemId}'); {(string.IsNullOrEmpty(OnUpdate) ? "" : $"{OnUpdate}('{itemId}');")}\">");
+                           $"onclick=\"toggleEditMode('{itemId}'); {onUpdateScript}\">");
                 sb.Append("Done");
                 sb.Append("</button>");
                 
@@ -328,11 +329,11 @@ public class EditArrayTagHelper : TagHelper
                 sb.Append("</button>");
                 
                 sb.Append($"<button type=\"button\" class=\"{ButtonCssClass} btn-sm btn-danger delete-item-btn mt-2\" ");
-                sb.Append($" onclick=\"markForDeletion(this.closest('.edit-array-item').id);");
+                sb.Append($" onclick=\"markForDeletion(this.closest('.edit-array-item').id)");
                 if (!string.IsNullOrEmpty(OnDelete))
                 {
                     var encodedCallback = HtmlEncoder.Default.Encode(OnDelete);
-                    sb.Append($" {encodedCallback}(this.closest('.edit-array-item').id);");
+                    sb.Append($"; {encodedCallback}(this.closest('.edit-array-item').id);");
                 }
                 sb.Append("\">Delete");
                 sb.Append("</button>");   
@@ -361,9 +362,14 @@ public class EditArrayTagHelper : TagHelper
             
             if (DisplayMode && !string.IsNullOrEmpty(DisplayViewName))
             {
+                // For template, use this.closest() to get the item ID since we don't have a specific itemId variable
+                var templateOnUpdateScript = string.IsNullOrEmpty(OnUpdate)
+                    ? string.Empty
+                    : $"{HtmlEncoder.Default.Encode(OnUpdate)}(this.closest('.edit-array-item').id);";
+
                 sb.Append($"<button type=\"button\" class=\"{ButtonCssClass} btn-sm btn-success done-edit-btn mt-2\" " +
                           "onclick=\"toggleEditMode(this.closest('.edit-array-item').id); " +
-                          $"{(string.IsNullOrEmpty(OnUpdate) ? "" : $"{OnUpdate}(this.closest('.edit-array-item').id);")}\" >");
+                          $"{templateOnUpdateScript}\" >");
                 sb.Append("Done");
                 sb.Append("</button>");
                 sb.Append("</div>");
@@ -462,6 +468,22 @@ public class EditArrayTagHelper : TagHelper
             : $"{prefix}.{collectionName}[{index}]";
     }
     
+    /// <summary>
+    /// Gets the OnUpdate callback script, properly encoded for safe inclusion in HTML onclick attributes.
+    /// </summary>
+    /// <param name="itemId">The item identifier to pass to the callback.</param>
+    /// <returns>An encoded callback script (e.g., "encodedFunc('itemId');") or empty string if no callback is set.</returns>
+    private string GetOnUpdateScript(string itemId)
+    {
+        if (string.IsNullOrEmpty(OnUpdate))
+        {
+            return string.Empty;
+        }
+
+        var encodedCallback = HtmlEncoder.Default.Encode(OnUpdate);
+        return $"{encodedCallback}('{itemId}');";
+    }
+
     /// <summary>
     /// Validates that all required configuration properties are properly set.
     /// </summary>
