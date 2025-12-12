@@ -621,20 +621,21 @@ public partial class EditArrayTagHelperTests
         {
             ViewName = "EditorTemplate",
             Items = new List<object>(),
-            ViewContext = CreateViewContext()
+            ViewContext = CreateViewContext(),
+            Id = "test"  // Set Id so we pass Id validation and reach ViewContext validation
         };
-        
+
         // Use reflection to set ViewContext to null (bypassing required property validation)
         var viewContextProperty = typeof(EditArrayTagHelper).GetProperty(nameof(EditArrayTagHelper.ViewContext));
         viewContextProperty?.SetValue(tagHelper, null);
-        
+
         var context = CreateContext();
         var output = CreateOutput();
-        
+
         // Act & Assert
         var exception = await Assert.ThrowsAsync<InvalidOperationException>(() =>
             tagHelper.ProcessAsync(context, output));
-        
+
         Assert.Contains("ViewContext", exception.Message);
         Assert.Contains("required", exception.Message);
     }
@@ -645,20 +646,21 @@ public partial class EditArrayTagHelperTests
         // Arrange
         var viewContext = CreateViewContext();
         viewContext.ViewData = null!; // Force null ViewData
-        
+
         var tagHelper = new EditArrayTagHelper(CreateMockHtmlHelper().Object)
         {
             ViewName = "EditorTemplate",
             Items = new List<object>(),
-            ViewContext = viewContext
+            ViewContext = viewContext,
+            Id = "test"  // Set Id so we pass Id validation and reach ViewData validation
         };
         var context = CreateContext();
         var output = CreateOutput();
-        
+
         // Act & Assert
         var exception = await Assert.ThrowsAsync<InvalidOperationException>(() =>
             tagHelper.ProcessAsync(context, output));
-        
+
         Assert.Contains("ViewData", exception.Message);
     }
     
@@ -1148,6 +1150,212 @@ public partial class EditArrayTagHelperTests
         // Done button should work fine with null OnUpdate
         Assert.Contains("done-edit-btn", content);
         Assert.DoesNotContain("null", content);
+    }
+
+    #endregion
+
+    #region Id Validation and Encoding Tests
+
+    [Fact]
+    public async Task ProcessAsync_WithNullId_ThrowsInvalidOperationException()
+    {
+        // Arrange
+        var items = new List<object> { new TestModel { Name = "Test" } };
+        var tagHelper = CreateTagHelper(items: items);
+        tagHelper.Id = null; // Explicitly set to null, overriding the helper default
+
+        var context = CreateContext();
+        var output = CreateOutput();
+
+        // Act & Assert
+        var exception = await Assert.ThrowsAsync<InvalidOperationException>(() =>
+            tagHelper.ProcessAsync(context, output));
+        Assert.Contains("id", exception.Message, StringComparison.OrdinalIgnoreCase);
+    }
+
+    [Fact]
+    public async Task ProcessAsync_WithEmptyId_ThrowsInvalidOperationException()
+    {
+        // Arrange
+        var items = new List<object> { new TestModel { Name = "Test" } };
+        var tagHelper = CreateTagHelper(items: items);
+        tagHelper.Id = ""; // Explicitly set to empty string
+
+        var context = CreateContext();
+        var output = CreateOutput();
+
+        // Act & Assert
+        var exception = await Assert.ThrowsAsync<InvalidOperationException>(() =>
+            tagHelper.ProcessAsync(context, output));
+        Assert.Contains("id", exception.Message, StringComparison.OrdinalIgnoreCase);
+    }
+
+    [Fact]
+    public async Task ProcessAsync_WithWhitespaceOnlyId_ThrowsInvalidOperationException()
+    {
+        // Arrange
+        var items = new List<object> { new TestModel { Name = "Test" } };
+        var tagHelper = CreateTagHelper(items: items);
+        tagHelper.Id = "   "; // Explicitly set to whitespace only
+
+        var context = CreateContext();
+        var output = CreateOutput();
+
+        // Act & Assert
+        var exception = await Assert.ThrowsAsync<InvalidOperationException>(() =>
+            tagHelper.ProcessAsync(context, output));
+        Assert.Contains("id", exception.Message, StringComparison.OrdinalIgnoreCase);
+    }
+
+    [Fact]
+    public async Task ProcessAsync_WithSpecialCharactersInId_EncodesInHtmlAttribute()
+    {
+        // Arrange
+        var items = new List<object> { new TestModel { Name = "Test" } };
+        // ID with special characters that need encoding
+        var tagHelper = CreateTagHelper(items: items, id: "test<script>");
+
+        var context = CreateContext();
+        var output = CreateOutput();
+
+        // Act
+        await tagHelper.ProcessAsync(context, output);
+
+        // Assert
+        // The id attribute should be HTML-encoded
+        var idAttribute = output.Attributes["id"].Value;
+        Assert.Contains("&lt;", idAttribute.ToString());
+        Assert.Contains("&gt;", idAttribute.ToString());
+        Assert.DoesNotContain("<script>", idAttribute.ToString());
+    }
+
+    [Fact]
+    public async Task ProcessAsync_WithQuotesInId_EncodesProperly()
+    {
+        // Arrange
+        var items = new List<object> { new TestModel { Name = "Test" } };
+        var tagHelper = CreateTagHelper(items: items, id: @"test""quote");
+
+        var context = CreateContext();
+        var output = CreateOutput();
+
+        // Act
+        await tagHelper.ProcessAsync(context, output);
+
+        // Assert
+        var content = GetOutputContent(output);
+        var idAttribute = output.Attributes["id"].Value.ToString();
+        // Quote should be encoded in HTML attribute context
+        Assert.Contains("&quot;", idAttribute);
+        Assert.DoesNotContain("\"", idAttribute);
+    }
+
+    [Fact]
+    public async Task ProcessAsync_WithIdContainingAmpersand_EncodesCorrectly()
+    {
+        // Arrange
+        var items = new List<object> { new TestModel { Name = "Test" } };
+        var tagHelper = CreateTagHelper(items: items, id: "test&harmful");
+
+        var context = CreateContext();
+        var output = CreateOutput();
+
+        // Act
+        await tagHelper.ProcessAsync(context, output);
+
+        // Assert
+        var idAttribute = output.Attributes["id"].Value.ToString();
+        // Ampersand should be encoded
+        Assert.Contains("&amp;", idAttribute);
+    }
+
+    [Fact]
+    public async Task ProcessAsync_WithIdInJavaScriptContext_EncodesForJavascript()
+    {
+        // Arrange
+        var items = new List<object> { new TestModel { Name = "Test" } };
+        var tagHelper = CreateTagHelper(items: items, id: "test'quote");
+        tagHelper.DisplayMode = true;
+        tagHelper.DisplayViewName = "DisplayView";
+
+        var context = CreateContext();
+        var output = CreateOutput();
+
+        // Act
+        await tagHelper.ProcessAsync(context, output);
+
+        // Assert
+        var content = GetOutputContent(output);
+        // The ID used in onclick handlers should be properly escaped
+        // For javascript context, single quotes need encoding
+        Assert.DoesNotContain("toggleEditMode('test'quote')", content);
+    }
+
+    [Fact]
+    public async Task ProcessAsync_WithValidId_UsesIdInAllLocations()
+    {
+        // Arrange
+        var items = new List<object> { new TestModel { Name = "Test" } };
+        var tagHelper = CreateTagHelper(items: items, id: "myList");
+
+        var context = CreateContext();
+        var output = CreateOutput();
+
+        // Act
+        await tagHelper.ProcessAsync(context, output);
+
+        // Assert
+        var content = GetOutputContent(output);
+        var idAttribute = output.Attributes["id"].Value.ToString();
+        // Verify ID attribute is set correctly with the encoded container ID
+        Assert.Equal("edit-array-myList", idAttribute);
+        // Verify ID appears in content (items container)
+        Assert.Contains("edit-array-myList-items", content);
+    }
+
+    [Fact]
+    public async Task ProcessAsync_WithIdInReorderButtons_EncodesForJavascript()
+    {
+        // Arrange
+        var items = new List<object> { new TestModel { Name = "Test" } };
+        var tagHelper = CreateTagHelper(items: items, id: "list<xss>");
+        tagHelper.EnableReordering = true;
+        tagHelper.DisplayMode = true;
+        tagHelper.DisplayViewName = "DisplayView";
+
+        var context = CreateContext();
+        var output = CreateOutput();
+
+        // Act
+        await tagHelper.ProcessAsync(context, output);
+
+        // Assert
+        var content = GetOutputContent(output);
+        // ID in JavaScript should be properly escaped to prevent breaking the JS code
+        // The escaped version should appear in moveItem calls
+        Assert.Contains("moveItem", content);
+        // Raw unencoded < and > should not appear in onclick
+        Assert.DoesNotContain("moveItem('edit-array-list<xss>", content);
+    }
+
+    [Fact]
+    public async Task ProcessAsync_WithIdContainingBackslash_EncodesAppropriately()
+    {
+        // Arrange
+        var items = new List<object> { new TestModel { Name = "Test" } };
+        var tagHelper = CreateTagHelper(items: items, id: @"test\escape");
+
+        var context = CreateContext();
+        var output = CreateOutput();
+
+        // Act
+        await tagHelper.ProcessAsync(context, output);
+
+        // Assert
+        var content = GetOutputContent(output);
+        // Should handle backslash safely
+        var idAttribute = output.Attributes["id"].Value.ToString();
+        Assert.Contains("test", idAttribute);
     }
 
     #endregion

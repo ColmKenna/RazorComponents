@@ -126,8 +126,8 @@ public class EditArrayTagHelper : TagHelper
         output.TagName = "div";
         output.Attributes.SetAttribute("class", ContainerCssClass);
         
-        // Create an ID for the container to use with JavaScript
-        string containerId = $"edit-array-{Id}";
+        // Create an ID for the container to use with JavaScript (with encoding for security)
+        string containerId = GetEncodedContainerId();
         output.Attributes.SetAttribute("id", containerId);
         if (EnableReordering)
         {
@@ -485,6 +485,23 @@ public class EditArrayTagHelper : TagHelper
     }
 
     /// <summary>
+    /// Gets the container ID for use in HTML attributes, properly HTML-encoded for safe output.
+    /// </summary>
+    /// <remarks>
+    /// The user-provided Id is HTML-encoded to prevent XSS attacks. The resulting encoded container ID
+    /// is safe for use in both HTML attributes and JavaScript string literals within those attributes
+    /// (e.g., onclick="moveItem('edit-array-id')"). All itemIds derived from this containerId inherit
+    /// the same safety guarantees.
+    /// </remarks>
+    /// <returns>The encoded container ID (e.g., "edit-array-myId").</returns>
+    private string GetEncodedContainerId()
+    {
+        // Encode the user-provided Id for safe HTML attribute output
+        var encodedId = HtmlEncoder.Default.Encode(Id);
+        return $"edit-array-{encodedId}";
+    }
+
+    /// <summary>
     /// Validates that all required configuration properties are properly set.
     /// </summary>
     /// <exception cref="InvalidOperationException">Thrown when any required property is not properly configured.</exception>
@@ -505,7 +522,15 @@ public class EditArrayTagHelper : TagHelper
                 $"The '{nameof(Items)}' property is required and must not be null. " +
                 "Use an empty collection if there are no items to render.");
         }
-        
+
+        // Validate Id (required for JavaScript functionality)
+        if (string.IsNullOrWhiteSpace(Id))
+        {
+            throw new InvalidOperationException(
+                $"The 'id' attribute is required and must not be null, empty, or whitespace. " +
+                "The id is used to generate unique JavaScript function calls and DOM element identifiers.");
+        }
+
         // Validate ViewContext and nested properties
         if (ViewContext == null)
         {
