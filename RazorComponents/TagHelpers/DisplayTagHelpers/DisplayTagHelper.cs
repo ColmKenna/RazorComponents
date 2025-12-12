@@ -8,7 +8,7 @@ namespace RazorComponents.TagHelpers.DisplayTagHelpers;
 public class DisplayTagHelper : TagHelper
 {
     [HtmlAttributeName("asp-for")]
-    public ModelExpression For { get; set; }
+    public required ModelExpression For { get; set; }
 
     [HtmlAttributeName("label-class")]
     public string? LabelClass { get; set; }
@@ -21,7 +21,7 @@ public class DisplayTagHelper : TagHelper
 
     [HtmlAttributeNotBound]
     [ViewContext]
-    public ViewContext ViewContext { get; set; }
+    public required ViewContext ViewContext { get; set; }
     
     public override void Process(TagHelperContext context, TagHelperOutput output)
     {
