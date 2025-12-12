@@ -1,0 +1,17 @@
+@page
+@model RazorComponents.Pages.SampleUses.Display.BasicUsageModel
+@{
+    ViewData["Title"] = "Display Tag Helper - Basic Usage";
+}
+
+<h1>Basic Usage</h1>
+<p>This demonstrates the default behavior of the <code>&lt;display&gt;</code> tag helper.</p>
+
+<div class="card p-3 mb-3">
+    <div class="mb-3">
+        <display asp-for="Name" />
+    </div>
+    <div class="mb-3">
+        <display asp-for="Email" />
+    </div>
+</div>

@@ -1,0 +1,29 @@
+@page
+@model RazorComponents.Pages.SampleUses.Display.ComplexUsageModel
+@{
+    ViewData["Title"] = "Display Tag Helper - Complex Models";
+}
+
+<h1>Complex Models</h1>
+<p>Demonstrates usage with nested properties and collections.</p>
+
+<div class="card p-3 mb-3">
+    <h3>Person Details</h3>
+    <div class="mb-3">
+        <display asp-for="User.FirstName" />
+    </div>
+    <div class="mb-3">
+        <display asp-for="User.LastName" />
+    </div>
+
+    <h3>Primary Address</h3>
+    <div class="mb-3">
+        <display asp-for="User.Addresses[0].Street" />
+    </div>
+    <div class="mb-3">
+        <display asp-for="User.Addresses[0].City" />
+    </div>
+    <div class="mb-3">
+        <display asp-for="User.Addresses[0].State" />
+    </div>
+</div>
