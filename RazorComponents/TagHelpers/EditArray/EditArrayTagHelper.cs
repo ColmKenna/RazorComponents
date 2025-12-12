@@ -568,6 +568,14 @@ public class EditArrayTagHelper : TagHelper
                 "The id is used to generate unique JavaScript function calls and DOM element identifiers.");
         }
 
+        // Validate DisplayMode requires DisplayViewName
+        if (DisplayMode && string.IsNullOrWhiteSpace(DisplayViewName))
+        {
+            throw new InvalidOperationException(
+                $"The '{nameof(DisplayViewName)}' property is required when '{nameof(DisplayMode)}' is enabled. " +
+                $"Please specify a partial view name for display mode, or set '{nameof(DisplayMode)}' to false.");
+        }
+
         // Validate ViewContext and nested properties
         if (ViewContext == null)
         {

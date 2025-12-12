@@ -47,6 +47,9 @@
                     <p class="card-text">
                         Shows items in display mode by default with ability to toggle to edit mode. Great UX for read-heavy scenarios.
                     </p>
+                    <p class="card-text">
+                        <small class="text-muted"><strong>Note:</strong> Requires both <code>asp-display-mode="true"</code> and <code>asp-display-view-name</code> to be set.</small>
+                    </p>
                     <h6 class="mt-3 mb-2">Features:</h6>
                     <ul class="small">
                         <li>Display and edit views</li>
@@ -219,13 +222,13 @@
                         </tr>
                         <tr>
                             <td><code>asp-display-view-name</code></td>
-                            <td>Path to the display template view (enables DisplayMode)</td>
-                            <td><span class="badge bg-success">No</span></td>
+                            <td>Path to the display template view. <strong>Required when <code>asp-display-mode="true"</code></strong></td>
+                            <td><span class="badge bg-warning text-dark">Conditional</span></td>
                             <td>null</td>
                         </tr>
                         <tr>
                             <td><code>asp-display-mode</code></td>
-                            <td>Show items in display mode by default</td>
+                            <td>Show items in display mode by default. When <code>true</code>, <code>asp-display-view-name</code> must be specified</td>
                             <td><span class="badge bg-success">No</span></td>
                             <td>false</td>
                         </tr>
@@ -303,12 +306,92 @@
                         </tr>
                         <tr>
                             <td><code>id</code></td>
-                            <td>HTML id attribute for the container</td>
-                            <td><span class="badge bg-success">No</span></td>
+                            <td>HTML id attribute for the container. <strong>Required for JavaScript functionality.</strong></td>
+                            <td><span class="badge bg-danger">Yes</span></td>
                             <td>-</td>
                         </tr>
                     </tbody>
                 </table>
+            </div>
+
+            <!-- Validation Rules -->
+            <div class="alert alert-info mt-4" role="alert">
+                <h5 class="alert-heading"><i class="bi bi-info-circle"></i> Validation Rules</h5>
+                <ul class="mb-0">
+                    <li><strong>DisplayMode Requirement:</strong> When <code>asp-display-mode="true"</code>, you must also specify <code>asp-display-view-name</code>. Omitting it will throw an <code>InvalidOperationException</code> with a clear error message.</li>
+                    <li><strong>ID Requirement:</strong> The <code>id</code> attribute is validated and cannot be null, empty, or whitespace as it's used for JavaScript functionality.</li>
+                    <li><strong>Security:</strong> All user-provided values (IDs, CSS classes, callbacks) are properly HTML-encoded to prevent XSS attacks.</li>
+                </ul>
+            </div>
+
+            <!-- Usage Examples -->
+            <div class="mt-4">
+                <h4 class="mb-3">Usage Examples</h4>
+
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <div class="card border-success">
+                            <div class="card-header bg-success text-white">
+                                <h6 class="mb-0">✓ Correct: DisplayMode with DisplayViewName</h6>
+                            </div>
+                            <div class="card-body">
+                                <pre class="mb-0"><code>&lt;edit-array asp-items="Model.Items"
+            asp-view-name="EditorTemplate"
+            id="myList"
+            asp-display-mode="true"
+            asp-display-view-name="DisplayTemplate"&gt;
+&lt;/edit-array&gt;</code></pre>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <div class="card border-danger">
+                            <div class="card-header bg-danger text-white">
+                                <h6 class="mb-0">✗ Incorrect: DisplayMode without DisplayViewName</h6>
+                            </div>
+                            <div class="card-body">
+                                <pre class="mb-0"><code>&lt;edit-array asp-items="Model.Items"
+            asp-view-name="EditorTemplate"
+            id="myList"
+            asp-display-mode="true"&gt;
+&lt;/edit-array&gt;
+<span class="text-danger"><!-- Will throw InvalidOperationException --></span></code></pre>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <div class="card border-success">
+                            <div class="card-header bg-success text-white">
+                                <h6 class="mb-0">✓ Correct: Edit Mode Only (No Display)</h6>
+                            </div>
+                            <div class="card-body">
+                                <pre class="mb-0"><code>&lt;edit-array asp-items="Model.Items"
+            asp-view-name="EditorTemplate"
+            id="myList"&gt;
+&lt;/edit-array&gt;
+<span class="text-muted"><!-- DisplayMode defaults to false --></span></code></pre>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <div class="card border-success">
+                            <div class="card-header bg-success text-white">
+                                <h6 class="mb-0">✓ Correct: With Template and Add Button</h6>
+                            </div>
+                            <div class="card-body">
+                                <pre class="mb-0"><code>&lt;edit-array asp-items="Model.Items"
+            asp-view-name="EditorTemplate"
+            id="myList"
+            asp-template="true"
+            asp-add-button="true"&gt;
+&lt;/edit-array&gt;</code></pre>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>

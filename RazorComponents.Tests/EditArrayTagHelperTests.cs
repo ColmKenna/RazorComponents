@@ -672,15 +672,177 @@ public partial class EditArrayTagHelperTests
         var tagHelper = CreateTagHelper(items: new List<object>());
         var context = CreateContext();
         var output = CreateOutput();
-        
+
         // Act & Assert - Should not throw, empty collection is valid
         await tagHelper.ProcessAsync(context, output);
-        
+
         // Verify it rendered successfully
         Assert.Equal("div", output.TagName);
         Assert.Equal("edit-array-container", output.Attributes["class"].Value);
     }
-    
+
+    #endregion
+
+    #region ProcessAsync - DisplayMode Validation Tests
+
+    [Fact]
+    public async Task ProcessAsync_WithDisplayModeWithoutDisplayViewName_ThrowsInvalidOperationException()
+    {
+        // Arrange
+        var tagHelper = CreateTagHelper();
+        tagHelper.DisplayMode = true;
+        tagHelper.DisplayViewName = null; // Invalid: DisplayMode requires DisplayViewName
+
+        var context = CreateContext();
+        var output = CreateOutput();
+
+        // Act & Assert
+        var exception = await Assert.ThrowsAsync<InvalidOperationException>(() =>
+            tagHelper.ProcessAsync(context, output));
+
+        Assert.Contains("DisplayViewName", exception.Message);
+        Assert.Contains("required", exception.Message, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("DisplayMode", exception.Message);
+    }
+
+    [Fact]
+    public async Task ProcessAsync_WithDisplayModeAndEmptyDisplayViewName_ThrowsInvalidOperationException()
+    {
+        // Arrange
+        var tagHelper = CreateTagHelper();
+        tagHelper.DisplayMode = true;
+        tagHelper.DisplayViewName = string.Empty; // Invalid: empty string
+
+        var context = CreateContext();
+        var output = CreateOutput();
+
+        // Act & Assert
+        var exception = await Assert.ThrowsAsync<InvalidOperationException>(() =>
+            tagHelper.ProcessAsync(context, output));
+
+        Assert.Contains("DisplayViewName", exception.Message);
+        Assert.Contains("required", exception.Message, StringComparison.OrdinalIgnoreCase);
+    }
+
+    [Fact]
+    public async Task ProcessAsync_WithDisplayModeAndWhitespaceDisplayViewName_ThrowsInvalidOperationException()
+    {
+        // Arrange
+        var tagHelper = CreateTagHelper();
+        tagHelper.DisplayMode = true;
+        tagHelper.DisplayViewName = "   "; // Invalid: whitespace only
+
+        var context = CreateContext();
+        var output = CreateOutput();
+
+        // Act & Assert
+        var exception = await Assert.ThrowsAsync<InvalidOperationException>(() =>
+            tagHelper.ProcessAsync(context, output));
+
+        Assert.Contains("DisplayViewName", exception.Message);
+        Assert.Contains("required", exception.Message, StringComparison.OrdinalIgnoreCase);
+    }
+
+    [Fact]
+    public async Task ProcessAsync_WithDisplayModeFalseAndNullDisplayViewName_DoesNotThrow()
+    {
+        // Arrange
+        var tagHelper = CreateTagHelper();
+        tagHelper.DisplayMode = false;
+        tagHelper.DisplayViewName = null; // Valid: DisplayViewName not needed when DisplayMode is false
+
+        var context = CreateContext();
+        var output = CreateOutput();
+
+        // Act & Assert - Should complete without exception
+        await tagHelper.ProcessAsync(context, output);
+
+        // Verify it rendered successfully
+        Assert.Equal("div", output.TagName);
+        Assert.Equal("edit-array-container", output.Attributes["class"].Value.ToString());
+    }
+
+    [Fact]
+    public async Task ProcessAsync_WithDisplayModeFalseAndEmptyDisplayViewName_DoesNotThrow()
+    {
+        // Arrange
+        var tagHelper = CreateTagHelper();
+        tagHelper.DisplayMode = false;
+        tagHelper.DisplayViewName = ""; // Valid: DisplayViewName ignored when DisplayMode is false
+
+        var context = CreateContext();
+        var output = CreateOutput();
+
+        // Act & Assert - Should complete without exception
+        await tagHelper.ProcessAsync(context, output);
+
+        Assert.Equal("div", output.TagName);
+    }
+
+    [Fact]
+    public async Task ProcessAsync_WithDisplayModeAndValidDisplayViewName_RendersCorrectly()
+    {
+        // Arrange
+        var items = new List<object> { new TestModel { Name = "Test" } };
+        var tagHelper = CreateTagHelper(items: items);
+        tagHelper.DisplayMode = true;
+        tagHelper.DisplayViewName = "DisplayView"; // Valid configuration
+
+        var context = CreateContext();
+        var output = CreateOutput();
+
+        // Act
+        await tagHelper.ProcessAsync(context, output);
+
+        // Assert - Should render display containers
+        var content = GetOutputContent(output);
+        Assert.Contains("display-container", content);
+        Assert.Contains("edit-container", content);
+    }
+
+    [Fact]
+    public async Task ProcessAsync_WithDisplayModeFalseAndSetDisplayViewName_IgnoresDisplayViewName()
+    {
+        // Arrange
+        var items = new List<object> { new TestModel { Name = "Test" } };
+        var tagHelper = CreateTagHelper(items: items);
+        tagHelper.DisplayMode = false;
+        tagHelper.DisplayViewName = "DisplayView"; // Set but ignored
+
+        var context = CreateContext();
+        var output = CreateOutput();
+
+        // Act
+        await tagHelper.ProcessAsync(context, output);
+
+        // Assert - Should NOT render display containers (DisplayMode is false)
+        var content = GetOutputContent(output);
+        Assert.DoesNotContain("display-container", content);
+    }
+
+    [Fact]
+    public async Task ProcessAsync_ValidationFailureMessage_IsDescriptive()
+    {
+        // Arrange
+        var tagHelper = CreateTagHelper();
+        tagHelper.DisplayMode = true;
+        tagHelper.DisplayViewName = null;
+
+        var context = CreateContext();
+        var output = CreateOutput();
+
+        // Act & Assert
+        var exception = await Assert.ThrowsAsync<InvalidOperationException>(() =>
+            tagHelper.ProcessAsync(context, output));
+
+        // Message should be helpful and guide the user to the solution
+        Assert.Contains("DisplayViewName", exception.Message);
+        Assert.Contains("DisplayMode", exception.Message);
+        Assert.True(
+            exception.Message.Contains("required") || exception.Message.Contains("must be specified"),
+            "Exception message should indicate that DisplayViewName is required");
+    }
+
     #endregion
     
     #region ProcessAsync - OnDelete Callback Tests
