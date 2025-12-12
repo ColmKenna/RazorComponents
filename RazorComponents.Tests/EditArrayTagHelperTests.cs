@@ -844,7 +844,150 @@ public partial class EditArrayTagHelperTests
     }
 
     #endregion
-    
+
+    #region GenerateButton Helper Method Tests
+
+    [Fact]
+    public void GenerateButton_WithEditButtonForItem_GeneratesCorrectHtml()
+    {
+        // Arrange
+        var tagHelper = CreateTagHelper();
+        var generateButtonMethod = typeof(EditArrayTagHelper).GetMethod("GenerateButton",
+            System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+
+        // Act
+        var result = generateButtonMethod?.Invoke(tagHelper, new object[] { "edit", "test-item-0", false });
+
+        // Assert
+        var html = result?.ToString();
+        Assert.NotNull(html);
+        Assert.Contains("type=\"button\"", html);
+        Assert.Contains("btn-primary", html);
+        Assert.Contains("edit-item-btn", html);
+        Assert.Contains("toggleEditMode('test-item-0')", html);
+        Assert.Contains(">Edit</button>", html);
+    }
+
+    [Fact]
+    public void GenerateButton_WithEditButtonForTemplate_UsesClosestPattern()
+    {
+        // Arrange
+        var tagHelper = CreateTagHelper();
+        var generateButtonMethod = typeof(EditArrayTagHelper).GetMethod("GenerateButton",
+            System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+
+        // Act
+        var result = generateButtonMethod?.Invoke(tagHelper, new object[] { "edit", null, true });
+
+        // Assert
+        var html = result?.ToString();
+        Assert.NotNull(html);
+        Assert.Contains("toggleEditMode(this.closest('.edit-array-item').id)", html);
+        Assert.DoesNotContain("test-item", html);
+    }
+
+    [Fact]
+    public void GenerateButton_WithDeleteButtonForItem_GeneratesCorrectHtml()
+    {
+        // Arrange
+        var tagHelper = CreateTagHelper();
+        var generateButtonMethod = typeof(EditArrayTagHelper).GetMethod("GenerateButton",
+            System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+
+        // Act
+        var result = generateButtonMethod?.Invoke(tagHelper, new object[] { "delete", "test-item-1", false });
+
+        // Assert
+        var html = result?.ToString();
+        Assert.NotNull(html);
+        Assert.Contains("type=\"button\"", html);
+        Assert.Contains("btn-danger", html);
+        Assert.Contains("delete-item-btn", html);
+        Assert.Contains("markForDeletion('test-item-1')", html);
+        Assert.Contains(">Delete</button>", html);
+    }
+
+    [Fact]
+    public void GenerateButton_WithDeleteButtonAndOnDeleteCallback_IncludesCallback()
+    {
+        // Arrange
+        var tagHelper = CreateTagHelper();
+        tagHelper.OnDelete = "handleDelete";
+        var generateButtonMethod = typeof(EditArrayTagHelper).GetMethod("GenerateButton",
+            System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+
+        // Act
+        var result = generateButtonMethod?.Invoke(tagHelper, new object[] { "delete", "test-item-2", false });
+
+        // Assert
+        var html = result?.ToString();
+        Assert.NotNull(html);
+        Assert.Contains("markForDeletion('test-item-2')", html);
+        Assert.Contains("handleDelete('test-item-2')", html);
+    }
+
+    [Fact]
+    public void GenerateButton_WithDoneButtonForItem_GeneratesCorrectHtml()
+    {
+        // Arrange
+        var tagHelper = CreateTagHelper();
+        var generateButtonMethod = typeof(EditArrayTagHelper).GetMethod("GenerateButton",
+            System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+
+        // Act
+        var result = generateButtonMethod?.Invoke(tagHelper, new object[] { "done", "test-item-3", false });
+
+        // Assert
+        var html = result?.ToString();
+        Assert.NotNull(html);
+        Assert.Contains("type=\"button\"", html);
+        Assert.Contains("btn-success", html);
+        Assert.Contains("done-edit-btn", html);
+        Assert.Contains("toggleEditMode('test-item-3')", html);
+        Assert.Contains(">Done</button>", html);
+    }
+
+    [Fact]
+    public void GenerateButton_WithDoneButtonAndOnUpdateCallback_IncludesCallback()
+    {
+        // Arrange
+        var tagHelper = CreateTagHelper();
+        tagHelper.OnUpdate = "handleUpdate";
+        var generateButtonMethod = typeof(EditArrayTagHelper).GetMethod("GenerateButton",
+            System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+
+        // Act
+        var result = generateButtonMethod?.Invoke(tagHelper, new object[] { "done", "test-item-4", false });
+
+        // Assert
+        var html = result?.ToString();
+        Assert.NotNull(html);
+        Assert.Contains("toggleEditMode('test-item-4')", html);
+        Assert.Contains("handleUpdate('test-item-4')", html);
+    }
+
+    [Fact]
+    public void GenerateButton_WithSpecialCharactersInCallback_EncodesCorrectly()
+    {
+        // Arrange
+        var tagHelper = CreateTagHelper();
+        tagHelper.OnDelete = "alert('test')";
+        var generateButtonMethod = typeof(EditArrayTagHelper).GetMethod("GenerateButton",
+            System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+
+        // Act
+        var result = generateButtonMethod?.Invoke(tagHelper, new object[] { "delete", "test-item-5", false });
+
+        // Assert
+        var html = result?.ToString();
+        Assert.NotNull(html);
+        // Should be encoded
+        Assert.Contains("alert(&#x27;test&#x27;)", html);
+        Assert.DoesNotContain("alert('test')", html);
+    }
+
+    #endregion
+
     #region ProcessAsync - OnDelete Callback Tests
     
     [Fact]
