@@ -109,6 +109,30 @@
             </div>
         </div>
 
+        <!-- Reordering Example Card -->
+        <div class="col-md-6">
+            <div class="card h-100 shadow-sm">
+                <div class="card-header bg-dark text-white">
+                    <h5 class="mb-0">Reordering Example</h5>
+                </div>
+                <div class="card-body">
+                    <p class="card-text">
+                        Shows optional Up/Down controls that renumber names/ids after items move. Buttons are fully themeable.
+                    </p>
+                    <h6 class="mt-3 mb-2">Features:</h6>
+                    <ul class="small">
+                        <li>Toggleable reordering (off by default)</li>
+                        <li>Custom button classes and labels</li>
+                        <li>Index-safe renumbering after moves</li>
+                        <li>Works with templates and display mode</li>
+                    </ul>
+                </div>
+                <div class="card-footer bg-light">
+                    <a asp-page="ReorderExample" class="btn btn-dark btn-sm">View Example</a>
+                </div>
+            </div>
+        </div>
+
         <!-- Empty Placeholder Example Card -->
         <div class="col-md-6">
             <div class="card h-100 shadow-sm">
@@ -252,6 +276,30 @@
                             <td>Placeholder text to display when Items collection is empty</td>
                             <td><span class="badge bg-success">No</span></td>
                             <td>null</td>
+                        </tr>
+                        <tr>
+                            <td><code>asp-enable-reordering</code></td>
+                            <td>Enables rendering of reorder buttons and renumbering behavior</td>
+                            <td><span class="badge bg-success">No</span></td>
+                            <td>false</td>
+                        </tr>
+                        <tr>
+                            <td><code>asp-reorder-button-class</code></td>
+                            <td>CSS class to apply to reorder buttons</td>
+                            <td><span class="badge bg-success">No</span></td>
+                            <td>btn btn-outline-secondary</td>
+                        </tr>
+                        <tr>
+                            <td><code>asp-move-up-text</code></td>
+                            <td>Button text for moving an item up</td>
+                            <td><span class="badge bg-success">No</span></td>
+                            <td>Move Up</td>
+                        </tr>
+                        <tr>
+                            <td><code>asp-move-down-text</code></td>
+                            <td>Button text for moving an item down</td>
+                            <td><span class="badge bg-success">No</span></td>
+                            <td>Move Down</td>
                         </tr>
                         <tr>
                             <td><code>id</code></td>
