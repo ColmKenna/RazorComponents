@@ -145,6 +145,7 @@ function toggleEditMode(itemId) {
     const item = document.getElementById(itemId);
     if (!item) return;
 
+    const containerId = getContainerIdFromItemId(itemId);
     const displayContainer = document.getElementById(`${itemId}-display`);
     const editContainer = document.getElementById(`${itemId}-edit`);
 
@@ -163,9 +164,11 @@ function toggleEditMode(itemId) {
         }
     }
     // re-enable the add button
-    const addButton = document.getElementById(containerId + '-add');
-    if (addButton) {
-        addButton.disabled = false;
+    if (containerId) {
+        const addButton = document.getElementById(containerId + '-add');
+        if (addButton) {
+            addButton.disabled = false;
+        }
     }
 
     const cancelButton = item.querySelector('button[data-cancel]');
