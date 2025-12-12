@@ -124,7 +124,7 @@ public class EditArrayTagHelper : TagHelper
         
         // Reset the TagHelper output
         output.TagName = "div";
-        output.Attributes.SetAttribute("class", ContainerCssClass);
+        output.Attributes.SetAttribute("class", GetEncodedContainerCssClass());
         
         // Create an ID for the container to use with JavaScript (with encoding for security)
         string containerId = GetEncodedContainerId();
@@ -160,7 +160,7 @@ public class EditArrayTagHelper : TagHelper
             var itemId = $"{containerId}-item-{index}";
             
             // Create a wrapper for this item
-            sb.Append($"<div class=\"{ItemCssClass}\" id=\"{itemId}\">");
+            sb.Append($"<div class=\"{GetEncodedItemCssClass()}\" id=\"{itemId}\">");
             
             // Check if IsDeleted property is present in the model and add a hidden input if not
             var isDeletedProperty = item.GetType().GetProperty("IsDeleted");            
@@ -199,12 +199,12 @@ public class EditArrayTagHelper : TagHelper
                 }
                 
                 // Move the edit button inside the display-container div
-                sb.Append($"<button type=\"button\" class=\"{ButtonCssClass} btn-sm btn-primary edit-item-btn mt-2\" ");
+                sb.Append($"<button type=\"button\" class=\"{GetEncodedButtonCssClass()} btn-sm btn-primary edit-item-btn mt-2\" ");
                 sb.Append($" onclick=\"toggleEditMode('{itemId}')\">");
                 sb.Append("Edit");
                 sb.Append("</button>");
-                
-                sb.Append($"<button type=\"button\" class=\"{ButtonCssClass} btn-sm btn-danger delete-item-btn mt-2\" ");
+
+                sb.Append($"<button type=\"button\" class=\"{GetEncodedButtonCssClass()} btn-sm btn-danger delete-item-btn mt-2\" ");
                 sb.Append($" onclick=\"markForDeletion('{itemId}')");
                 if (!string.IsNullOrEmpty(OnDelete))
                 {
@@ -232,7 +232,7 @@ public class EditArrayTagHelper : TagHelper
                 
                 // Add done button with update handler
                 var onUpdateScript = GetOnUpdateScript(itemId);
-                sb.Append($"<button type=\"button\" class=\"{ButtonCssClass} btn-sm btn-success done-edit-btn mt-2\" " +
+                sb.Append($"<button type=\"button\" class=\"{GetEncodedButtonCssClass()} btn-sm btn-success done-edit-btn mt-2\" " +
                            $"onclick=\"toggleEditMode('{itemId}'); {onUpdateScript}\">");
                 sb.Append("Done");
                 sb.Append("</button>");
@@ -304,7 +304,7 @@ public class EditArrayTagHelper : TagHelper
             };
             
             // Create a wrapper for the template item
-            sb.Append($"<div class=\"{ItemCssClass}\">");
+            sb.Append($"<div class=\"{GetEncodedItemCssClass()}\">");
 
             var name = $"{templateFieldName}.IsDeleted";
 
@@ -323,12 +323,12 @@ public class EditArrayTagHelper : TagHelper
                         sb.Append(writer.ToString());
                     }
                 }
-                sb.Append($"<button type=\"button\" class=\"{ButtonCssClass} btn-sm btn-primary edit-item-btn mt-2\" " +
+                sb.Append($"<button type=\"button\" class=\"{GetEncodedButtonCssClass()} btn-sm btn-primary edit-item-btn mt-2\" " +
                           "onclick=\"toggleEditMode(this.closest('.edit-array-item').id)\">");
                 sb.Append("Edit");
                 sb.Append("</button>");
-                
-                sb.Append($"<button type=\"button\" class=\"{ButtonCssClass} btn-sm btn-danger delete-item-btn mt-2\" ");
+
+                sb.Append($"<button type=\"button\" class=\"{GetEncodedButtonCssClass()} btn-sm btn-danger delete-item-btn mt-2\" ");
                 sb.Append($" onclick=\"markForDeletion(this.closest('.edit-array-item').id)");
                 if (!string.IsNullOrEmpty(OnDelete))
                 {
@@ -367,7 +367,7 @@ public class EditArrayTagHelper : TagHelper
                     ? string.Empty
                     : $"{HtmlEncoder.Default.Encode(OnUpdate)}(this.closest('.edit-array-item').id);";
 
-                sb.Append($"<button type=\"button\" class=\"{ButtonCssClass} btn-sm btn-success done-edit-btn mt-2\" " +
+                sb.Append($"<button type=\"button\" class=\"{GetEncodedButtonCssClass()} btn-sm btn-success done-edit-btn mt-2\" " +
                           "onclick=\"toggleEditMode(this.closest('.edit-array-item').id); " +
                           $"{templateOnUpdateScript}\" >");
                 sb.Append("Done");
@@ -392,7 +392,7 @@ public class EditArrayTagHelper : TagHelper
             {
                 
                 // button should have and id containerId + '-add'
-                sb.Append($"<button type=\"button\" class=\"{ButtonCssClass} btn-primary mt-2\" id=\"{containerId}-add\" onclick=\"addNewItem('{containerId}', '{templateId}')\">");
+                sb.Append($"<button type=\"button\" class=\"{GetEncodedButtonCssClass()} btn-primary mt-2\" id=\"{containerId}-add\" onclick=\"addNewItem('{containerId}', '{templateId}')\">");
                 sb.Append("Add New Item");
                 sb.Append("</button>");
             }
@@ -411,13 +411,13 @@ public class EditArrayTagHelper : TagHelper
 
         var upText = EncodeButtonText(MoveUpButtonText, "Move Up");
         var downText = EncodeButtonText(MoveDownButtonText, "Move Down");
-        var cssClass = GetReorderButtonCssClass();
+        var encodedCssClass = GetEncodedReorderButtonCssClass();
 
         sb.Append("<div class=\"reorder-controls\">");
-        sb.Append($"<button type=\"button\" class=\"{cssClass} reorder-btn reorder-up-btn\" data-reorder-direction=\"up\" onclick=\"moveItem('{containerId}','{itemId}',-1)\">");
+        sb.Append($"<button type=\"button\" class=\"{encodedCssClass} reorder-btn reorder-up-btn\" data-reorder-direction=\"up\" onclick=\"moveItem('{containerId}','{itemId}',-1)\">");
         sb.Append(upText);
         sb.Append("</button>");
-        sb.Append($"<button type=\"button\" class=\"{cssClass} reorder-btn reorder-down-btn\" data-reorder-direction=\"down\" onclick=\"moveItem('{containerId}','{itemId}',1)\">");
+        sb.Append($"<button type=\"button\" class=\"{encodedCssClass} reorder-btn reorder-down-btn\" data-reorder-direction=\"down\" onclick=\"moveItem('{containerId}','{itemId}',1)\">");
         sb.Append(downText);
         sb.Append("</button>");
         sb.Append("</div>");
@@ -432,13 +432,13 @@ public class EditArrayTagHelper : TagHelper
 
         var upText = EncodeButtonText(MoveUpButtonText, "Move Up");
         var downText = EncodeButtonText(MoveDownButtonText, "Move Down");
-        var cssClass = GetReorderButtonCssClass();
+        var encodedCssClass = GetEncodedReorderButtonCssClass();
 
         sb.Append("<div class=\"reorder-controls\">");
-        sb.Append($"<button type=\"button\" class=\"{cssClass} reorder-btn reorder-up-btn\" data-reorder-direction=\"up\" onclick=\"moveItem('{containerId}', this.closest('.edit-array-item').id, -1)\">");
+        sb.Append($"<button type=\"button\" class=\"{encodedCssClass} reorder-btn reorder-up-btn\" data-reorder-direction=\"up\" onclick=\"moveItem('{containerId}', this.closest('.edit-array-item').id, -1)\">");
         sb.Append(upText);
         sb.Append("</button>");
-        sb.Append($"<button type=\"button\" class=\"{cssClass} reorder-btn reorder-down-btn\" data-reorder-direction=\"down\" onclick=\"moveItem('{containerId}', this.closest('.edit-array-item').id, 1)\">");
+        sb.Append($"<button type=\"button\" class=\"{encodedCssClass} reorder-btn reorder-down-btn\" data-reorder-direction=\"down\" onclick=\"moveItem('{containerId}', this.closest('.edit-array-item').id, 1)\">");
         sb.Append(downText);
         sb.Append("</button>");
         sb.Append("</div>");
@@ -447,6 +447,43 @@ public class EditArrayTagHelper : TagHelper
     private string GetReorderButtonCssClass()
     {
         return string.IsNullOrWhiteSpace(ReorderButtonCssClass) ? ButtonCssClass : ReorderButtonCssClass;
+    }
+
+    /// <summary>
+    /// Gets the container CSS class, properly HTML-encoded for safe output in attributes.
+    /// </summary>
+    /// <returns>The encoded container CSS class.</returns>
+    private string GetEncodedContainerCssClass()
+    {
+        return HtmlEncoder.Default.Encode(ContainerCssClass);
+    }
+
+    /// <summary>
+    /// Gets the item CSS class, properly HTML-encoded for safe output in attributes.
+    /// </summary>
+    /// <returns>The encoded item CSS class.</returns>
+    private string GetEncodedItemCssClass()
+    {
+        return HtmlEncoder.Default.Encode(ItemCssClass);
+    }
+
+    /// <summary>
+    /// Gets the button CSS class, properly HTML-encoded for safe output in attributes.
+    /// </summary>
+    /// <returns>The encoded button CSS class.</returns>
+    private string GetEncodedButtonCssClass()
+    {
+        return HtmlEncoder.Default.Encode(ButtonCssClass);
+    }
+
+    /// <summary>
+    /// Gets the reorder button CSS class, properly HTML-encoded for safe output in attributes.
+    /// </summary>
+    /// <returns>The encoded reorder button CSS class (falls back to ButtonCssClass if ReorderButtonCssClass is empty).</returns>
+    private string GetEncodedReorderButtonCssClass()
+    {
+        var cssClass = GetReorderButtonCssClass();
+        return HtmlEncoder.Default.Encode(cssClass);
     }
 
     private string EncodeButtonText(string text, string fallback)

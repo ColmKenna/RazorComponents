@@ -1359,4 +1359,224 @@ public partial class EditArrayTagHelperTests
     }
 
     #endregion
+
+    #region CSS Class Encoding Tests
+
+    [Fact]
+    public async Task ProcessAsync_WithSpecialCharactersInContainerCssClass_EncodesClass()
+    {
+        // Arrange
+        var items = new List<object> { new TestModel { Name = "Test" } };
+        var tagHelper = CreateTagHelper(items: items);
+        tagHelper.ContainerCssClass = "myClass<script>alert('xss')</script>";
+
+        var context = CreateContext();
+        var output = CreateOutput();
+
+        // Act
+        await tagHelper.ProcessAsync(context, output);
+
+        // Assert
+        var classAttribute = output.Attributes["class"].Value.ToString();
+        // Should encode < and >
+        Assert.Contains("&lt;", classAttribute);
+        Assert.Contains("&gt;", classAttribute);
+        // Should NOT contain unencoded script tag
+        Assert.DoesNotContain("<script>", classAttribute);
+    }
+
+    [Fact]
+    public async Task ProcessAsync_WithQuotesInContainerCssClass_EncodesCorrectly()
+    {
+        // Arrange
+        var items = new List<object> { new TestModel { Name = "Test" } };
+        var tagHelper = CreateTagHelper(items: items);
+        tagHelper.ContainerCssClass = @"myClass"" onclick=""alert('xss')""";
+
+        var context = CreateContext();
+        var output = CreateOutput();
+
+        // Act
+        await tagHelper.ProcessAsync(context, output);
+
+        // Assert
+        var classAttribute = output.Attributes["class"].Value.ToString();
+        // Quotes should be encoded
+        Assert.Contains("&quot;", classAttribute);
+        // Should NOT contain unencoded quotes that could break attribute
+        Assert.DoesNotContain("\" onclick=", classAttribute);
+    }
+
+    [Fact]
+    public async Task ProcessAsync_WithSpecialCharactersInItemCssClass_EncodesInHtml()
+    {
+        // Arrange
+        var items = new List<object> { new TestModel { Name = "Test" } };
+        var tagHelper = CreateTagHelper(items: items);
+        tagHelper.ItemCssClass = "item<payload>";
+
+        var context = CreateContext();
+        var output = CreateOutput();
+
+        // Act
+        await tagHelper.ProcessAsync(context, output);
+
+        // Assert
+        var content = GetOutputContent(output);
+        // Should encode angle brackets
+        Assert.Contains("&lt;", content);
+        Assert.Contains("&gt;", content);
+        // Should NOT contain unencoded brackets
+        Assert.DoesNotContain("item<payload>", content);
+    }
+
+    [Fact]
+    public async Task ProcessAsync_WithSpecialCharactersInButtonCssClass_EncodesInAllButtons()
+    {
+        // Arrange
+        var items = new List<object> { new TestModel { Name = "Test" } };
+        var tagHelper = CreateTagHelper(items: items);
+        tagHelper.DisplayMode = true;
+        tagHelper.DisplayViewName = "DisplayView";
+        tagHelper.ButtonCssClass = "btn\"alert('xss')";
+
+        var context = CreateContext();
+        var output = CreateOutput();
+
+        // Act
+        await tagHelper.ProcessAsync(context, output);
+
+        // Assert
+        var content = GetOutputContent(output);
+        // Quotes should be encoded in button classes
+        Assert.Contains("&quot;", content);
+        // Should NOT contain unencoded quote that breaks attribute
+        Assert.DoesNotContain("btn\"alert", content);
+    }
+
+    [Fact]
+    public async Task ProcessAsync_WithAmpersandInCssClass_EncodesForHtml()
+    {
+        // Arrange
+        var items = new List<object> { new TestModel { Name = "Test" } };
+        var tagHelper = CreateTagHelper(items: items);
+        tagHelper.ContainerCssClass = "class1&class2";
+
+        var context = CreateContext();
+        var output = CreateOutput();
+
+        // Act
+        await tagHelper.ProcessAsync(context, output);
+
+        // Assert
+        var classAttribute = output.Attributes["class"].Value.ToString();
+        // Ampersand should be encoded
+        Assert.Contains("&amp;", classAttribute);
+    }
+
+    [Fact]
+    public async Task ProcessAsync_WithReorderButtonsAndSpecialCharsInCssClass_EncodesReorderClass()
+    {
+        // Arrange
+        var items = new List<object> { new TestModel { Name = "Test" } };
+        var tagHelper = CreateTagHelper(items: items);
+        tagHelper.EnableReordering = true;
+        tagHelper.ReorderButtonCssClass = "btn<xss>";
+
+        var context = CreateContext();
+        var output = CreateOutput();
+
+        // Act
+        await tagHelper.ProcessAsync(context, output);
+
+        // Assert
+        var content = GetOutputContent(output);
+        // Reorder buttons should have encoded class
+        Assert.Contains("&lt;xss&gt;", content);
+        // Should NOT have unencoded brackets in button class
+        Assert.DoesNotContain("btn<xss>", content);
+    }
+
+    [Fact]
+    public async Task ProcessAsync_WithValidCssClasses_DoesNotAlterNormalClasses()
+    {
+        // Arrange - Test that normal CSS classes (without special chars) pass through encoding unchanged
+        var items = new List<object> { new TestModel { Name = "Test" } };
+        var tagHelper = CreateTagHelper(items: items);
+        // Set all CSS classes to normal values without special characters
+        tagHelper.ContainerCssClass = "container-fluid";
+        tagHelper.ItemCssClass = "list-item";
+        tagHelper.ButtonCssClass = "btn btn-primary";
+        tagHelper.ReorderButtonCssClass = "btn btn-outline-secondary";
+        tagHelper.EnableReordering = true;
+
+        var context = CreateContext();
+        var output = CreateOutput();
+
+        // Act
+        await tagHelper.ProcessAsync(context, output);
+
+        // Assert
+        var content = GetOutputContent(output);
+
+        // Container class should appear unchanged in the container's class attribute
+        var containerClass = output.Attributes["class"].Value.ToString();
+        Assert.Equal("container-fluid", containerClass);
+
+        // Item class should appear unchanged in the content
+        Assert.Contains("list-item", content);
+
+        // Reorder button class should appear unchanged in the reorder buttons
+        Assert.Contains("btn btn-outline-secondary", content);
+
+        // Normal classes should not be encoded (no HTML entities should appear for valid CSS names)
+        // Check that the item class appears as-is, not encoded
+        Assert.Contains("class=\"list-item\"", content);
+    }
+
+    [Fact]
+    public async Task ProcessAsync_WithHtmlEntitiesInCssClass_EncodesAllChars()
+    {
+        // Arrange
+        var items = new List<object> { new TestModel { Name = "Test" } };
+        var tagHelper = CreateTagHelper(items: items);
+        tagHelper.ItemCssClass = "class&nbsp;test";
+
+        var context = CreateContext();
+        var output = CreateOutput();
+
+        // Act
+        await tagHelper.ProcessAsync(context, output);
+
+        // Assert
+        var content = GetOutputContent(output);
+        // The & should be encoded to &amp;
+        Assert.Contains("&amp;nbsp;", content);
+    }
+
+    [Fact]
+    public async Task ProcessAsync_WithTemplateAndSpecialCharsInCssClass_EncodesTemplateClasses()
+    {
+        // Arrange
+        var items = new List<object> { new TestModel { Name = "Test" } };
+        var tagHelper = CreateTagHelper(items: items);
+        tagHelper.RenderTemplate = true;
+        tagHelper.DisplayMode = true;
+        tagHelper.DisplayViewName = "DisplayView";
+        tagHelper.ItemCssClass = "template<test>";
+
+        var context = CreateContext();
+        var output = CreateOutput();
+
+        // Act
+        await tagHelper.ProcessAsync(context, output);
+
+        // Assert
+        var content = GetOutputContent(output);
+        // Template item class should also be encoded
+        Assert.Contains("&lt;test&gt;", content);
+        Assert.DoesNotContain("template<test>", content);
+    }
+
+    #endregion
 }
