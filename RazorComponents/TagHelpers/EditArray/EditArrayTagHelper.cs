@@ -27,7 +27,11 @@ public class EditArrayTagHelper : TagHelper
     private const string ReorderButtonCssClassAttributeName = "asp-reorder-button-class";
     private const string MoveUpButtonTextAttributeName = "asp-move-up-text";
     private const string MoveDownButtonTextAttributeName = "asp-move-down-text";
-    
+    private const string EditButtonTextAttributeName = "asp-edit-text";
+    private const string DeleteButtonTextAttributeName = "asp-delete-text";
+    private const string DoneButtonTextAttributeName = "asp-done-text";
+    private const string AddButtonTextAttributeName = "asp-add-text";
+
     // ============================================================
     // REQUIRED PROPERTIES
     // ============================================================
@@ -386,6 +390,78 @@ public class EditArrayTagHelper : TagHelper
     [HtmlAttributeName(MoveDownButtonTextAttributeName)]
     public string MoveDownButtonText { get; set; } = "Move Down";
 
+    /// <summary>
+    /// Gets or sets the text displayed on the "Edit" button.
+    /// </summary>
+    /// <value>
+    /// The button text. Default is "Edit".
+    /// </value>
+    /// <remarks>
+    /// <para>
+    /// This property is used when <see cref="DisplayMode"/> is <c>true</c>. The Edit button appears
+    /// in the display container and allows users to switch an item to edit mode.
+    /// </para>
+    /// <para>
+    /// The value is HTML-encoded before output to prevent XSS attacks.
+    /// </para>
+    /// </remarks>
+    [HtmlAttributeName(EditButtonTextAttributeName)]
+    public string EditButtonText { get; set; } = "Edit";
+
+    /// <summary>
+    /// Gets or sets the text displayed on the "Delete" button.
+    /// </summary>
+    /// <value>
+    /// The button text. Default is "Delete".
+    /// </value>
+    /// <remarks>
+    /// <para>
+    /// This property is used when <see cref="DisplayMode"/> is <c>true</c>. The Delete button appears
+    /// in the display container and marks items for deletion.
+    /// </para>
+    /// <para>
+    /// The value is HTML-encoded before output to prevent XSS attacks.
+    /// </para>
+    /// </remarks>
+    [HtmlAttributeName(DeleteButtonTextAttributeName)]
+    public string DeleteButtonText { get; set; } = "Delete";
+
+    /// <summary>
+    /// Gets or sets the text displayed on the "Done" button.
+    /// </summary>
+    /// <value>
+    /// The button text. Default is "Done".
+    /// </value>
+    /// <remarks>
+    /// <para>
+    /// This property is used when <see cref="DisplayMode"/> is <c>true</c>. The Done button appears
+    /// in the edit container and allows users to complete editing and return to display mode.
+    /// </para>
+    /// <para>
+    /// The value is HTML-encoded before output to prevent XSS attacks.
+    /// </para>
+    /// </remarks>
+    [HtmlAttributeName(DoneButtonTextAttributeName)]
+    public string DoneButtonText { get; set; } = "Done";
+
+    /// <summary>
+    /// Gets or sets the text displayed on the "Add New Item" button.
+    /// </summary>
+    /// <value>
+    /// The button text. Default is "Add New Item".
+    /// </value>
+    /// <remarks>
+    /// <para>
+    /// This property is used when <see cref="RenderTemplate"/> and <see cref="ShowAddButton"/> are both <c>true</c>.
+    /// The Add button appears below the template section and allows users to add new items to the collection.
+    /// </para>
+    /// <para>
+    /// The value is HTML-encoded before output to prevent XSS attacks.
+    /// </para>
+    /// </remarks>
+    [HtmlAttributeName(AddButtonTextAttributeName)]
+    public string AddButtonText { get; set; } = "Add New Item";
+
     // ============================================================
     // FRAMEWORK PROPERTIES
     // ============================================================
@@ -653,7 +729,9 @@ public class EditArrayTagHelper : TagHelper
               .Append(containerId)
               .Append("', '")
               .Append(templateId)
-              .Append("')\">Add New Item</button>");
+              .Append("')\">")
+              .Append(HtmlEncoder.Default.Encode(AddButtonText))
+              .Append("</button>");
         }
     }
 
@@ -833,17 +911,17 @@ public class EditArrayTagHelper : TagHelper
         {
             case "edit":
                 cssModifier = "btn-sm btn-primary edit-item-btn mt-2";
-                buttonText = "Edit";
+                buttonText = EditButtonText;
                 primaryAction = "toggleEditMode";
                 break;
             case "delete":
                 cssModifier = "btn-sm btn-danger delete-item-btn mt-2";
-                buttonText = "Delete";
+                buttonText = DeleteButtonText;
                 primaryAction = "markForDeletion";
                 break;
             case "done":
                 cssModifier = "btn-sm btn-success done-edit-btn mt-2";
-                buttonText = "Done";
+                buttonText = DoneButtonText;
                 primaryAction = "toggleEditMode";
                 break;
             default:
@@ -891,7 +969,7 @@ public class EditArrayTagHelper : TagHelper
         }
 
         sb.Append("\">")
-          .Append(buttonText)
+          .Append(HtmlEncoder.Default.Encode(buttonText))
           .Append("</button>");
 
         return sb.ToString();

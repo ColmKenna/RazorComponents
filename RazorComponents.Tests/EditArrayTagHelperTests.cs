@@ -989,6 +989,269 @@ public partial class EditArrayTagHelperTests
 
     #endregion
 
+    #region Configurable Button Text Tests
+
+    [Fact]
+    public void EditButtonText_DefaultsToEdit()
+    {
+        // Arrange & Act
+        var tagHelper = CreateTagHelper();
+
+        // Assert
+        Assert.Equal("Edit", tagHelper.EditButtonText);
+    }
+
+    [Fact]
+    public void DeleteButtonText_DefaultsToDelete()
+    {
+        // Arrange & Act
+        var tagHelper = CreateTagHelper();
+
+        // Assert
+        Assert.Equal("Delete", tagHelper.DeleteButtonText);
+    }
+
+    [Fact]
+    public void DoneButtonText_DefaultsToDone()
+    {
+        // Arrange & Act
+        var tagHelper = CreateTagHelper();
+
+        // Assert
+        Assert.Equal("Done", tagHelper.DoneButtonText);
+    }
+
+    [Fact]
+    public void AddButtonText_DefaultsToAddNewItem()
+    {
+        // Arrange & Act
+        var tagHelper = CreateTagHelper();
+
+        // Assert
+        Assert.Equal("Add New Item", tagHelper.AddButtonText);
+    }
+
+    [Fact]
+    public void GenerateButton_WithCustomEditButtonText_UsesCustomText()
+    {
+        // Arrange
+        var tagHelper = CreateTagHelper();
+        tagHelper.EditButtonText = "Modify";
+        var generateButtonMethod = typeof(EditArrayTagHelper).GetMethod("GenerateButton",
+            System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+
+        // Act
+        var result = generateButtonMethod?.Invoke(tagHelper, new object[] { "edit", "test-item-0", false });
+
+        // Assert
+        var html = result?.ToString();
+        Assert.NotNull(html);
+        Assert.Contains(">Modify</button>", html);
+        Assert.DoesNotContain(">Edit</button>", html);
+    }
+
+    [Fact]
+    public void GenerateButton_WithCustomDeleteButtonText_UsesCustomText()
+    {
+        // Arrange
+        var tagHelper = CreateTagHelper();
+        tagHelper.DeleteButtonText = "Remove";
+        var generateButtonMethod = typeof(EditArrayTagHelper).GetMethod("GenerateButton",
+            System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+
+        // Act
+        var result = generateButtonMethod?.Invoke(tagHelper, new object[] { "delete", "test-item-0", false });
+
+        // Assert
+        var html = result?.ToString();
+        Assert.NotNull(html);
+        Assert.Contains(">Remove</button>", html);
+        Assert.DoesNotContain(">Delete</button>", html);
+    }
+
+    [Fact]
+    public void GenerateButton_WithCustomDoneButtonText_UsesCustomText()
+    {
+        // Arrange
+        var tagHelper = CreateTagHelper();
+        tagHelper.DoneButtonText = "Save";
+        var generateButtonMethod = typeof(EditArrayTagHelper).GetMethod("GenerateButton",
+            System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+
+        // Act
+        var result = generateButtonMethod?.Invoke(tagHelper, new object[] { "done", "test-item-0", false });
+
+        // Assert
+        var html = result?.ToString();
+        Assert.NotNull(html);
+        Assert.Contains(">Save</button>", html);
+        Assert.DoesNotContain(">Done</button>", html);
+    }
+
+    [Fact]
+    public async Task ProcessAsync_WithCustomAddButtonText_UsesCustomTextInAddButton()
+    {
+        // Arrange
+        var items = new List<object> { new TestModel { Name = "Test" } };
+        var tagHelper = CreateTagHelper(items: items);
+        tagHelper.RenderTemplate = true;
+        tagHelper.ShowAddButton = true;
+        tagHelper.AddButtonText = "Create New";
+
+        var context = CreateContext();
+        var output = CreateOutput();
+
+        // Act
+        await tagHelper.ProcessAsync(context, output);
+
+        // Assert
+        var content = GetOutputContent(output);
+        Assert.Contains(">Create New</button>", content);
+        Assert.DoesNotContain(">Add New Item</button>", content);
+    }
+
+    [Fact]
+    public async Task ProcessAsync_WithAllCustomButtonTexts_UsesAllCustomTextsInRenderedOutput()
+    {
+        // Arrange
+        var items = new List<object> { new TestModel { Name = "Test" } };
+        var tagHelper = CreateTagHelper(items: items);
+        tagHelper.DisplayMode = true;
+        tagHelper.DisplayViewName = "DisplayView";
+        tagHelper.RenderTemplate = true;
+        tagHelper.ShowAddButton = true;
+        tagHelper.EditButtonText = "Modify";
+        tagHelper.DeleteButtonText = "Remove";
+        tagHelper.DoneButtonText = "Save";
+        tagHelper.AddButtonText = "Create New";
+
+        var context = CreateContext();
+        var output = CreateOutput();
+
+        // Act
+        await tagHelper.ProcessAsync(context, output);
+
+        // Assert
+        var content = GetOutputContent(output);
+        Assert.Contains(">Modify</button>", content);
+        Assert.Contains(">Remove</button>", content);
+        Assert.Contains(">Save</button>", content);
+        Assert.Contains(">Create New</button>", content);
+        // Ensure default texts are NOT present
+        Assert.DoesNotContain(">Edit</button>", content);
+        Assert.DoesNotContain(">Delete</button>", content);
+        Assert.DoesNotContain(">Done</button>", content);
+        Assert.DoesNotContain(">Add New Item</button>", content);
+    }
+
+    [Fact]
+    public async Task ProcessAsync_WithCustomButtonTextInTemplate_UsesCustomTextInTemplateButtons()
+    {
+        // Arrange
+        var items = new List<object> { new TestModel { Name = "Test" } };
+        var tagHelper = CreateTagHelper(items: items);
+        tagHelper.DisplayMode = true;
+        tagHelper.DisplayViewName = "DisplayView";
+        tagHelper.RenderTemplate = true;
+        tagHelper.EditButtonText = "Edit Item";
+        tagHelper.DeleteButtonText = "Delete Item";
+        tagHelper.DoneButtonText = "Done Editing";
+
+        var context = CreateContext();
+        var output = CreateOutput();
+
+        // Act
+        await tagHelper.ProcessAsync(context, output);
+
+        // Assert
+        var content = GetOutputContent(output);
+        // Template buttons should use custom text
+        Assert.Contains("<template", content);
+        Assert.Contains(">Edit Item</button>", content);
+        Assert.Contains(">Delete Item</button>", content);
+        Assert.Contains(">Done Editing</button>", content);
+    }
+
+    [Fact]
+    public async Task ProcessAsync_WithSpecialCharactersInButtonText_EncodesButtonText()
+    {
+        // Arrange
+        var items = new List<object> { new TestModel { Name = "Test" } };
+        var tagHelper = CreateTagHelper(items: items);
+        tagHelper.DisplayMode = true;
+        tagHelper.DisplayViewName = "DisplayView";
+        tagHelper.EditButtonText = "<Edit>";
+        tagHelper.DeleteButtonText = "Delete & Remove";
+
+        var context = CreateContext();
+        var output = CreateOutput();
+
+        // Act
+        await tagHelper.ProcessAsync(context, output);
+
+        // Assert
+        var content = GetOutputContent(output);
+        // Button text should be HTML-encoded
+        Assert.Contains("&lt;Edit&gt;", content);
+        Assert.Contains("Delete &amp; Remove", content);
+        // Should NOT contain unencoded versions
+        Assert.DoesNotContain(">Delete & Remove</button>", content);
+    }
+
+    [Fact]
+    public void EditButtonText_CanBeSetAndRetrieved()
+    {
+        // Arrange
+        var tagHelper = CreateTagHelper();
+
+        // Act
+        tagHelper.EditButtonText = "Custom Edit";
+
+        // Assert
+        Assert.Equal("Custom Edit", tagHelper.EditButtonText);
+    }
+
+    [Fact]
+    public void DeleteButtonText_CanBeSetAndRetrieved()
+    {
+        // Arrange
+        var tagHelper = CreateTagHelper();
+
+        // Act
+        tagHelper.DeleteButtonText = "Custom Delete";
+
+        // Assert
+        Assert.Equal("Custom Delete", tagHelper.DeleteButtonText);
+    }
+
+    [Fact]
+    public void DoneButtonText_CanBeSetAndRetrieved()
+    {
+        // Arrange
+        var tagHelper = CreateTagHelper();
+
+        // Act
+        tagHelper.DoneButtonText = "Custom Done";
+
+        // Assert
+        Assert.Equal("Custom Done", tagHelper.DoneButtonText);
+    }
+
+    [Fact]
+    public void AddButtonText_CanBeSetAndRetrieved()
+    {
+        // Arrange
+        var tagHelper = CreateTagHelper();
+
+        // Act
+        tagHelper.AddButtonText = "Custom Add";
+
+        // Assert
+        Assert.Equal("Custom Add", tagHelper.AddButtonText);
+    }
+
+    #endregion
+
     #region Render Helper Extraction Tests
 
     [Fact]
