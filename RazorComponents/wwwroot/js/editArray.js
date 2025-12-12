@@ -272,3 +272,96 @@ function updateDisplayFromForm(itemId) {
     }
 }
 
+function moveItem(containerId, itemId, offset) {
+    const container = document.getElementById(`${containerId}-items`);
+    const item = document.getElementById(itemId);
+    if (!container || !item || offset === 0) return;
+
+    const items = Array.from(container.querySelectorAll('.edit-array-item'));
+    const currentIndex = items.indexOf(item);
+    if (currentIndex === -1) return;
+
+    const targetIndex = currentIndex + offset;
+    if (targetIndex < 0 || targetIndex >= items.length) return;
+
+    const referenceItem = items[targetIndex];
+    const insertBeforeNode = offset > 0 ? referenceItem.nextSibling : referenceItem;
+    container.insertBefore(item, insertBeforeNode);
+
+    renumberItems(containerId);
+}
+
+function renumberItems(containerId) {
+    const container = document.getElementById(`${containerId}-items`);
+    if (!container) return;
+
+    const items = Array.from(container.querySelectorAll('.edit-array-item'));
+    items.forEach((item, newIndex) => {
+        const oldId = item.id;
+        const newId = `${containerId}-item-${newIndex}`;
+
+        updateAttributeWithIndex(item, 'id', newIndex, oldId, newId);
+
+        const descendants = item.querySelectorAll('*');
+        descendants.forEach(child => {
+            updateAttributeWithIndex(child, 'id', newIndex, oldId, newId);
+            updateAttributeWithIndex(child, 'name', newIndex, oldId, newId);
+            updateAttributeWithIndex(child, 'for', newIndex, oldId, newId);
+            updateAttributeWithIndex(child, 'data-id', newIndex, oldId, newId);
+            updateAttributeWithIndex(child, 'data-display-for', newIndex, oldId, newId);
+            updateAttributeWithIndex(child, 'data-valmsg-for', newIndex, oldId, newId);
+            updateAttributeWithIndex(child, 'data-new-item-marker', newIndex, oldId, newId);
+            updateAttributeWithIndex(child, 'aria-describedby', newIndex, oldId, newId);
+
+            const onclick = child.getAttribute('onclick');
+            if (onclick && oldId) {
+                const updatedOnclick = onclick.replaceAll(oldId, newId);
+                if (updatedOnclick !== onclick) {
+                    child.setAttribute('onclick', updatedOnclick);
+                }
+            }
+        });
+    });
+}
+
+function updateAttributeWithIndex(element, attributeName, newIndex, oldId, newId) {
+    if (!element) return;
+
+    const currentValue = attributeName === 'for'
+        ? element.htmlFor || element.getAttribute('for')
+        : element.getAttribute(attributeName);
+
+    if (!currentValue) return;
+
+    const updatedValue = replaceIndexTokens(currentValue, newIndex, oldId, newId);
+    if (updatedValue === currentValue) return;
+
+    if (attributeName === 'for') {
+        element.htmlFor = updatedValue;
+    } else if (attributeName === 'id') {
+        element.id = updatedValue;
+    } else {
+        element.setAttribute(attributeName, updatedValue);
+    }
+}
+
+function replaceIndexTokens(value, newIndex, oldId, newId) {
+    let updated = value;
+    if (oldId && newId && updated.includes(oldId)) {
+        updated = updated.replaceAll(oldId, newId);
+    }
+
+    updated = updated.replace(/\[\d+\]/g, `[${newIndex}]`);
+    updated = updated.replace(/_(\d+)__/g, `_${newIndex}__`);
+    updated = updated.replace(/__newItem__\d+/g, `__newItem__${newIndex}`);
+    updated = updated.replace(/-item-\d+/g, `-item-${newIndex}`);
+
+    return updated;
+}
+
+function getContainerIdFromItemId(itemId) {
+    if (!itemId) return null;
+    const match = itemId.match(/^(.*)-item-\d+$/);
+    return match && match[1] ? match[1] : null;
+}
+
