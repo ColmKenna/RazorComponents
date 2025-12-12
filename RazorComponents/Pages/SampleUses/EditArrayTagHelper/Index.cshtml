@@ -112,6 +112,30 @@
             </div>
         </div>
 
+        <!-- Custom Button Text Example Card -->
+        <div class="col-md-6">
+            <div class="card h-100 shadow-sm">
+                <div class="card-header bg-purple text-white" style="background-color: #6f42c1;">
+                    <h5 class="mb-0">Custom Button Text</h5>
+                </div>
+                <div class="card-body">
+                    <p class="card-text">
+                        Customize the text displayed on all buttons (Edit, Delete, Done, Add). Perfect for internationalization or domain-specific terminology.
+                    </p>
+                    <h6 class="mt-3 mb-2">Features:</h6>
+                    <ul class="small">
+                        <li>Internationalization (i18n) support</li>
+                        <li>Custom Edit/Delete/Done/Add text</li>
+                        <li>Domain-specific language</li>
+                        <li>Automatic HTML encoding</li>
+                    </ul>
+                </div>
+                <div class="card-footer bg-light">
+                    <a asp-page="CustomButtonTextExample" class="btn btn-sm text-white" style="background-color: #6f42c1;">View Example</a>
+                </div>
+            </div>
+        </div>
+
         <!-- Reordering Example Card -->
         <div class="col-md-6">
             <div class="card h-100 shadow-sm">
@@ -303,6 +327,30 @@
                             <td>Button text for moving an item down</td>
                             <td><span class="badge bg-success">No</span></td>
                             <td>Move Down</td>
+                        </tr>
+                        <tr>
+                            <td><code>asp-edit-text</code></td>
+                            <td>Text for the Edit button (shown in display mode)</td>
+                            <td><span class="badge bg-success">No</span></td>
+                            <td>Edit</td>
+                        </tr>
+                        <tr>
+                            <td><code>asp-delete-text</code></td>
+                            <td>Text for the Delete button (shown in display mode)</td>
+                            <td><span class="badge bg-success">No</span></td>
+                            <td>Delete</td>
+                        </tr>
+                        <tr>
+                            <td><code>asp-done-text</code></td>
+                            <td>Text for the Done button (shown in edit mode)</td>
+                            <td><span class="badge bg-success">No</span></td>
+                            <td>Done</td>
+                        </tr>
+                        <tr>
+                            <td><code>asp-add-text</code></td>
+                            <td>Text for the Add New Item button (when <code>asp-add-button="true"</code>)</td>
+                            <td><span class="badge bg-success">No</span></td>
+                            <td>Add New Item</td>
                         </tr>
                         <tr>
                             <td><code>id</code></td>

@@ -1,0 +1,235 @@
+@page
+@model RazorComponents.Pages.SampleUses.EditArrayTagHelper.CustomButtonTextExample
+@{
+    ViewData["Title"] = "Custom Button Text Example";
+}
+
+<div class="container mt-5">
+    <h1>Custom Button Text Example</h1>
+    <p class="lead">Customize the text displayed on all buttons in the EditArray tag helper</p>
+
+    @if (TempData["Message"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            @TempData["Message"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    <form method="post">
+        <div class="row">
+            <div class="col-md-10">
+                <div class="form-group mb-4">
+                    <label asp-for="Person.FirstName" class="form-label">First Name</label>
+                    <input asp-for="Person.FirstName" class="form-control" />
+                </div>
+
+                <div class="form-group mb-4">
+                    <label asp-for="Person.LastName" class="form-label">Last Name</label>
+                    <input asp-for="Person.LastName" class="form-control" />
+                </div>
+
+                <hr class="my-5" />
+
+                <!-- Example 1: English (Default) -->
+                <div class="card mb-4">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="mb-0">Example 1: Default Button Text (English)</h5>
+                    </div>
+                    <div class="card-body">
+                        <p class="text-muted mb-3">Standard button text: Edit, Delete, Done, Add New Item</p>
+                        <edit-array
+                            asp-items="@Model.Person.Addresses"
+                            asp-view-name="~/Pages/Shared/EditorTemplates/Address.cshtml"
+                            asp-display-view-name="~/Pages/Shared/DisplayTemplates/Address.cshtml"
+                            asp-for="Person.Addresses"
+                            asp-template="true"
+                            asp-add-button="true"
+                            asp-display-mode="true"
+                            id="addresses-default">
+                        </edit-array>
+                    </div>
+                </div>
+
+                <!-- Example 2: Spanish -->
+                <div class="card mb-4">
+                    <div class="card-header bg-success text-white">
+                        <h5 class="mb-0">Example 2: Spanish Button Text</h5>
+                    </div>
+                    <div class="card-body">
+                        <p class="text-muted mb-3">Custom button text in Spanish: Editar, Eliminar, Listo, Agregar Nueva Dirección</p>
+                        <edit-array
+                            asp-items="@Model.Person.Addresses"
+                            asp-view-name="~/Pages/Shared/EditorTemplates/Address.cshtml"
+                            asp-display-view-name="~/Pages/Shared/DisplayTemplates/Address.cshtml"
+                            asp-for="Person.Addresses"
+                            asp-template="true"
+                            asp-add-button="true"
+                            asp-display-mode="true"
+                            asp-edit-text="Editar"
+                            asp-delete-text="Eliminar"
+                            asp-done-text="Listo"
+                            asp-add-text="Agregar Nueva Dirección"
+                            id="addresses-spanish">
+                        </edit-array>
+                    </div>
+                </div>
+
+                <!-- Example 3: French -->
+                <div class="card mb-4">
+                    <div class="card-header bg-info text-white">
+                        <h5 class="mb-0">Example 3: French Button Text</h5>
+                    </div>
+                    <div class="card-body">
+                        <p class="text-muted mb-3">Custom button text in French: Modifier, Supprimer, Terminé, Ajouter Nouvelle Adresse</p>
+                        <edit-array
+                            asp-items="@Model.Person.Addresses"
+                            asp-view-name="~/Pages/Shared/EditorTemplates/Address.cshtml"
+                            asp-display-view-name="~/Pages/Shared/DisplayTemplates/Address.cshtml"
+                            asp-for="Person.Addresses"
+                            asp-template="true"
+                            asp-add-button="true"
+                            asp-display-mode="true"
+                            asp-edit-text="Modifier"
+                            asp-delete-text="Supprimer"
+                            asp-done-text="Terminé"
+                            asp-add-text="Ajouter Nouvelle Adresse"
+                            id="addresses-french">
+                        </edit-array>
+                    </div>
+                </div>
+
+                <!-- Example 4: Custom Action-Oriented Text -->
+                <div class="card mb-4">
+                    <div class="card-header bg-warning text-dark">
+                        <h5 class="mb-0">Example 4: Action-Oriented Button Text</h5>
+                    </div>
+                    <div class="card-body">
+                        <p class="text-muted mb-3">Custom action-oriented text: Modify, Remove, Save Changes, Create New Entry</p>
+                        <edit-array
+                            asp-items="@Model.Person.Addresses"
+                            asp-view-name="~/Pages/Shared/EditorTemplates/Address.cshtml"
+                            asp-display-view-name="~/Pages/Shared/DisplayTemplates/Address.cshtml"
+                            asp-for="Person.Addresses"
+                            asp-template="true"
+                            asp-add-button="true"
+                            asp-display-mode="true"
+                            asp-edit-text="Modify"
+                            asp-delete-text="Remove"
+                            asp-done-text="Save Changes"
+                            asp-add-text="Create New Entry"
+                            id="addresses-custom">
+                        </edit-array>
+                    </div>
+                </div>
+
+                <div class="mt-4">
+                    <button type="submit" class="btn btn-primary btn-lg">Save All Changes</button>
+                    <a asp-page="Index" class="btn btn-secondary btn-lg">Back to Examples</a>
+                </div>
+            </div>
+        </div>
+    </form>
+
+    <!-- Documentation Section -->
+    <div class="row mt-5">
+        <div class="col-md-12">
+            <hr class="my-5" />
+            <h2 class="mb-4">Available Button Text Properties</h2>
+
+            <div class="table-responsive">
+                <table class="table table-bordered table-hover">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Property</th>
+                            <th>Description</th>
+                            <th>Default Value</th>
+                            <th>Example</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><code>asp-edit-text</code></td>
+                            <td>Text for the Edit button (shown in display mode)</td>
+                            <td>Edit</td>
+                            <td><code>asp-edit-text="Modify"</code></td>
+                        </tr>
+                        <tr>
+                            <td><code>asp-delete-text</code></td>
+                            <td>Text for the Delete button (shown in display mode)</td>
+                            <td>Delete</td>
+                            <td><code>asp-delete-text="Remove"</code></td>
+                        </tr>
+                        <tr>
+                            <td><code>asp-done-text</code></td>
+                            <td>Text for the Done button (shown in edit mode)</td>
+                            <td>Done</td>
+                            <td><code>asp-done-text="Save"</code></td>
+                        </tr>
+                        <tr>
+                            <td><code>asp-add-text</code></td>
+                            <td>Text for the Add New Item button (when <code>asp-add-button="true"</code>)</td>
+                            <td>Add New Item</td>
+                            <td><code>asp-add-text="Create New"</code></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="alert alert-info mt-4" role="alert">
+                <h5 class="alert-heading"><i class="bi bi-info-circle"></i> Use Cases</h5>
+                <ul class="mb-0">
+                    <li><strong>Internationalization (i18n):</strong> Display buttons in different languages for global audiences</li>
+                    <li><strong>Domain-Specific Language:</strong> Use terminology specific to your application domain (e.g., "Archive" instead of "Delete")</li>
+                    <li><strong>Clarity:</strong> Use more descriptive text for better user experience (e.g., "Save Changes" instead of "Done")</li>
+                    <li><strong>Consistency:</strong> Match your application's existing button text conventions</li>
+                    <li><strong>Security:</strong> All button text is automatically HTML-encoded to prevent XSS attacks</li>
+                </ul>
+            </div>
+
+            <div class="alert alert-success mt-4" role="alert">
+                <h5 class="alert-heading"><i class="bi bi-check-circle"></i> Code Example</h5>
+                <pre class="mb-0"><code>&lt;edit-array
+    asp-items="@Model.Items"
+    asp-view-name="EditorTemplate"
+    asp-display-view-name="DisplayTemplate"
+    asp-display-mode="true"
+    asp-template="true"
+    asp-add-button="true"
+    asp-edit-text="Modifier"
+    asp-delete-text="Supprimer"
+    asp-done-text="Terminé"
+    asp-add-text="Ajouter"
+    id="myArray"&gt;
+&lt;/edit-array&gt;</code></pre>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .card {
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        transition: transform 0.2s;
+    }
+
+    .card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+    }
+
+    pre code {
+        color: #333;
+    }
+
+    .table-hover tbody tr:hover {
+        background-color: #f5f5f5;
+    }
+</style>
+
+@section Scripts {
+    <script>
+        // Custom button text example uses the standard editArray.js functionality
+        console.log('Custom Button Text Example loaded');
+    </script>
+}
