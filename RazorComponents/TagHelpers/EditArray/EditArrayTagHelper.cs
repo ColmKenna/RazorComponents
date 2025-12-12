@@ -1,4 +1,5 @@
-﻿using System.Text;
+﻿using System.Linq;
+using System.Text;
 using System.Text.Encodings.Web;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.AspNetCore.Mvc.ViewFeatures;
@@ -138,7 +139,7 @@ public class EditArrayTagHelper : TagHelper
         (_htmlHelper as IViewContextAware)?.Contextualize(ViewContext);
         
         // Create container for rendered items and template sections
-        var sb = new StringBuilder();
+        var sb = new StringBuilder(EstimateInitialCapacity());
 
         // Get the model expression prefix from ViewContext
         var modelExpressionPrefix = ViewContext.ViewData.TemplateInfo.HtmlFieldPrefix;
@@ -412,6 +413,30 @@ public class EditArrayTagHelper : TagHelper
         sb.Append(downText);
         sb.Append("</button>");
         sb.Append("</div>");
+    }
+
+    private int EstimateInitialCapacity()
+    {
+        const int baseCapacity = 200;
+        const int perItemEstimate = 500;
+
+        var count = 0;
+        if (Items != null && Items.TryGetNonEnumeratedCount(out var knownCount))
+        {
+            count = knownCount;
+        }
+        else
+        {
+            count = 10; // fallback guess when count is not cheaply available
+        }
+
+        var capacity = baseCapacity + (perItemEstimate * count);
+        if (RenderTemplate)
+        {
+            capacity += perItemEstimate; // extra budget for template markup
+        }
+
+        return capacity;
     }
 
     private string GetReorderButtonCssClass()
