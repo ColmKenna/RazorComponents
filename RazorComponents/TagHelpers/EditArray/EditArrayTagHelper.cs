@@ -495,7 +495,7 @@ public class EditArrayTagHelper : TagHelper
                 Model = item
             };
 
-            if (DisplayMode && !string.IsNullOrEmpty(DisplayViewName))
+            if (DisplayMode && !string.IsNullOrWhiteSpace(DisplayViewName))
             {
                 await RenderItemDisplayMode(sb, item, itemId, viewData);
             }
@@ -594,7 +594,7 @@ public class EditArrayTagHelper : TagHelper
 
         var name = $"{templateFieldName}.IsDeleted";
 
-        if (DisplayMode && !string.IsNullOrEmpty(DisplayViewName))
+        if (DisplayMode && !string.IsNullOrWhiteSpace(DisplayViewName))
         {
             sb.Append("<div class=\"display-container\" style=\"display: none;\">");
             if (templateModel != null)
@@ -631,7 +631,7 @@ public class EditArrayTagHelper : TagHelper
             }
         }
 
-        if (DisplayMode && !string.IsNullOrEmpty(DisplayViewName))
+        if (DisplayMode && !string.IsNullOrWhiteSpace(DisplayViewName))
         {
             sb.Append(GenerateButton("done", null, true));
             sb.Append("</div>");
@@ -804,14 +804,14 @@ public class EditArrayTagHelper : TagHelper
     
     private string GetFieldName(string? prefix, string collectionName, object index)
     {
-        if (string.IsNullOrEmpty(collectionName))
+        if (string.IsNullOrWhiteSpace(collectionName))
         {
-            return string.IsNullOrEmpty(prefix) 
-                ? $"[{index}]" 
+            return string.IsNullOrWhiteSpace(prefix)
+                ? $"[{index}]"
                 : $"{prefix}[{index}]";
         }
-        
-        return string.IsNullOrEmpty(prefix)
+
+        return string.IsNullOrWhiteSpace(prefix)
             ? $"{collectionName}[{index}]"
             : $"{prefix}.{collectionName}[{index}]";
     }
@@ -866,7 +866,7 @@ public class EditArrayTagHelper : TagHelper
           .Append(')');
 
         // Add callback for delete buttons (OnDelete callback)
-        if (string.Equals(buttonType, "delete", StringComparison.OrdinalIgnoreCase) && !string.IsNullOrEmpty(OnDelete))
+        if (string.Equals(buttonType, "delete", StringComparison.OrdinalIgnoreCase) && !string.IsNullOrWhiteSpace(OnDelete))
         {
             var encodedCallback = HtmlEncoder.Default.Encode(OnDelete);
             sb.Append("; ")
@@ -879,7 +879,7 @@ public class EditArrayTagHelper : TagHelper
         // Add callback for done buttons (OnUpdate callback)
         if (string.Equals(buttonType, "done", StringComparison.OrdinalIgnoreCase))
         {
-            if (!string.IsNullOrEmpty(OnUpdate))
+            if (!string.IsNullOrWhiteSpace(OnUpdate))
             {
                 var encodedCallback = HtmlEncoder.Default.Encode(OnUpdate);
                 sb.Append("; ")
