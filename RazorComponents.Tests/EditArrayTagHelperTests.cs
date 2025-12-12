@@ -2256,4 +2256,235 @@ public partial class EditArrayTagHelperTests
     }
 
     #endregion
+
+    #region ARIA Accessibility Tests
+
+    [Fact]
+    public async Task ProcessAsync_WithReordering_IncludesAriaLabelsOnReorderButtons()
+    {
+        // Arrange
+        var items = new List<object> { new TestModel { Name = "Test" } };
+        var tagHelper = CreateTagHelper(items: items);
+        tagHelper.EnableReordering = true;
+        tagHelper.DisplayMode = true;
+        tagHelper.DisplayViewName = "DisplayView";
+        var context = CreateContext();
+        var output = CreateOutput();
+
+        // Act
+        await tagHelper.ProcessAsync(context, output);
+
+        // Assert
+        var content = GetOutputContent(output);
+        Assert.Contains("aria-label=\"Move item edit-array-test-item-0 up\"", content);
+        Assert.Contains("aria-label=\"Move item edit-array-test-item-0 down\"", content);
+    }
+
+    [Fact]
+    public async Task ProcessAsync_EditButton_IncludesAriaLabel()
+    {
+        // Arrange
+        var items = new List<object> { new TestModel { Name = "Test" } };
+        var tagHelper = CreateTagHelper(items: items);
+        tagHelper.DisplayMode = true;
+        tagHelper.DisplayViewName = "DisplayView";
+        var context = CreateContext();
+        var output = CreateOutput();
+
+        // Act
+        await tagHelper.ProcessAsync(context, output);
+
+        // Assert
+        var content = GetOutputContent(output);
+        Assert.Contains("aria-label=\"Edit item edit-array-test-item-0\"", content);
+    }
+
+    [Fact]
+    public async Task ProcessAsync_DeleteButton_IncludesAriaLabel()
+    {
+        // Arrange
+        var items = new List<object> { new TestModel { Name = "Test" } };
+        var tagHelper = CreateTagHelper(items: items);
+        tagHelper.DisplayMode = true;
+        tagHelper.DisplayViewName = "DisplayView";
+        var context = CreateContext();
+        var output = CreateOutput();
+
+        // Act
+        await tagHelper.ProcessAsync(context, output);
+
+        // Assert
+        var content = GetOutputContent(output);
+        Assert.Contains("aria-label=\"Delete item edit-array-test-item-0\"", content);
+    }
+
+    [Fact]
+    public async Task ProcessAsync_DoneButton_IncludesAriaLabel()
+    {
+        // Arrange
+        var items = new List<object> { new TestModel { Name = "Test" } };
+        var tagHelper = CreateTagHelper(items: items);
+        tagHelper.DisplayMode = true;
+        tagHelper.DisplayViewName = "DisplayView";
+        var context = CreateContext();
+        var output = CreateOutput();
+
+        // Act
+        await tagHelper.ProcessAsync(context, output);
+
+        // Assert
+        var content = GetOutputContent(output);
+        Assert.Contains("aria-label=\"Done editing item edit-array-test-item-0\"", content);
+    }
+
+    [Fact]
+    public async Task ProcessAsync_AddButton_IncludesAriaLabel()
+    {
+        // Arrange
+        var items = new List<object> { new TestModel { Name = "Test" } };
+        var tagHelper = CreateTagHelper(items: items);
+        tagHelper.ShowAddButton = true;
+        tagHelper.RenderTemplate = true;
+        var context = CreateContext();
+        var output = CreateOutput();
+
+        // Act
+        await tagHelper.ProcessAsync(context, output);
+
+        // Assert
+        var content = GetOutputContent(output);
+        Assert.Contains("aria-label=\"Add new item\"", content);
+    }
+
+    [Fact]
+    public async Task ProcessAsync_TemplateEditButton_IncludesAriaLabel()
+    {
+        // Arrange
+        var items = new List<object> { new TestModel { Name = "Test" } };
+        var tagHelper = CreateTagHelper(items: items);
+        tagHelper.RenderTemplate = true;
+        tagHelper.DisplayMode = true;
+        tagHelper.DisplayViewName = "DisplayView";
+        var context = CreateContext();
+        var output = CreateOutput();
+
+        // Act
+        await tagHelper.ProcessAsync(context, output);
+
+        // Assert
+        var content = GetOutputContent(output);
+        Assert.Contains("aria-label=\"Edit item\"", content);
+    }
+
+    [Fact]
+    public async Task ProcessAsync_TemplateDeleteButton_IncludesAriaLabel()
+    {
+        // Arrange
+        var items = new List<object> { new TestModel { Name = "Test" } };
+        var tagHelper = CreateTagHelper(items: items);
+        tagHelper.RenderTemplate = true;
+        tagHelper.DisplayMode = true;
+        tagHelper.DisplayViewName = "DisplayView";
+        var context = CreateContext();
+        var output = CreateOutput();
+
+        // Act
+        await tagHelper.ProcessAsync(context, output);
+
+        // Assert
+        var content = GetOutputContent(output);
+        Assert.Contains("aria-label=\"Delete item\"", content);
+    }
+
+    [Fact]
+    public async Task ProcessAsync_TemplateDoneButton_IncludesAriaLabel()
+    {
+        // Arrange
+        var items = new List<object> { new TestModel { Name = "Test" } };
+        var tagHelper = CreateTagHelper(items: items);
+        tagHelper.RenderTemplate = true;
+        tagHelper.DisplayMode = true;
+        tagHelper.DisplayViewName = "DisplayView";
+        var context = CreateContext();
+        var output = CreateOutput();
+
+        // Act
+        await tagHelper.ProcessAsync(context, output);
+
+        // Assert
+        var content = GetOutputContent(output);
+        Assert.Contains("aria-label=\"Done editing item\"", content);
+    }
+
+    [Fact]
+    public async Task ProcessAsync_TemplateReorderButtons_IncludeGenericAriaLabels()
+    {
+        // Arrange
+        var items = new List<object> { new TestModel { Name = "Test" } };
+        var tagHelper = CreateTagHelper(items: items);
+        tagHelper.RenderTemplate = true;
+        tagHelper.EnableReordering = true;
+        var context = CreateContext();
+        var output = CreateOutput();
+
+        // Act
+        await tagHelper.ProcessAsync(context, output);
+
+        // Assert
+        var content = GetOutputContent(output);
+        // Template reorder buttons use generic labels since item ID is not known
+        Assert.Contains("aria-label=\"Move item up\"", content);
+        Assert.Contains("aria-label=\"Move item down\"", content);
+    }
+
+    [Fact]
+    public async Task ProcessAsync_MultipleItems_EachHasUniqueAriaLabels()
+    {
+        // Arrange
+        var items = new List<object> 
+        { 
+            new TestModel { Name = "Item1" },
+            new TestModel { Name = "Item2" }
+        };
+        var tagHelper = CreateTagHelper(items: items);
+        tagHelper.DisplayMode = true;
+        tagHelper.DisplayViewName = "DisplayView";
+        var context = CreateContext();
+        var output = CreateOutput();
+
+        // Act
+        await tagHelper.ProcessAsync(context, output);
+
+        // Assert
+        var content = GetOutputContent(output);
+        // Each item should have unique aria-labels with its ID
+        Assert.Contains("aria-label=\"Edit item edit-array-test-item-0\"", content);
+        Assert.Contains("aria-label=\"Edit item edit-array-test-item-1\"", content);
+        Assert.Contains("aria-label=\"Delete item edit-array-test-item-0\"", content);
+        Assert.Contains("aria-label=\"Delete item edit-array-test-item-1\"", content);
+    }
+
+    [Fact]
+    public async Task ProcessAsync_AriaLabelsAreHtmlEncoded()
+    {
+        // Arrange
+        var items = new List<object> { new TestModel { Name = "Test" } };
+        var tagHelper = CreateTagHelper(items: items);
+        tagHelper.DisplayMode = true;
+        tagHelper.DisplayViewName = "DisplayView";
+        var context = CreateContext();
+        var output = CreateOutput();
+
+        // Act
+        await tagHelper.ProcessAsync(context, output);
+
+        // Assert
+        var content = GetOutputContent(output);
+        // Verify that aria-labels are properly formed attributes (not broken)
+        Assert.Matches(@"aria-label=""Edit item edit-array-test-item-0""", content);
+        Assert.Matches(@"aria-label=""Delete item edit-array-test-item-0""", content);
+        Assert.Matches(@"aria-label=""Done editing item edit-array-test-item-0""", content);
+    }
+
+    #endregion
 }
