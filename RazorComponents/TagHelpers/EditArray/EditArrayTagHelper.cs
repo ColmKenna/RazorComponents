@@ -28,6 +28,10 @@ public class EditArrayTagHelper : TagHelper
     private const string MoveUpButtonTextAttributeName = "asp-move-up-text";
     private const string MoveDownButtonTextAttributeName = "asp-move-down-text";
     
+    // ============================================================
+    // REQUIRED PROPERTIES
+    // ============================================================
+
     /// <summary>
     /// Gets or sets the name of the partial view used to render each item in edit mode.
     /// This property is required.
@@ -41,26 +45,6 @@ public class EditArrayTagHelper : TagHelper
     /// </remarks>
     [HtmlAttributeName(ViewNameAttributeName)]
     public required string ViewName { get; set; }
-    
-    /// <summary>
-    /// Gets or sets the name of the partial view used to render each item in display mode.
-    /// Required when <see cref="DisplayMode"/> is <c>true</c>.
-    /// </summary>
-    /// <value>
-    /// The path to the partial view for display mode, or <c>null</c> if display mode is not used.
-    /// </value>
-    /// <remarks>
-    /// <para>
-    /// When <see cref="DisplayMode"/> is enabled, items are initially rendered using this view.
-    /// Users can toggle between display and edit modes using Edit/Done buttons.
-    /// </para>
-    /// <para>
-    /// If <see cref="DisplayMode"/> is <c>true</c> and this property is <c>null</c>, empty, or whitespace,
-    /// an <see cref="InvalidOperationException"/> will be thrown during validation.
-    /// </para>
-    /// </remarks>
-    [HtmlAttributeName(DisplayViewNameAttributeName)]
-    public string? DisplayViewName { get; set; }
 
     /// <summary>
     /// Gets or sets the collection of items to render in the edit array.
@@ -77,7 +61,35 @@ public class EditArrayTagHelper : TagHelper
     /// </remarks>
     [HtmlAttributeName(ItemsAttributeName)]
     public required IEnumerable<object> Items { get; set; }
-    
+
+    /// <summary>
+    /// Gets or sets the HTML id attribute for the edit array container.
+    /// This property is required.
+    /// </summary>
+    /// <value>
+    /// A unique identifier for the container element. Must not be <c>null</c>, empty, or whitespace.
+    /// </value>
+    /// <remarks>
+    /// <para>
+    /// The id is used to generate unique identifiers for all child elements and is referenced by
+    /// JavaScript functions for add, edit, delete, and reorder operations. Each item's id is derived
+    /// from this container id (e.g., if id="myArray", items will have ids like "edit-array-myArray-item-0").
+    /// </para>
+    /// <para>
+    /// The value is HTML-encoded before output to prevent XSS attacks. The encoded id is safe for use
+    /// in both HTML attributes and JavaScript string literals.
+    /// </para>
+    /// <para>
+    /// An <see cref="InvalidOperationException"/> is thrown during validation if this property is not set.
+    /// </para>
+    /// </remarks>
+    [HtmlAttributeName("id")]
+    public string Id { get; set; }
+
+    // ============================================================
+    // OPTIONAL PROPERTIES (Core Functionality)
+    // ============================================================
+
     /// <summary>
     /// Gets or sets the model expression for the collection property being edited.
     /// Optional but recommended for proper model binding.
@@ -99,45 +111,6 @@ public class EditArrayTagHelper : TagHelper
     public ModelExpression? For { get; set; }
 
     /// <summary>
-    /// Gets or sets a value indicating whether to render a template section for adding new items.
-    /// </summary>
-    /// <value>
-    /// <c>true</c> to render a template section; otherwise, <c>false</c>. Default is <c>false</c>.
-    /// </value>
-    /// <remarks>
-    /// <para>
-    /// When enabled, an HTML <c>&lt;template&gt;</c> element is rendered containing a blueprint for new items.
-    /// This template uses placeholder field names (e.g., "[__index__]") that must be replaced with actual
-    /// indices when items are added via JavaScript.
-    /// </para>
-    /// <para>
-    /// Typically used in conjunction with <see cref="ShowAddButton"/> to allow users to dynamically add new items
-    /// to the collection.
-    /// </para>
-    /// </remarks>
-    [HtmlAttributeName(TemplateAttributeName)]
-    public bool RenderTemplate { get; set; } = false;
-    
-    /// <summary>
-    /// Gets or sets a value indicating whether to render an "Add New Item" button.
-    /// </summary>
-    /// <value>
-    /// <c>true</c> to show the add button; otherwise, <c>false</c>. Default is <c>false</c>.
-    /// </value>
-    /// <remarks>
-    /// <para>
-    /// When enabled, an "Add New Item" button is rendered that allows users to dynamically add new items
-    /// to the collection. This button invokes the JavaScript <c>addNewItem()</c> function.
-    /// </para>
-    /// <para>
-    /// Requires <see cref="RenderTemplate"/> to be <c>true</c> to function properly, as the button clones
-    /// the template to create new items.
-    /// </para>
-    /// </remarks>
-    [HtmlAttributeName(AddButtonAttributeName)]
-    public bool ShowAddButton { get; set; } = false;
-    
-    /// <summary>
     /// Gets or sets a value indicating whether items should be rendered in display mode by default.
     /// </summary>
     /// <value>
@@ -156,6 +129,102 @@ public class EditArrayTagHelper : TagHelper
     /// </remarks>
     [HtmlAttributeName(DisplayModeAttributeName)]
     public bool DisplayMode { get; set; } = false;
+
+    /// <summary>
+    /// Gets or sets the name of the partial view used to render each item in display mode.
+    /// Required when <see cref="DisplayMode"/> is <c>true</c>.
+    /// </summary>
+    /// <value>
+    /// The path to the partial view for display mode, or <c>null</c> if display mode is not used.
+    /// </value>
+    /// <remarks>
+    /// <para>
+    /// When <see cref="DisplayMode"/> is enabled, items are initially rendered using this view.
+    /// Users can toggle between display and edit modes using Edit/Done buttons.
+    /// </para>
+    /// <para>
+    /// If <see cref="DisplayMode"/> is <c>true</c> and this property is <c>null</c>, empty, or whitespace,
+    /// an <see cref="InvalidOperationException"/> will be thrown during validation.
+    /// </para>
+    /// </remarks>
+    [HtmlAttributeName(DisplayViewNameAttributeName)]
+    public string? DisplayViewName { get; set; }
+
+    /// <summary>
+    /// Gets or sets a value indicating whether to render a template section for adding new items.
+    /// </summary>
+    /// <value>
+    /// <c>true</c> to render a template section; otherwise, <c>false</c>. Default is <c>false</c>.
+    /// </value>
+    /// <remarks>
+    /// <para>
+    /// When enabled, an HTML <c>&lt;template&gt;</c> element is rendered containing a blueprint for new items.
+    /// This template uses placeholder field names (e.g., "[__index__]") that must be replaced with actual
+    /// indices when items are added via JavaScript.
+    /// </para>
+    /// <para>
+    /// Typically used in conjunction with <see cref="ShowAddButton"/> to allow users to dynamically add new items
+    /// to the collection.
+    /// </para>
+    /// </remarks>
+    [HtmlAttributeName(TemplateAttributeName)]
+    public bool RenderTemplate { get; set; } = false;
+
+    /// <summary>
+    /// Gets or sets a value indicating whether to render an "Add New Item" button.
+    /// </summary>
+    /// <value>
+    /// <c>true</c> to show the add button; otherwise, <c>false</c>. Default is <c>false</c>.
+    /// </value>
+    /// <remarks>
+    /// <para>
+    /// When enabled, an "Add New Item" button is rendered that allows users to dynamically add new items
+    /// to the collection. This button invokes the JavaScript <c>addNewItem()</c> function.
+    /// </para>
+    /// <para>
+    /// Requires <see cref="RenderTemplate"/> to be <c>true</c> to function properly, as the button clones
+    /// the template to create new items.
+    /// </para>
+    /// </remarks>
+    [HtmlAttributeName(AddButtonAttributeName)]
+    public bool ShowAddButton { get; set; } = false;
+
+    /// <summary>
+    /// Gets or sets a value indicating whether to enable item reordering functionality.
+    /// </summary>
+    /// <value>
+    /// <c>true</c> to enable reordering with Move Up/Down buttons; otherwise, <c>false</c>. Default is <c>false</c>.
+    /// </value>
+    /// <remarks>
+    /// When enabled, each item will have "Move Up" and "Move Down" buttons that allow users to reorder items
+    /// in the collection. The reorder buttons invoke the JavaScript <c>moveItem()</c> function.
+    /// The container element will also have a <c>data-reorder-enabled="true"</c> attribute.
+    /// </remarks>
+    [HtmlAttributeName(EnableReorderAttributeName)]
+    public bool EnableReordering { get; set; } = false;
+
+    /// <summary>
+    /// Gets or sets the text to display when the collection is empty.
+    /// </summary>
+    /// <value>
+    /// The placeholder text, or <c>null</c> to display nothing when the collection is empty.
+    /// </value>
+    /// <remarks>
+    /// <para>
+    /// When the <see cref="Items"/> collection is empty and this property is set, the specified text is
+    /// rendered inside a div with the class "edit-array-placeholder". This provides user feedback that
+    /// the list is empty rather than showing a blank area.
+    /// </para>
+    /// <para>
+    /// The value is HTML-encoded before output to prevent XSS attacks.
+    /// </para>
+    /// </remarks>
+    [HtmlAttributeName(EmptyPlaceholderAttributeName)]
+    public string? EmptyPlaceholder { get; set; }
+
+    // ============================================================
+    // CALLBACK PROPERTIES
+    // ============================================================
 
     /// <summary>
     /// Gets or sets the JavaScript function name to invoke when a user completes editing an item (clicks "Done").
@@ -194,65 +263,6 @@ public class EditArrayTagHelper : TagHelper
     public string? OnUpdate { get; set; }
 
     /// <summary>
-    /// Gets or sets a value indicating whether to enable item reordering functionality.
-    /// </summary>
-    /// <value>
-    /// <c>true</c> to enable reordering with Move Up/Down buttons; otherwise, <c>false</c>. Default is <c>false</c>.
-    /// </value>
-    /// <remarks>
-    /// When enabled, each item will have "Move Up" and "Move Down" buttons that allow users to reorder items
-    /// in the collection. The reorder buttons invoke the JavaScript <c>moveItem()</c> function.
-    /// The container element will also have a <c>data-reorder-enabled="true"</c> attribute.
-    /// </remarks>
-    [HtmlAttributeName(EnableReorderAttributeName)]
-    public bool EnableReordering { get; set; } = false;
-
-    /// <summary>
-    /// Gets or sets the CSS class(es) to apply to reorder buttons (Move Up/Down).
-    /// </summary>
-    /// <value>
-    /// A string containing one or more CSS classes separated by spaces.
-    /// Default is "btn btn-outline-secondary".
-    /// </value>
-    /// <remarks>
-    /// <para>
-    /// This property is only used when <see cref="EnableReordering"/> is <c>true</c>.
-    /// If this property is <c>null</c>, empty, or whitespace, the value of <see cref="ButtonCssClass"/> is used instead.
-    /// </para>
-    /// <para>
-    /// The value is HTML-encoded before output to prevent XSS attacks.
-    /// </para>
-    /// </remarks>
-    [HtmlAttributeName(ReorderButtonCssClassAttributeName)]
-    public string ReorderButtonCssClass { get; set; } = "btn btn-outline-secondary";
-
-    /// <summary>
-    /// Gets or sets the text displayed on the "Move Up" button.
-    /// </summary>
-    /// <value>
-    /// The button text. Default is "Move Up".
-    /// </value>
-    /// <remarks>
-    /// This property is only used when <see cref="EnableReordering"/> is <c>true</c>.
-    /// The value is HTML-encoded before output to prevent XSS attacks.
-    /// </remarks>
-    [HtmlAttributeName(MoveUpButtonTextAttributeName)]
-    public string MoveUpButtonText { get; set; } = "Move Up";
-
-    /// <summary>
-    /// Gets or sets the text displayed on the "Move Down" button.
-    /// </summary>
-    /// <value>
-    /// The button text. Default is "Move Down".
-    /// </value>
-    /// <remarks>
-    /// This property is only used when <see cref="EnableReordering"/> is <c>true</c>.
-    /// The value is HTML-encoded before output to prevent XSS attacks.
-    /// </remarks>
-    [HtmlAttributeName(MoveDownButtonTextAttributeName)]
-    public string MoveDownButtonText { get; set; } = "Move Down";
-
-    /// <summary>
     /// Gets or sets the JavaScript function name to invoke after an item is marked for deletion.
     /// The function receives the item's DOM element ID as a parameter.
     /// </summary>
@@ -267,10 +277,10 @@ public class EditArrayTagHelper : TagHelper
     /// </para>
     /// </remarks>
     /// <example>
-    /// &lt;edit-array asp-items="Model.Items" asp-view-name="ItemEditor" 
+    /// &lt;edit-array asp-items="Model.Items" asp-view-name="ItemEditor"
     ///              asp-display-mode="true" asp-display-view-name="ItemDisplay"
     ///              asp-on-delete="handleItemDeleted" /&gt;
-    /// 
+    ///
     /// &lt;script&gt;
     ///     function handleItemDeleted(itemId) {
     ///         console.log('Item deleted: ' + itemId);
@@ -280,6 +290,10 @@ public class EditArrayTagHelper : TagHelper
     /// </example>
     [HtmlAttributeName(OnDeleteAttributeName)]
     public string? OnDelete { get; set; }
+
+    // ============================================================
+    // STYLING PROPERTIES
+    // ============================================================
 
     /// <summary>
     /// Gets or sets the CSS class(es) to apply to the outer container element.
@@ -328,23 +342,53 @@ public class EditArrayTagHelper : TagHelper
     public string ButtonCssClass { get; set; } = "btn";
 
     /// <summary>
-    /// Gets or sets the text to display when the collection is empty.
+    /// Gets or sets the CSS class(es) to apply to reorder buttons (Move Up/Down).
     /// </summary>
     /// <value>
-    /// The placeholder text, or <c>null</c> to display nothing when the collection is empty.
+    /// A string containing one or more CSS classes separated by spaces.
+    /// Default is "btn btn-outline-secondary".
     /// </value>
     /// <remarks>
     /// <para>
-    /// When the <see cref="Items"/> collection is empty and this property is set, the specified text is
-    /// rendered inside a div with the class "edit-array-placeholder". This provides user feedback that
-    /// the list is empty rather than showing a blank area.
+    /// This property is only used when <see cref="EnableReordering"/> is <c>true</c>.
+    /// If this property is <c>null</c>, empty, or whitespace, the value of <see cref="ButtonCssClass"/> is used instead.
     /// </para>
     /// <para>
     /// The value is HTML-encoded before output to prevent XSS attacks.
     /// </para>
     /// </remarks>
-    [HtmlAttributeName(EmptyPlaceholderAttributeName)]
-    public string? EmptyPlaceholder { get; set; }
+    [HtmlAttributeName(ReorderButtonCssClassAttributeName)]
+    public string ReorderButtonCssClass { get; set; } = "btn btn-outline-secondary";
+
+    /// <summary>
+    /// Gets or sets the text displayed on the "Move Up" button.
+    /// </summary>
+    /// <value>
+    /// The button text. Default is "Move Up".
+    /// </value>
+    /// <remarks>
+    /// This property is only used when <see cref="EnableReordering"/> is <c>true</c>.
+    /// The value is HTML-encoded before output to prevent XSS attacks.
+    /// </remarks>
+    [HtmlAttributeName(MoveUpButtonTextAttributeName)]
+    public string MoveUpButtonText { get; set; } = "Move Up";
+
+    /// <summary>
+    /// Gets or sets the text displayed on the "Move Down" button.
+    /// </summary>
+    /// <value>
+    /// The button text. Default is "Move Down".
+    /// </value>
+    /// <remarks>
+    /// This property is only used when <see cref="EnableReordering"/> is <c>true</c>.
+    /// The value is HTML-encoded before output to prevent XSS attacks.
+    /// </remarks>
+    [HtmlAttributeName(MoveDownButtonTextAttributeName)]
+    public string MoveDownButtonText { get; set; } = "Move Down";
+
+    // ============================================================
+    // FRAMEWORK PROPERTIES
+    // ============================================================
 
     /// <summary>
     /// Gets or sets the view context for rendering partial views.
@@ -361,31 +405,7 @@ public class EditArrayTagHelper : TagHelper
     /// and maintaining proper model binding prefixes.
     /// </remarks>
     [ViewContext]
-    public required ViewContext ViewContext { get; set; }
-    
-    /// <summary>
-    /// Gets or sets the HTML id attribute for the edit array container.
-    /// This property is required.
-    /// </summary>
-    /// <value>
-    /// A unique identifier for the container element. Must not be <c>null</c>, empty, or whitespace.
-    /// </value>
-    /// <remarks>
-    /// <para>
-    /// The id is used to generate unique identifiers for all child elements and is referenced by
-    /// JavaScript functions for add, edit, delete, and reorder operations. Each item's id is derived
-    /// from this container id (e.g., if id="myArray", items will have ids like "edit-array-myArray-item-0").
-    /// </para>
-    /// <para>
-    /// The value is HTML-encoded before output to prevent XSS attacks. The encoded id is safe for use
-    /// in both HTML attributes and JavaScript string literals.
-    /// </para>
-    /// <para>
-    /// An <see cref="InvalidOperationException"/> is thrown during validation if this property is not set.
-    /// </para>
-    /// </remarks>
-    [HtmlAttributeName("id")]
-    public string Id { get; set; } 
+    public required ViewContext ViewContext { get; set; } 
 
     private readonly IHtmlHelper _htmlHelper;
 
