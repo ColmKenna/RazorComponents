@@ -137,232 +137,239 @@ public class EditArrayTagHelper : TagHelper
         // Setup HtmlHelper to be used in our views
         (_htmlHelper as IViewContextAware)?.Contextualize(ViewContext);
         
-        // Create container for rendered items
+        // Create container for rendered items and template sections
         var sb = new StringBuilder();
-        
+
         // Get the model expression prefix from ViewContext
         var modelExpressionPrefix = ViewContext.ViewData.TemplateInfo.HtmlFieldPrefix;
-        
+
         // Extract the property name from the ModelExpression if provided
         string collectionName = For?.Name ?? string.Empty;
-        
-        // Create a wrapper div for the items
-        sb.Append($"<div class=\"edit-array-items\" id=\"{containerId}-items\">");
-        
-        // Process each item
+
+        // Render items
+        await RenderItems(sb, containerId, modelExpressionPrefix, collectionName);
+
+        // Render template section when requested
+        if (RenderTemplate)
+        {
+            await RenderTemplateSection(sb, containerId, modelExpressionPrefix, collectionName);
+        }
+
+        // Set the output content
+        output.Content.SetHtmlContent(sb.ToString());
+    }
+
+    private async Task<bool> RenderItems(StringBuilder sb, string containerId, string modelExpressionPrefix, string collectionName)
+    {
+        sb.Append("<div class=\"edit-array-items\" id=\"")
+          .Append(containerId)
+          .Append("-items\">");
+
         var hasItems = false;
-        int index = 0;
+        var index = 0;
+
         foreach (var item in Items)
         {
             hasItems = true;
-            // Create a unique ID for this item based on its index and collection name
+
             var fieldName = GetFieldName(modelExpressionPrefix, collectionName, index);
             var itemId = $"{containerId}-item-{index}";
-            
-            // Create a wrapper for this item
-            sb.Append($"<div class=\"{GetEncodedItemCssClass()}\" id=\"{itemId}\">");
-            
-            // Check if IsDeleted property is present in the model and add a hidden input if not
-            var isDeletedProperty = item.GetType().GetProperty("IsDeleted");            
-            
-            if (isDeletedProperty == null )
-            {                
-                // Add hidden input for IsDeleted with default value (false)
-                sb.Append($"<input type=\"hidden\" name=\"{fieldName}.IsDeleted\" value=\"false\" data-is-deleted-marker />");
+
+            sb.Append("<div class=\"")
+              .Append(GetEncodedItemCssClass())
+              .Append("\" id=\"")
+              .Append(itemId)
+              .Append("\">");
+
+            var isDeletedProperty = item.GetType().GetProperty("IsDeleted");
+
+            if (isDeletedProperty == null)
+            {
+                sb.Append("<input type=\"hidden\" name=\"")
+                  .Append(fieldName)
+                  .Append(".IsDeleted\" value=\"false\" data-is-deleted-marker />");
             }
 
-            // Store the original prefix
             var originalPrefix = ViewContext.ViewData.TemplateInfo.HtmlFieldPrefix;
-            
-            // Set the new prefix for this item
             ViewContext.ViewData.TemplateInfo.HtmlFieldPrefix = fieldName;
-            
-            // Create a new ViewDataDictionary with the item as model
+
             var viewData = new ViewDataDictionary<object>(ViewContext.ViewData)
             {
                 Model = item
             };
-            
+
             if (DisplayMode && !string.IsNullOrEmpty(DisplayViewName))
             {
-                // Render display view and edit button in display mode
-                sb.Append($"<div class=\"display-container\" id=\"{itemId}-display\">");
-                
-                // Render the display view with the specific model
-                var displayViewContent = await _htmlHelper.PartialAsync(DisplayViewName, item, viewData);
-                
-                // Capture the HTML output
+                await RenderItemDisplayMode(sb, item, itemId, viewData);
+            }
+            else
+            {
+                await RenderItemEditMode(sb, item, viewData);
+            }
+
+            AppendReorderButtons(sb, containerId, itemId);
+
+            ViewContext.ViewData.TemplateInfo.HtmlFieldPrefix = originalPrefix;
+
+            sb.Append("</div>");
+
+            index++;
+        }
+
+        if (!hasItems)
+        {
+            RenderEmptyPlaceholder(sb);
+        }
+
+        sb.Append("</div>");
+
+        return hasItems;
+    }
+
+    private async Task RenderItemDisplayMode(StringBuilder sb, object item, string itemId, ViewDataDictionary<object> viewData)
+    {
+        sb.Append("<div class=\"display-container\" id=\"")
+          .Append(itemId)
+          .Append("-display\">");
+
+        var displayViewContent = await _htmlHelper.PartialAsync(DisplayViewName!, item, viewData);
+        using (var writer = new StringWriter())
+        {
+            displayViewContent.WriteTo(writer, HtmlEncoder.Default);
+            sb.Append(writer.ToString());
+        }
+
+        sb.Append(GenerateButton("edit", itemId, false));
+        sb.Append(GenerateButton("delete", itemId, false));
+        sb.Append("</div>");
+
+        sb.Append("<div class=\"edit-container\" id=\"")
+          .Append(itemId)
+          .Append("-edit\" style=\"display: none;\">");
+
+        var editorViewContent = await _htmlHelper.PartialAsync(ViewName, item, viewData);
+        using (var writer = new StringWriter())
+        {
+            editorViewContent.WriteTo(writer, HtmlEncoder.Default);
+            sb.Append(writer.ToString());
+        }
+
+        sb.Append(GenerateButton("done", itemId, false));
+        sb.Append("</div>");
+    }
+
+    private async Task RenderItemEditMode(StringBuilder sb, object item, ViewDataDictionary<object> viewData)
+    {
+        var viewContent = await _htmlHelper.PartialAsync(ViewName, item, viewData);
+        using (var writer = new StringWriter())
+        {
+            viewContent.WriteTo(writer, HtmlEncoder.Default);
+            sb.Append(writer.ToString());
+        }
+    }
+
+    private async Task RenderTemplateSection(StringBuilder sb, string containerId, string modelExpressionPrefix, string collectionName)
+    {
+        var templateId = $"{containerId}-template";
+        sb.Append("<template id=\"")
+          .Append(templateId)
+          .Append("\">");
+
+        var templateFieldName = GetFieldName(modelExpressionPrefix, collectionName, "__index__");
+        var originalPrefix = ViewContext.ViewData.TemplateInfo.HtmlFieldPrefix;
+        ViewContext.ViewData.TemplateInfo.HtmlFieldPrefix = templateFieldName;
+
+        object? templateModel = null;
+        var itemType = Items.GetType().GetGenericArguments().FirstOrDefault();
+        if (itemType != null)
+        {
+            templateModel = Activator.CreateInstance(itemType);
+        }
+
+        var viewData = new ViewDataDictionary<object>(ViewContext.ViewData)
+        {
+            Model = templateModel
+        };
+
+        sb.Append("<div class=\"")
+          .Append(GetEncodedItemCssClass())
+          .Append("\">");
+
+        var name = $"{templateFieldName}.IsDeleted";
+
+        if (DisplayMode && !string.IsNullOrEmpty(DisplayViewName))
+        {
+            sb.Append("<div class=\"display-container\" style=\"display: none;\">");
+            if (templateModel != null)
+            {
+                var displayViewContent = await _htmlHelper.PartialAsync(DisplayViewName!, templateModel, viewData);
                 using (var writer = new StringWriter())
                 {
                     displayViewContent.WriteTo(writer, HtmlEncoder.Default);
                     sb.Append(writer.ToString());
                 }
-
-                // Add edit and delete buttons
-                sb.Append(GenerateButton("edit", itemId, false));
-                sb.Append(GenerateButton("delete", itemId, false));
-                
-                
-                sb.Append("</div>");
-                
-                // Render editor view (initially hidden)
-                sb.Append($"<div class=\"edit-container\" id=\"{itemId}-edit\" style=\"display: none;\">");
-                
-                // Render the editor view with the specific model
-                var editorViewContent = await _htmlHelper.PartialAsync(ViewName, item, viewData);
-                
-                // Capture the HTML output
-                using (var writer = new StringWriter())
-                {
-                    editorViewContent.WriteTo(writer, HtmlEncoder.Default);
-                    sb.Append(writer.ToString());
-                }
-
-                // Add done button
-                sb.Append(GenerateButton("done", itemId, false));
-                
-                sb.Append("</div>");
-            }
-            else
-            {
-                // Render the view with the specific model (editor only)
-                var viewContent = await _htmlHelper.PartialAsync(ViewName, item, viewData);
-                
-                // Capture the HTML output
-                using (var writer = new StringWriter())
-                {
-                    viewContent.WriteTo(writer, HtmlEncoder.Default);
-                    sb.Append(writer.ToString());
-                }
             }
 
-            AppendReorderButtons(sb, containerId, itemId);
-            
-            // Restore original prefix
-            ViewContext.ViewData.TemplateInfo.HtmlFieldPrefix = originalPrefix;
-            
-            // Close item wrapper
+            sb.Append(GenerateButton("edit", null, true));
+            sb.Append(GenerateButton("delete", null, true));
             sb.Append("</div>");
-            
-            index++;
+
+            sb.Append("<div class=\"edit-container\">");
         }
-        
-        // Render placeholder when no items are available
-        if (!hasItems && !string.IsNullOrWhiteSpace(EmptyPlaceholder))
+
+        if (templateModel != null)
         {
-            sb.Append($"<div class=\"edit-array-placeholder\">{HtmlEncoder.Default.Encode(EmptyPlaceholder)}</div>");
+            var viewContent = await _htmlHelper.PartialAsync(ViewName, templateModel, viewData);
+            using (var writer = new StringWriter())
+            {
+                viewContent.WriteTo(writer, HtmlEncoder.Default);
+                var templateContent = writer.ToString();
+                sb.Append(templateContent);
+                if (!templateContent.Contains($"name=\"{name}\"", StringComparison.OrdinalIgnoreCase))
+                {
+                    sb.Append("<input type=\"hidden\" name=\"")
+                      .Append(name)
+                      .Append("\" value=\"false\" data-is-deleted-marker />");
+                }
+            }
         }
-        
-        // Close the items wrapper
+
+        if (DisplayMode && !string.IsNullOrEmpty(DisplayViewName))
+        {
+            sb.Append(GenerateButton("done", null, true));
+            sb.Append("</div>");
+        }
+
+        AppendTemplateReorderButtons(sb, containerId);
+
         sb.Append("</div>");
-        
-        // Add template item if requested
-        if (RenderTemplate)
+        ViewContext.ViewData.TemplateInfo.HtmlFieldPrefix = originalPrefix;
+        sb.Append("</template>");
+
+                if (ShowAddButton)
+                {
+                        sb.Append("<button type=\"button\" class=\"")
+                            .Append(GetEncodedButtonCssClass())
+                            .Append(" btn-primary mt-2\" id=\"")
+                            .Append(containerId)
+                            .Append("-add\" onclick=\"addNewItem('")
+                            .Append(containerId)
+                            .Append("', '")
+                            .Append(templateId)
+                            .Append("')\">Add New Item</button>");
+                }
+    }
+
+    private void RenderEmptyPlaceholder(StringBuilder sb)
+    {
+        if (string.IsNullOrWhiteSpace(EmptyPlaceholder))
         {
-            string templateId = $"{containerId}-template";
-            sb.Append($"<template id=\"{templateId}\">");
-
-            // Generate template with a special index
-            var templateFieldName = GetFieldName(modelExpressionPrefix, collectionName, "__index__");
-
-
-
-        // Store the original prefix
-            var originalPrefix = ViewContext.ViewData.TemplateInfo.HtmlFieldPrefix;
-            
-            // Set the new prefix for the template
-            ViewContext.ViewData.TemplateInfo.HtmlFieldPrefix = templateFieldName;
-            
-            // Create a default model instance for the template
-            object? templateModel = null;
-            var itemType = Items.GetType().GetGenericArguments().FirstOrDefault();
-            if (itemType != null)
-            {
-                templateModel = Activator.CreateInstance(itemType);
-            }
-            
-            // Create a new ViewDataDictionary with the template model
-            var viewData = new ViewDataDictionary<object>(ViewContext.ViewData)
-            {
-                Model = templateModel
-            };
-            
-            // Create a wrapper for the template item
-            sb.Append($"<div class=\"{GetEncodedItemCssClass()}\">");
-
-            var name = $"{templateFieldName}.IsDeleted";
-
-
-            if (DisplayMode && !string.IsNullOrEmpty(DisplayViewName))
-            {
-                // In display mode, we include both the display and edit templates
-                // Display template (initially hidden in the template)
-                sb.Append("<div class=\"display-container\" style=\"display: none;\">");
-                if (templateModel != null)
-                {
-                    var displayViewContent = await _htmlHelper.PartialAsync(DisplayViewName, templateModel, viewData);
-                    using (var writer = new StringWriter())
-                    {
-                        displayViewContent.WriteTo(writer, HtmlEncoder.Default);
-                        sb.Append(writer.ToString());
-                    }
-                }
-                // Add edit and delete buttons (template mode)
-                sb.Append(GenerateButton("edit", null, true));
-                sb.Append(GenerateButton("delete", null, true));
-
-                sb.Append("</div>");
-                
-                // Edit template
-                sb.Append("<div class=\"edit-container\">");
-            }
-            
-            // Render the template view
-            if (templateModel != null) 
-            {
-                var viewContent = await _htmlHelper.PartialAsync(ViewName, templateModel, viewData);
-                using (var writer = new StringWriter())
-                {
-                    viewContent.WriteTo(writer, HtmlEncoder.Default);
-                    var templateContent = writer.ToString();
-                    sb.Append(templateContent);
-                    if (!templateContent.Contains($"name=\"{name}\"", StringComparison.OrdinalIgnoreCase ))
-                    {
-                        sb.Append($"<input type=\"hidden\" name=\"{name}\" value=\"false\" data-is-deleted-marker />");
-                    }
-                }
-            }
-            
-            if (DisplayMode && !string.IsNullOrEmpty(DisplayViewName))
-            {
-                // Add done button (template mode)
-                sb.Append(GenerateButton("done", null, true));
-                sb.Append("</div>");
-            }
-
-            AppendTemplateReorderButtons(sb, containerId);
-            
-            // Close the template item wrapper
-            sb.Append("</div>");
-            
-            // Restore original prefix
-            ViewContext.ViewData.TemplateInfo.HtmlFieldPrefix = originalPrefix;
-            
-            sb.Append("</template>");
-            
-            // Add button to create new entry if requested
-            if (ShowAddButton)
-            {
-                
-                // button should have and id containerId + '-add'
-                sb.Append($"<button type=\"button\" class=\"{GetEncodedButtonCssClass()} btn-primary mt-2\" id=\"{containerId}-add\" onclick=\"addNewItem('{containerId}', '{templateId}')\">");
-                sb.Append("Add New Item");
-                sb.Append("</button>");
-            }
+            return;
         }
-        
-        // Set the output content
-        output.Content.SetHtmlContent(sb.ToString());
+
+        sb.Append("<div class=\"edit-array-placeholder\">")
+          .Append(HtmlEncoder.Default.Encode(EmptyPlaceholder))
+          .Append("</div>");
     }
 
     private void AppendReorderButtons(StringBuilder sb, string containerId, string itemId)

@@ -1,4 +1,5 @@
 using System.Reflection;
+using System.Text;
 using System.Text.Encodings.Web;
 using Microsoft.AspNetCore.Html;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
@@ -984,6 +985,114 @@ public partial class EditArrayTagHelperTests
         // Should be encoded
         Assert.Contains("alert(&#x27;test&#x27;)", html);
         Assert.DoesNotContain("alert('test')", html);
+    }
+
+    #endregion
+
+    #region Render Helper Extraction Tests
+
+    [Fact]
+    public async Task RenderItems_WithSingleItem_RendersItemWrapperAndReturnsTrue()
+    {
+        // Arrange
+        var items = new List<object> { new TestModel { Name = "Item" } };
+        var tagHelper = CreateTagHelper(items: items);
+        tagHelper.DisplayMode = true;
+        tagHelper.DisplayViewName = "Display";
+        var renderItems = typeof(EditArrayTagHelper).GetMethod(
+            "RenderItems",
+            BindingFlags.NonPublic | BindingFlags.Instance);
+
+        var sb = new StringBuilder();
+        var containerId = "edit-array-test";
+        var modelExpressionPrefix = tagHelper.ViewContext.ViewData.TemplateInfo.HtmlFieldPrefix;
+        var collectionName = tagHelper.For?.Name ?? string.Empty;
+
+        // Act
+        var task = renderItems?.Invoke(tagHelper, new object[] { sb, containerId, modelExpressionPrefix, collectionName }) as Task<bool>;
+        Assert.NotNull(task); // Guard reflection failures
+        var hasItems = await task!;
+
+        // Assert
+        Assert.True(hasItems);
+        var content = sb.ToString();
+        Assert.Contains("<div class=\"edit-array-items\"", content);
+        Assert.Contains("edit-array-test-item-0", content);
+    }
+
+    [Fact]
+    public async Task RenderItems_WithNoItems_ReturnsFalseAndLeavesWrapperClosed()
+    {
+        // Arrange
+        var tagHelper = CreateTagHelper(items: new List<object>());
+        var renderItems = typeof(EditArrayTagHelper).GetMethod(
+            "RenderItems",
+            BindingFlags.NonPublic | BindingFlags.Instance);
+
+        var sb = new StringBuilder();
+        var containerId = "edit-array-empty";
+        var modelExpressionPrefix = tagHelper.ViewContext.ViewData.TemplateInfo.HtmlFieldPrefix;
+        var collectionName = tagHelper.For?.Name ?? string.Empty;
+
+        // Act
+        var task = renderItems?.Invoke(tagHelper, new object[] { sb, containerId, modelExpressionPrefix, collectionName }) as Task<bool>;
+        Assert.NotNull(task);
+        var hasItems = await task!;
+
+        // Assert
+        Assert.False(hasItems);
+        Assert.Contains("<div class=\"edit-array-items\" id=\"edit-array-empty-items\">", sb.ToString());
+    }
+
+    [Fact]
+    public async Task RenderTemplateSection_WithRenderTemplateTrue_RendersTemplateMarkup()
+    {
+        // Arrange
+        var items = new List<object> { new TestModel { Name = "Item" } };
+        var tagHelper = CreateTagHelper(items: items);
+        tagHelper.RenderTemplate = true;
+        tagHelper.DisplayMode = true;
+        tagHelper.DisplayViewName = "Display";
+
+        var renderTemplateSection = typeof(EditArrayTagHelper).GetMethod(
+            "RenderTemplateSection",
+            BindingFlags.NonPublic | BindingFlags.Instance);
+
+        var sb = new StringBuilder();
+        var containerId = "edit-array-test";
+        var modelExpressionPrefix = tagHelper.ViewContext.ViewData.TemplateInfo.HtmlFieldPrefix;
+        var collectionName = tagHelper.For?.Name ?? string.Empty;
+
+        // Act
+        var task = renderTemplateSection?.Invoke(tagHelper, new object[] { sb, containerId, modelExpressionPrefix, collectionName }) as Task;
+        Assert.NotNull(task);
+        await task!;
+
+        // Assert
+        var content = sb.ToString();
+        Assert.Contains("<template id=\"edit-array-test-template\">", content);
+        Assert.Contains("display-container", content); // Includes display/edit template content
+    }
+
+    [Fact]
+    public void RenderEmptyPlaceholder_WithPlaceholder_AppendsEncodedPlaceholder()
+    {
+        // Arrange
+        var tagHelper = CreateTagHelper();
+        tagHelper.EmptyPlaceholder = "<span>Empty</span>";
+        var renderEmptyPlaceholder = typeof(EditArrayTagHelper).GetMethod(
+            "RenderEmptyPlaceholder",
+            BindingFlags.NonPublic | BindingFlags.Instance);
+
+        var sb = new StringBuilder();
+
+        // Act
+        renderEmptyPlaceholder?.Invoke(tagHelper, new object[] { sb });
+
+        // Assert
+        var content = sb.ToString();
+        Assert.Contains("edit-array-placeholder", content);
+        Assert.Contains("&lt;span&gt;Empty&lt;/span&gt;", content);
     }
 
     #endregion
