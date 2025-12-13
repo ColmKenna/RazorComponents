@@ -978,4 +978,99 @@ public class DisplayTagHelperTests
     }
 
     #endregion
+
+    #region Process - Null Validation Tests
+
+    /// <summary>
+    /// Verifies that Process throws InvalidOperationException when For property is null.
+    /// This ensures proper error messaging for missing asp-for attribute.
+    /// </summary>
+    [Fact]
+    public void Process_WithNullFor_ThrowsInvalidOperationException()
+    {
+        // Arrange
+        var tagHelper = new DisplayTagHelper
+        {
+            For = null!,
+            ViewContext = CreateViewContext()
+        };
+        var context = CreateContext();
+        var output = CreateOutput();
+
+        // Act & Assert
+        var exception = Assert.Throws<InvalidOperationException>(() =>
+            tagHelper.Process(context, output));
+        Assert.NotEmpty(exception.Message);
+        Assert.Contains("asp-for", exception.Message);
+    }
+
+    /// <summary>
+    /// Verifies that Process throws InvalidOperationException when ViewContext property is null.
+    /// This ensures proper error messaging when framework fails to set ViewContext.
+    /// </summary>
+    [Fact]
+    public void Process_WithNullViewContext_ThrowsInvalidOperationException()
+    {
+        // Arrange
+        var tagHelper = new DisplayTagHelper
+        {
+            For = CreateSimpleModelExpression("Test", "Value"),
+            ViewContext = null!
+        };
+        var context = CreateContext();
+        var output = CreateOutput();
+
+        // Act & Assert
+        var exception = Assert.Throws<InvalidOperationException>(() =>
+            tagHelper.Process(context, output));
+        Assert.NotEmpty(exception.Message);
+        Assert.Contains(nameof(ViewContext), exception.Message);
+    }
+
+    /// <summary>
+    /// Verifies that Process throws InvalidOperationException when both properties are null.
+    /// Should throw for the first null property checked (For).
+    /// </summary>
+    [Fact]
+    public void Process_WithBothPropertiesNull_ThrowsInvalidOperationException()
+    {
+        // Arrange
+        var tagHelper = new DisplayTagHelper
+        {
+            For = null!,
+            ViewContext = null!
+        };
+        var context = CreateContext();
+        var output = CreateOutput();
+
+        // Act & Assert
+        // Should throw for the first null property checked
+        Assert.Throws<InvalidOperationException>(() =>
+            tagHelper.Process(context, output));
+    }
+
+    /// <summary>
+    /// Verifies that Process completes successfully when both required properties are set.
+    /// This is the happy path that validates normal operation is not affected by validation.
+    /// </summary>
+    [Fact]
+    public void Process_WithValidForAndViewContext_DoesNotThrow()
+    {
+        // Arrange
+        var model = new SimpleModel { Name = "Test" };
+        var modelExpression = CreateModelExpression(model, m => m.Name, model.Name);
+        var tagHelper = CreateTagHelper(forExpression: modelExpression);
+        var context = CreateContext();
+        var output = CreateOutput();
+
+        // Act & Assert - Should complete without throwing validation exceptions
+        tagHelper.Process(context, output);
+        
+        // Verify output was generated
+        var content = GetOutputContent(output);
+        Assert.Contains("<label", content);
+        Assert.Contains("<div", content);
+    }
+
+    #endregion
 }
