@@ -700,7 +700,7 @@ public class TabItemTagHelperTests : TagHelperTestBase<TabItemTagHelper>
     #region Special Characters Tests
 
     [Fact]
-    public async Task ProcessAsync_WithHtmlEntityInHeading_PreservesEntity()
+    public async Task ProcessAsync_WithHtmlEntityInHeading_EncodesEntity()
     {
         // Arrange
         var tagHelper = CreateTagHelper(heading: "Tab &amp; More");
@@ -712,11 +712,12 @@ public class TabItemTagHelperTests : TagHelperTestBase<TabItemTagHelper>
 
         // Assert
         var content = GetOutputContent(output);
-        Assert.Contains("Tab &amp; More", content);
+        // HTML entity should be double-encoded to prevent XSS
+        Assert.Contains("Tab &amp;amp; More", content);
     }
 
     [Fact]
-    public async Task ProcessAsync_WithQuotesInHeading_HandlesCorrectly()
+    public async Task ProcessAsync_WithQuotesInHeading_EncodesQuotes()
     {
         // Arrange
         var tagHelper = CreateTagHelper(heading: "Tab \"quoted\"");
@@ -728,7 +729,50 @@ public class TabItemTagHelperTests : TagHelperTestBase<TabItemTagHelper>
 
         // Assert
         var content = GetOutputContent(output);
-        Assert.Contains("Tab \"quoted\"", content);
+        // Quotes should be encoded to prevent attribute injection
+        Assert.Contains("Tab &quot;quoted&quot;", content);
+    }
+
+    #endregion
+
+    #region Security Tests (XSS Prevention)
+
+    [Fact]
+    public async Task Process_WithMaliciousHeading_EncodesOutput()
+    {
+        // Arrange
+        var tagHelper = CreateTagHelper(heading: "<script>alert('xss')</script>");
+        var context = CreateContext();
+        var output = CreateOutputWithContent("");
+
+        // Act
+        await tagHelper.ProcessAsync(context, output);
+
+        // Assert
+        var content = TagHelperTestBase<TabItemTagHelper>.GetOutputContent(output);
+        // Should contain encoded version &lt;script&gt;...
+        Assert.False(content.Contains("<script>", StringComparison.Ordinal));
+        Assert.True(content.Contains("&lt;script&gt;", StringComparison.Ordinal));
+    }
+
+    [Theory]
+    [InlineData("<img src=x onerror=alert('xss')>", "&lt;img")]
+    [InlineData("<svg onload=alert('xss')>", "&lt;svg")]
+    [InlineData("javascript:alert('xss')", "javascript:alert")]
+    [InlineData("<iframe src='javascript:alert(1)'>", "&lt;iframe")]
+    public async Task Process_WithVariousMaliciousInputs_EncodesOutput(string maliciousInput, string expectedEncoded)
+    {
+        // Arrange
+        var tagHelper = CreateTagHelper(heading: maliciousInput);
+        var context = CreateContext();
+        var output = CreateOutputWithContent("");
+
+        // Act
+        await tagHelper.ProcessAsync(context, output);
+
+        // Assert
+        var content = TagHelperTestBase<TabItemTagHelper>.GetOutputContent(output);
+        Assert.True(content.Contains(expectedEncoded, StringComparison.Ordinal));
     }
 
     #endregion

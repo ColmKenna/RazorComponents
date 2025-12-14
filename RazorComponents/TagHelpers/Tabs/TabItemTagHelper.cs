@@ -1,4 +1,5 @@
 ﻿using System.Text;
+using System.Text.Encodings.Web;
 using System.Text.RegularExpressions;
 using Microsoft.AspNetCore.Razor.TagHelpers;
 
@@ -25,8 +26,12 @@ public class TabItemTagHelper : TagHelper
         {
             Id = GenerateIdFromHeading(Heading);
         }
+
+        // Encode the heading to prevent XSS attacks
+        var encodedHeading = HtmlEncoder.Default.Encode(Heading);
+
         sb.Append($"<input class=\"tabs-panel-input\" name=\"tabs\" type=\"radio\" id=\"{Id}\" {(Selected ? "checked=\"checked\"" : "")}/>");
-        sb.Append($"<label class=\"tab-heading\" for=\"{Id}\">{Heading}</label>");
+        sb.Append($"<label class=\"tab-heading\" for=\"{Id}\">{encodedHeading}</label>");
         sb.Append($"<div class=\"panel\"><div class=\"panel-content\">{content.GetContent()}</div></div>");
 
         output.TagName = null; // Remove the original <tab-item> tag
