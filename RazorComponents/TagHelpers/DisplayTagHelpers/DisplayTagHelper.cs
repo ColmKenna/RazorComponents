@@ -108,7 +108,13 @@ public class DisplayTagHelper : TagHelper
     /// <returns>A valid HTML id string.</returns>
     private string GenerateId(string fieldName)
     {
-        var id = fieldName.Replace('.', '_').Replace('[', '_').Replace(']', '_');
+        var id = new string(fieldName
+            .Select(c => c switch
+            {
+                '.' or '[' or ']' => '_',
+                _ => c
+            })
+            .ToArray());
         if (!string.IsNullOrEmpty(IdSuffix))
         {
             id += IdSuffix;
