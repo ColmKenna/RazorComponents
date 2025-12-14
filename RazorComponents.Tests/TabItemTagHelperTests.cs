@@ -8,9 +8,19 @@ using Xunit;
 
 namespace RazorComponents.Tests;
 
-public class TabItemTagHelperTests
+public class TabItemTagHelperTests : TagHelperTestBase<TabItemTagHelper>
 {
     #region Helper Methods
+
+    protected override TabItemTagHelper CreateTagHelper(Action<TabItemTagHelper>? configure = null)
+    {
+        var tagHelper = new TabItemTagHelper
+        {
+            Heading = "Tab Heading"
+        };
+        configure?.Invoke(tagHelper);
+        return tagHelper;
+    }
 
     private static TabItemTagHelper CreateTagHelper(
         string? id = null,
@@ -25,7 +35,7 @@ public class TabItemTagHelperTests
         };
     }
 
-    private static TagHelperContext CreateContext(
+    private static new TagHelperContext CreateContext(
         string tagName = "tab-item",
         TagHelperAttributeList? attributes = null,
         string? parentTag = "tab")
@@ -43,48 +53,6 @@ public class TabItemTagHelperTests
             allAttributes: attributes ?? new TagHelperAttributeList(),
             items: items,
             uniqueId: "test");
-    }
-
-    private static TagHelperOutput CreateOutput(
-        string tagName = "tab-item",
-        TagMode tagMode = TagMode.StartTagAndEndTag)
-    {
-        return new TagHelperOutput(
-            tagName: tagName,
-            attributes: new TagHelperAttributeList(),
-            getChildContentAsync: (useCached, encoder) =>
-                Task.FromResult<TagHelperContent>(new DefaultTagHelperContent()))
-        {
-            TagMode = tagMode
-        };
-    }
-
-    private static TagHelperOutput CreateOutputWithContent(
-        string childContent,
-        string tagName = "tab-item")
-    {
-        var output = new TagHelperOutput(
-            tagName: tagName,
-            attributes: new TagHelperAttributeList(),
-            getChildContentAsync: (useCached, encoder) =>
-            {
-                var content = new DefaultTagHelperContent();
-                content.SetHtmlContent(childContent);
-                return Task.FromResult<TagHelperContent>(content);
-            })
-        {
-            TagMode = TagMode.StartTagAndEndTag
-        };
-        return output;
-    }
-
-    private static string GetOutputContent(TagHelperOutput output)
-    {
-        using (var writer = new StringWriter())
-        {
-            output.Content.WriteTo(writer, System.Text.Encodings.Web.HtmlEncoder.Default);
-            return writer.ToString();
-        }
     }
 
     #endregion

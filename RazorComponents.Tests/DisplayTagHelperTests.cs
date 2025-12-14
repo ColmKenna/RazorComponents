@@ -11,7 +11,7 @@ using Xunit;
 
 namespace RazorComponents.Tests;
 
-public class DisplayTagHelperTests
+public class DisplayTagHelperTests : TagHelperTestBase<DisplayTagHelper>
 {
     #region Test Models
 
@@ -46,7 +46,16 @@ public class DisplayTagHelperTests
 
     #endregion
 
-    #region Helper Methods
+    protected override DisplayTagHelper CreateTagHelper(Action<DisplayTagHelper>? configure = null)
+    {
+        var tagHelper = new DisplayTagHelper
+        {
+            ViewContext = CreateViewContext(),
+            For = CreateSimpleModelExpression("Dummy", "Dummy")
+        };
+        configure?.Invoke(tagHelper);
+        return tagHelper;
+    }
 
     private static DisplayTagHelper CreateTagHelper(
         ModelExpression? forExpression = null,
@@ -67,98 +76,6 @@ public class DisplayTagHelperTests
             ViewContext = viewContext
         };
     }
-
-    private static ViewContext CreateViewContext(string? htmlFieldPrefix = null)
-    {
-        var actionContext = new Microsoft.AspNetCore.Mvc.ActionContext(
-            new Microsoft.AspNetCore.Http.DefaultHttpContext(),
-            new Microsoft.AspNetCore.Routing.RouteData(),
-            new Microsoft.AspNetCore.Mvc.Abstractions.ActionDescriptor());
-
-        var viewContext = new ViewContext(
-            actionContext,
-            Mock.Of<Microsoft.AspNetCore.Mvc.ViewEngines.IView>(),
-            new ViewDataDictionary(new EmptyModelMetadataProvider(), new ModelStateDictionary()),
-            Mock.Of<Microsoft.AspNetCore.Mvc.ViewFeatures.ITempDataDictionary>(),
-            TextWriter.Null,
-            new HtmlHelperOptions());
-
-        if (htmlFieldPrefix != null)
-        {
-            viewContext.ViewData.TemplateInfo.HtmlFieldPrefix = htmlFieldPrefix;
-        }
-
-        return viewContext;
-    }
-
-    private static TagHelperContext CreateContext(
-        string tagName = "display",
-        TagHelperAttributeList? attributes = null)
-    {
-        return new TagHelperContext(
-            tagName: tagName,
-            allAttributes: attributes ?? new TagHelperAttributeList(),
-            items: new Dictionary<object, object>(),
-            uniqueId: "test");
-    }
-
-    private static TagHelperOutput CreateOutput(
-        string tagName = "display",
-        TagMode tagMode = TagMode.StartTagAndEndTag)
-    {
-        return new TagHelperOutput(
-            tagName: tagName,
-            attributes: new TagHelperAttributeList(),
-            getChildContentAsync: (useCached, encoder) =>
-                Task.FromResult<TagHelperContent>(new DefaultTagHelperContent()))
-        {
-            TagMode = tagMode
-        };
-    }
-
-    private static string GetOutputContent(TagHelperOutput output)
-    {
-        using var writer = new StringWriter();
-        output.Content.WriteTo(writer, HtmlEncoder.Default);
-        return writer.ToString();
-    }
-
-    private static ModelExpression CreateModelExpression<TModel, TProperty>(
-        TModel model,
-        System.Linq.Expressions.Expression<Func<TModel, TProperty>> expression,
-        TProperty value)
-    {
-        var metadataProvider = new EmptyModelMetadataProvider();
-        var modelType = typeof(TModel);
-        
-        // Get property name from expression
-        var memberExpression = (System.Linq.Expressions.MemberExpression)expression.Body;
-        var propertyName = memberExpression.Member.Name;
-        
-        // Create model explorer for the property
-        var containerMetadata = metadataProvider.GetMetadataForType(modelType);
-        var propertyMetadata = metadataProvider.GetMetadataForProperty(modelType, propertyName);
-        var modelExplorer = new ModelExplorer(metadataProvider, containerMetadata, model)
-            .GetExplorerForProperty(propertyName, value);
-
-        return new ModelExpression(propertyName, modelExplorer);
-    }
-
-    private static ModelExpression CreateSimpleModelExpression(string propertyName, object? value, string? displayName = null)
-    {
-        var metadataProvider = new EmptyModelMetadataProvider();
-        var modelType = typeof(SimpleModel);
-        var containerMetadata = metadataProvider.GetMetadataForType(modelType);
-        var propertyMetadata = metadataProvider.GetMetadataForProperty(modelType, nameof(SimpleModel.Name));
-        
-        var model = new SimpleModel { Name = value?.ToString() ?? string.Empty };
-        var modelExplorer = new ModelExplorer(metadataProvider, containerMetadata, model)
-            .GetExplorerForProperty(nameof(SimpleModel.Name), value);
-
-        return new ModelExpression(propertyName, modelExplorer);
-    }
-
-    #endregion
 
     #region Constructor and Default Property Tests
 

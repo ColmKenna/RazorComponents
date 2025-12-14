@@ -7,64 +7,15 @@ using Xunit;
 
 namespace RazorComponents.Tests;
 
-public class TabTagHelperTests
+public class TabTagHelperTests : TagHelperTestBase<TabTagHelper>
 {
     #region Helper Methods
 
-    private static TabTagHelper CreateTagHelper()
+    protected override TabTagHelper CreateTagHelper(Action<TabTagHelper>? configure = null)
     {
-        return new TabTagHelper();
-    }
-
-    private static TagHelperContext CreateContext(
-        string tagName = "tab",
-        TagHelperAttributeList? attributes = null)
-    {
-        return new TagHelperContext(
-            tagName: tagName,
-            allAttributes: attributes ?? new TagHelperAttributeList(),
-            items: new Dictionary<object, object>(),
-            uniqueId: "test");
-    }
-
-    private static TagHelperOutput CreateOutput(
-        string tagName = "tab",
-        TagMode tagMode = TagMode.StartTagAndEndTag)
-    {
-        return new TagHelperOutput(
-            tagName: tagName,
-            attributes: new TagHelperAttributeList(),
-            getChildContentAsync: (useCached, encoder) =>
-                Task.FromResult<TagHelperContent>(new DefaultTagHelperContent()))
-        {
-            TagMode = tagMode
-        };
-    }
-
-    private static TagHelperOutput CreateOutputWithContent(string childContent)
-    {
-        var output = new TagHelperOutput(
-            tagName: "tab",
-            attributes: new TagHelperAttributeList(),
-            getChildContentAsync: (useCached, encoder) =>
-            {
-                var content = new DefaultTagHelperContent();
-                content.SetHtmlContent(childContent);
-                return Task.FromResult<TagHelperContent>(content);
-            })
-        {
-            TagMode = TagMode.StartTagAndEndTag
-        };
-        return output;
-    }
-
-    private static string GetOutputContent(TagHelperOutput output)
-    {
-        using (var writer = new StringWriter())
-        {
-            output.Content.WriteTo(writer, System.Text.Encodings.Web.HtmlEncoder.Default);
-            return writer.ToString();
-        }
+        var tagHelper = new TabTagHelper();
+        configure?.Invoke(tagHelper);
+        return tagHelper;
     }
 
     #endregion

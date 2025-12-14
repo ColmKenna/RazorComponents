@@ -12,7 +12,7 @@ using Xunit;
 
 namespace RazorComponents.Tests;
 
-public partial class EditArrayTagHelperTests
+public partial class EditArrayTagHelperTests : TagHelperTestBase<EditArrayTagHelper>
 {
     #region Test Models
     
@@ -31,6 +31,20 @@ public partial class EditArrayTagHelperTests
     #endregion
 
     #region Helper Methods
+
+    protected override EditArrayTagHelper CreateTagHelper(Action<EditArrayTagHelper>? configure = null)
+    {
+        var htmlHelper = CreateMockHtmlHelper().Object;
+        var tagHelper = new EditArrayTagHelper(htmlHelper)
+        {
+            ViewName = "EditorTemplate",
+            Items = new List<object>(),
+            ViewContext = CreateViewContext(),
+            Id = "test"
+        };
+        configure?.Invoke(tagHelper);
+        return tagHelper;
+    }
 
     private static EditArrayTagHelper CreateTagHelper(
         IHtmlHelper? htmlHelper = null,
@@ -69,63 +83,6 @@ public partial class EditArrayTagHelperTests
             .Setup(h => h.Contextualize(It.IsAny<ViewContext>()));
 
         return mockHtmlHelper;
-    }
-
-    private static ViewContext CreateViewContext(string? htmlFieldPrefix = null)
-    {
-        var actionContext = new Microsoft.AspNetCore.Mvc.ActionContext(
-            new Microsoft.AspNetCore.Http.DefaultHttpContext(),
-            new Microsoft.AspNetCore.Routing.RouteData(),
-            new Microsoft.AspNetCore.Mvc.Abstractions.ActionDescriptor());
-
-        var viewContext = new ViewContext(
-            actionContext,
-            Mock.Of<Microsoft.AspNetCore.Mvc.ViewEngines.IView>(),
-            new ViewDataDictionary(new EmptyModelMetadataProvider(), new ModelStateDictionary()),
-            Mock.Of<Microsoft.AspNetCore.Mvc.ViewFeatures.ITempDataDictionary>(),
-            TextWriter.Null,
-            new HtmlHelperOptions());
-
-        if (htmlFieldPrefix != null)
-        {
-            viewContext.ViewData.TemplateInfo.HtmlFieldPrefix = htmlFieldPrefix;
-        }
-
-        return viewContext;
-    }
-
-    private static TagHelperContext CreateContext(
-        string tagName = "edit-array",
-        TagHelperAttributeList? attributes = null)
-    {
-        return new TagHelperContext(
-            tagName: tagName,
-            allAttributes: attributes ?? new TagHelperAttributeList(),
-            items: new Dictionary<object, object>(),
-            uniqueId: "test");
-    }
-
-    private static TagHelperOutput CreateOutput(
-        string tagName = "edit-array",
-        TagMode tagMode = TagMode.StartTagAndEndTag)
-    {
-        return new TagHelperOutput(
-            tagName: tagName,
-            attributes: new TagHelperAttributeList(),
-            getChildContentAsync: (useCached, encoder) =>
-                Task.FromResult<TagHelperContent>(new DefaultTagHelperContent()))
-        {
-            TagMode = tagMode
-        };
-    }
-
-    private static string GetOutputContent(TagHelperOutput output)
-    {
-        using (var writer = new StringWriter())
-        {
-            output.Content.WriteTo(writer, HtmlEncoder.Default);
-            return writer.ToString();
-        }
     }
 
     #endregion
