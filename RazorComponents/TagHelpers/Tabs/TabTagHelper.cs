@@ -29,10 +29,10 @@ public class TabTagHelper : TagHelper
             {
                 // Use context-based selection (preferred method)
                 var tabInputPattern = $"<input class=\"tabs-panel-input\" name=\"tabs\" type=\"radio\" id=\"{selectedTabId}\"";
-                var tabInputIndex = content.IndexOf(tabInputPattern);
+                var tabInputIndex = content.IndexOf(tabInputPattern, StringComparison.Ordinal);
                 if (tabInputIndex != -1)
                 {
-                    var insertIndex = content.IndexOf("/>", tabInputIndex);
+                    var insertIndex = content.IndexOf("/>", tabInputIndex, StringComparison.Ordinal);
                     if (insertIndex != -1)
                     {
                         content = content.Insert(insertIndex, " checked=\"checked\"");
@@ -43,10 +43,10 @@ public class TabTagHelper : TagHelper
             {
                 // Fallback to old HTML parsing method for backward compatibility
                 // (when no TabItems registered, e.g., in tests with raw HTML)
-                var firstTabItemIndex = content.IndexOf("<input class=\"tabs-panel-input\"");
+                var firstTabItemIndex = content.IndexOf("<input class=\"tabs-panel-input\"", StringComparison.Ordinal);
                 if (firstTabItemIndex != -1)
                 {
-                    var insertIndex = content.IndexOf("/>", firstTabItemIndex);
+                    var insertIndex = content.IndexOf("/>", firstTabItemIndex, StringComparison.Ordinal);
                     content = content.Insert(insertIndex, "checked=\"checked\"");
                 }
             }
