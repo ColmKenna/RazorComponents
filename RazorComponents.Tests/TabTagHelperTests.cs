@@ -450,4 +450,40 @@ public class TabTagHelperTests : TagHelperTestBase<TabTagHelper>
     }
 
     #endregion
+
+    #region TabContext Tests (Parent-Child Communication)
+
+    [Fact]
+    public async Task Process_SetsTabContext_InScope()
+    {
+        // Arrange
+        var tagHelper = CreateTagHelper();
+        var context = CreateContext();
+        var output = CreateOutputWithContent("");
+
+        // Act
+        await tagHelper.ProcessAsync(context, output);
+
+        // Assert
+        Assert.True(context.Items.ContainsKey(typeof(TabContext)));
+        Assert.IsType<TabContext>(context.Items[typeof(TabContext)]);
+    }
+
+    [Fact]
+    public async Task Process_TabContext_IsAvailableToChildTagHelpers()
+    {
+        // Arrange
+        var tagHelper = CreateTagHelper();
+        var context = CreateContext();
+        var output = CreateOutputWithContent("");
+
+        // Act - Parent creates context
+        await tagHelper.ProcessAsync(context, output);
+
+        // Assert - Context should be in Items for child tag helpers to access
+        var tabContext = context.Items[typeof(TabContext)] as TabContext;
+        Assert.NotNull(tabContext);
+    }
+
+    #endregion
 }

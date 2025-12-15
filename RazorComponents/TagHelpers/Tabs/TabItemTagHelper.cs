@@ -27,6 +27,16 @@ public class TabItemTagHelper : TagHelper
             Id = GenerateIdFromHeading(Heading);
         }
 
+        // Register this tab with the parent TabContext if it exists
+        if (context.Items.TryGetValue(typeof(TabContext), out var contextObj) && contextObj is TabContext tabContext)
+        {
+            tabContext.RegisterTab(new TabItemInfo
+            {
+                Id = Id,
+                IsSelected = Selected
+            });
+        }
+
         // Encode the heading to prevent XSS attacks
         var encodedHeading = HtmlEncoder.Default.Encode(Heading);
 

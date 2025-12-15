@@ -776,4 +776,66 @@ public class TabItemTagHelperTests : TagHelperTestBase<TabItemTagHelper>
     }
 
     #endregion
+
+    #region TabContext Integration Tests
+
+    [Fact]
+    public async Task TabItem_RegistersSelf_WithParentContext()
+    {
+        // Arrange
+        var tagHelper = CreateTagHelper(id: "test-tab", heading: "Test");
+
+        // Create a context with TabContext already set (simulating parent TabTagHelper)
+        var context = CreateContext();
+        var tabContext = new TabContext();
+        context.Items[typeof(TabContext)] = tabContext;
+
+        var output = CreateOutputWithContent("");
+
+        // Act
+        await tagHelper.ProcessAsync(context, output);
+
+        // Assert
+        Assert.Equal(1, tabContext.Tabs.Count);
+        Assert.Equal("test-tab", tabContext.Tabs[0].Id);
+        Assert.False(tabContext.Tabs[0].IsSelected);
+    }
+
+    [Fact]
+    public async Task TabItem_WithSelected_RegistersAsSelected()
+    {
+        // Arrange
+        var tagHelper = CreateTagHelper(id: "selected-tab", selected: true, heading: "Selected");
+
+        var context = CreateContext();
+        var tabContext = new TabContext();
+        context.Items[typeof(TabContext)] = tabContext;
+
+        var output = CreateOutputWithContent("");
+
+        // Act
+        await tagHelper.ProcessAsync(context, output);
+
+        // Assert
+        Assert.Equal(1, tabContext.Tabs.Count);
+        Assert.True(tabContext.Tabs[0].IsSelected);
+    }
+
+    [Fact]
+    public async Task TabItem_WithoutParentContext_StillWorks()
+    {
+        // Arrange
+        var tagHelper = CreateTagHelper(id: "standalone-tab", heading: "Standalone");
+        var context = CreateContext();
+        var output = CreateOutputWithContent("");
+
+        // Act & Assert - Should not throw
+        await tagHelper.ProcessAsync(context, output);
+
+        // Should still generate valid output
+        var content = TagHelperTestBase<TabItemTagHelper>.GetOutputContent(output);
+        Assert.Contains("id=\"standalone-tab\"", content);
+    }
+
+    #endregion
 }
