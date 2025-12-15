@@ -130,9 +130,9 @@ public class TabTagHelperTests : TagHelperTestBase<TabTagHelper>
         var outputContent = GetOutputContent(output);
         Assert.Contains("id=\"tab1\" checked=\"checked\"", outputContent);
         // Second and third tabs should not have checked attribute
-        var beforeSecondTab = outputContent.Substring(0, outputContent.IndexOf("id=\"tab2\""));
+        var beforeSecondTab = outputContent.Substring(0, outputContent.IndexOf("id=\"tab2\"", StringComparison.Ordinal));
         var afterFirstTab = outputContent.Substring(beforeSecondTab.Length);
-        var beforeThirdTab = afterFirstTab.Substring(0, afterFirstTab.IndexOf("id=\"tab3\""));
+        var beforeThirdTab = afterFirstTab.Substring(0, afterFirstTab.IndexOf("id=\"tab3\"", StringComparison.Ordinal));
         Assert.DoesNotContain("id=\"tab2\" checked=\"checked\"", beforeThirdTab);
     }
 
@@ -258,8 +258,8 @@ public class TabTagHelperTests : TagHelperTestBase<TabTagHelper>
         var outputContent = GetOutputContent(output);
         // Should find and modify the first occurrence
         Assert.Contains("checked=\"checked\"", outputContent);
-        var firstInputIndex = outputContent.IndexOf("id=\"first\"");
-        var checkedIndex = outputContent.IndexOf("checked=\"checked\"");
+        var firstInputIndex = outputContent.IndexOf("id=\"first\"", StringComparison.Ordinal);
+        var checkedIndex = outputContent.IndexOf("checked=\"checked\"", StringComparison.Ordinal);
         Assert.True(firstInputIndex < checkedIndex);
     }
 

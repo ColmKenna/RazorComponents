@@ -687,9 +687,9 @@ public class TabItemTagHelperTests : TagHelperTestBase<TabItemTagHelper>
 
         // Assert
         var content = GetOutputContent(output);
-        var inputIndex = content.IndexOf("<input");
-        var labelIndex = content.IndexOf("<label");
-        var panelIndex = content.IndexOf("<div class=\"panel\"");
+        var inputIndex = content.IndexOf("<input", StringComparison.Ordinal);
+        var labelIndex = content.IndexOf("<label", StringComparison.Ordinal);
+        var panelIndex = content.IndexOf("<div class=\"panel\"", StringComparison.Ordinal);
 
         // Input should come before label which should come before panel
         Assert.True(inputIndex < labelIndex && labelIndex < panelIndex);

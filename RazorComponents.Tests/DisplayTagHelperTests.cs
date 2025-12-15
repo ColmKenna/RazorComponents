@@ -790,8 +790,8 @@ public class DisplayTagHelperTests : TagHelperTestBase<DisplayTagHelper>
 
         // Assert
         var content = GetOutputContent(output);
-        var labelIndex = content.IndexOf("<label");
-        var divIndex = content.IndexOf("<div");
+        var labelIndex = content.IndexOf("<label", StringComparison.Ordinal);
+        var divIndex = content.IndexOf("<div", StringComparison.Ordinal);
         Assert.True(labelIndex < divIndex, "Label should appear before div");
     }
 
