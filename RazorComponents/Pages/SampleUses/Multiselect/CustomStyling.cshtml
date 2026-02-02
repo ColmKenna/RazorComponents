@@ -1,0 +1,154 @@
+@page
+@model RazorComponents.Pages.SampleUses.Multiselect.CustomStylingModel
+@addTagHelper *, RazorComponents
+@{
+    ViewData["Title"] = "Multiselect Checkbox - Custom Styling";
+}
+
+<style>
+    /* Theme Variables - Override these in your site's theme */
+    :root {
+        /* Gradient theme */
+        --custom-gradient-start: #667eea;
+        --custom-gradient-end: #764ba2;
+        
+        /* Colors */
+        --custom-text-color: #ffffff;
+        --custom-option-bg: rgba(255, 255, 255, 0.2);
+        --custom-option-hover-bg: rgba(255, 255, 255, 0.3);
+        --custom-option-checked-bg: rgba(255, 255, 255, 0.4);
+        --custom-option-checked-shadow: rgba(255, 255, 255, 0.6);
+        --custom-pill-bg: rgba(255, 255, 255, 0.2);
+        --custom-pill-checked-bg: rgba(255, 255, 255, 0.5);
+        
+        /* Spacing */
+        --custom-group-padding: 1.5rem;
+        --custom-group-radius: 12px;
+        --custom-option-radius: 8px;
+        --custom-grid-gap: 0.75rem;
+        --custom-option-padding: 0.75rem;
+        --custom-pill-padding: 0.25rem 0.5rem;
+        --custom-pill-radius: 4px;
+        
+        /* Typography */
+        --custom-label-size: 1.25rem;
+        --custom-pill-size: 0.875rem;
+    }
+    
+    .custom-group {
+        background: linear-gradient(135deg, var(--custom-gradient-start) 0%, var(--custom-gradient-end) 100%);
+        padding: var(--custom-group-padding);
+        border-radius: var(--custom-group-radius);
+        color: var(--custom-text-color);
+    }
+    
+    .custom-label {
+        font-size: var(--custom-label-size);
+        font-weight: bold;
+        margin-bottom: 0.5rem;
+    }
+    
+    .custom-description {
+        opacity: 0.9;
+        margin-bottom: 1rem;
+    }
+    
+    .custom-fieldset {
+        border: none;
+        padding: 0;
+    }
+    
+    .custom-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+        gap: var(--custom-grid-gap);
+    }
+    
+    .custom-option {
+        background: var(--custom-option-bg);
+        border-radius: var(--custom-option-radius);
+        transition: all 0.2s ease;
+    }
+    
+    .custom-option:hover {
+        background: var(--custom-option-hover-bg);
+        transform: translateY(-2px);
+    }
+    
+    .custom-option:has(.custom-input:checked) {
+        background: var(--custom-option-checked-bg);
+        box-shadow: 0 0 0 2px var(--custom-option-checked-shadow);
+    }
+    
+    .custom-input {
+        position: absolute;
+        opacity: 0;
+        width: 0;
+        height: 0;
+        pointer-events: none;
+    }
+    
+    .custom-checkbox-label {
+        display: flex;
+        align-items: center;
+        cursor: pointer;
+        padding: var(--custom-option-padding);
+        margin: 0;
+        width: 100%;
+    }
+    
+    .custom-pill {
+        background: var(--custom-pill-bg);
+        padding: var(--custom-pill-padding);
+        border-radius: var(--custom-pill-radius);
+        font-size: var(--custom-pill-size);
+    }
+    
+    .custom-option:has(.custom-input:checked) .custom-pill {
+        background: var(--custom-pill-checked-bg);
+        font-weight: 600;
+    }
+</style>
+
+<h1>Multiselect Checkbox - Custom Styling</h1>
+<p>This demonstrates custom CSS classes applied to the <code>&lt;multiselect-checkbox&gt;</code> tag helper.</p>
+
+<div class="mb-4">
+    <multiselect-checkbox 
+        title="Select Your Favorite Colors"
+        description="Pick all the colors you like from the list below."
+        multiselect-for="SelectedColors"
+        multiselect-items="AvailableColors"
+        id-prefix="color-checkbox"
+        fieldset-id="colors-fieldset"
+        group-class="custom-group"
+        label-class="custom-label"
+        description-class="custom-description"
+        fieldset-class="custom-fieldset"
+        grid-class="custom-grid"
+        option-class="custom-option"
+        input-class="custom-input"
+        checkbox-label-class="custom-checkbox-label"
+        pill-class="custom-pill" />
+</div>
+
+<h3>Code Example</h3>
+<pre><code>&lt;multiselect-checkbox 
+    title="Select Your Favorite Colors"
+    description="Pick all the colors you like."
+    multiselect-for="SelectedColors"
+    multiselect-items="AvailableColors"
+    group-class="custom-group"
+    label-class="custom-label"
+    description-class="custom-description"
+    fieldset-class="custom-fieldset"
+    grid-class="custom-grid"
+    option-class="custom-option"
+    input-class="custom-input"
+    checkbox-label-class="custom-checkbox-label"
+    pill-class="custom-pill" /&gt;</code></pre>
+
+<p class="mt-3">
+    <a asp-page="BasicUsage" class="btn btn-secondary">← Basic Usage</a>
+    <a asp-page="Themes" class="btn btn-primary">Themes →</a>
+</p>

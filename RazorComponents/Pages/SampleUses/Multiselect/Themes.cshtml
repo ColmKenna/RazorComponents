@@ -1,0 +1,242 @@
+@page
+@model RazorComponents.Pages.SampleUses.Multiselect.ThemesModel
+@addTagHelper *, RazorComponents
+@{
+    ViewData["Title"] = "Multiselect Checkbox - Themes";
+}
+
+<link rel="stylesheet" href="~/components/Multiselect/multiselect.css" />
+
+<style>
+    /* =========================================================================
+       Theme Examples
+       =========================================================================
+       The multiselect component uses CSS custom properties (variables) prefixed
+       with --ms-* for theming. Override these variables to create custom themes.
+       ========================================================================= */
+
+    /* Purple/Violet Theme */
+    .theme-purple {
+        --ms-primary-color: #7c3aed;
+        --ms-primary-color-hover: #6d28d9;
+        --ms-primary-color-active: #5b21b6;
+        --ms-card-bg: #faf5ff;
+        --ms-surface-bg: #f3e8ff;
+        --ms-input-border: #c4b5fd;
+        --ms-input-border-hover: #a78bfa;
+        --ms-focus-border: #a78bfa;
+        --ms-focus-shadow: 0 0 0 0.25rem rgba(124, 58, 237, 0.25);
+        --ms-option-pill-color: #5b21b6;
+        --ms-option-pill-active-bg: rgba(124, 58, 237, 0.15);
+        --ms-option-pill-active-color: #7c3aed;
+    }
+
+    /* Teal/Cyan Theme */
+    .theme-teal {
+        --ms-primary-color: #0d9488;
+        --ms-primary-color-hover: #0f766e;
+        --ms-primary-color-active: #115e59;
+        --ms-card-bg: #f0fdfa;
+        --ms-surface-bg: #ccfbf1;
+        --ms-input-border: #5eead4;
+        --ms-input-border-hover: #2dd4bf;
+        --ms-focus-border: #2dd4bf;
+        --ms-focus-shadow: 0 0 0 0.25rem rgba(13, 148, 136, 0.25);
+        --ms-option-pill-color: #115e59;
+        --ms-option-pill-active-bg: rgba(13, 148, 136, 0.15);
+        --ms-option-pill-active-color: #0d9488;
+    }
+
+    /* Rose/Pink Theme */
+    .theme-rose {
+        --ms-primary-color: #e11d48;
+        --ms-primary-color-hover: #be123c;
+        --ms-primary-color-active: #9f1239;
+        --ms-card-bg: #fff1f2;
+        --ms-surface-bg: #ffe4e6;
+        --ms-input-border: #fda4af;
+        --ms-input-border-hover: #fb7185;
+        --ms-focus-border: #fb7185;
+        --ms-focus-shadow: 0 0 0 0.25rem rgba(225, 29, 72, 0.25);
+        --ms-option-pill-color: #9f1239;
+        --ms-option-pill-active-bg: rgba(225, 29, 72, 0.15);
+        --ms-option-pill-active-color: #e11d48;
+    }
+
+    /* Dark Theme (manual override) */
+    .theme-dark {
+        --ms-primary-color: #3b82f6;
+        --ms-primary-color-hover: #60a5fa;
+        --ms-primary-color-active: #93c5fd;
+        --ms-card-bg: #1e293b;
+        --ms-surface-bg: #334155;
+        --ms-form-bg: #475569;
+        --ms-text-color: #f1f5f9;
+        --ms-text-light: #ffffff;
+        --ms-text-muted: #94a3b8;
+        --ms-input-border: #475569;
+        --ms-input-border-hover: #60a5fa;
+        --ms-focus-border: #60a5fa;
+        --ms-focus-shadow: 0 0 0 0.25rem rgba(59, 130, 246, 0.35);
+        --ms-option-pill-color: #e2e8f0;
+        --ms-option-pill-active-bg: rgba(59, 130, 246, 0.25);
+        --ms-option-pill-active-color: #93c5fd;
+    }
+
+    /* Amber/Orange Theme */
+    .theme-amber {
+        --ms-primary-color: #d97706;
+        --ms-primary-color-hover: #b45309;
+        --ms-primary-color-active: #92400e;
+        --ms-card-bg: #fffbeb;
+        --ms-surface-bg: #fef3c7;
+        --ms-input-border: #fcd34d;
+        --ms-input-border-hover: #fbbf24;
+        --ms-focus-border: #fbbf24;
+        --ms-focus-shadow: 0 0 0 0.25rem rgba(217, 119, 6, 0.25);
+        --ms-option-pill-color: #92400e;
+        --ms-option-pill-active-bg: rgba(217, 119, 6, 0.15);
+        --ms-option-pill-active-color: #d97706;
+    }
+
+    /* Theme card styling */
+    .theme-card {
+        padding: 1.5rem;
+        border-radius: 0.5rem;
+        margin-bottom: 2rem;
+    }
+
+    .theme-card h3 {
+        margin-top: 0;
+        margin-bottom: 1rem;
+    }
+
+    .theme-dark.theme-card {
+        color: var(--ms-text-color);
+    }
+
+    .theme-dark.theme-card h3 {
+        color: var(--ms-text-light);
+    }
+</style>
+
+<h1>Multiselect Checkbox - Themes</h1>
+<p>
+    The multiselect component supports theming via CSS custom properties (variables).
+    Override the <code>--ms-*</code> variables to create custom color schemes.
+</p>
+
+<h2>Default Theme</h2>
+<p>Uses the built-in blue theme with automatic dark mode support via <code>prefers-color-scheme</code>.</p>
+<div class="mb-4">
+    <multiselect-checkbox 
+        title="Select Fruits"
+        description="Using default theme styling."
+        multiselect-for="SelectedFruits"
+        multiselect-items="AvailableFruits"
+        id-prefix="default-theme" />
+</div>
+
+<hr />
+
+<h2>Purple Theme</h2>
+<div class="theme-purple theme-card" style="background: var(--ms-card-bg);">
+    <multiselect-checkbox 
+        title="Select Fruits"
+        description="Purple/violet color scheme."
+        multiselect-for="SelectedFruits"
+        multiselect-items="AvailableFruits"
+        id-prefix="purple-theme" />
+</div>
+
+<h2>Teal Theme</h2>
+<div class="theme-teal theme-card" style="background: var(--ms-card-bg);">
+    <multiselect-checkbox 
+        title="Select Fruits"
+        description="Teal/cyan color scheme."
+        multiselect-for="SelectedFruits"
+        multiselect-items="AvailableFruits"
+        id-prefix="teal-theme" />
+</div>
+
+<h2>Rose Theme</h2>
+<div class="theme-rose theme-card" style="background: var(--ms-card-bg);">
+    <multiselect-checkbox 
+        title="Select Fruits"
+        description="Rose/pink color scheme."
+        multiselect-for="SelectedFruits"
+        multiselect-items="AvailableFruits"
+        id-prefix="rose-theme" />
+</div>
+
+<h2>Amber Theme</h2>
+<div class="theme-amber theme-card" style="background: var(--ms-card-bg);">
+    <multiselect-checkbox 
+        title="Select Fruits"
+        description="Amber/orange color scheme."
+        multiselect-for="SelectedFruits"
+        multiselect-items="AvailableFruits"
+        id-prefix="amber-theme" />
+</div>
+
+<h2>Dark Theme</h2>
+<div class="theme-dark theme-card" style="background: var(--ms-card-bg);">
+    <multiselect-checkbox 
+        title="Select Fruits"
+        description="Dark mode color scheme."
+        multiselect-for="SelectedFruits"
+        multiselect-items="AvailableFruits"
+        id-prefix="dark-theme" />
+</div>
+
+<hr />
+
+<h2>Available CSS Variables</h2>
+<p>Override these variables in your theme class to customize the multiselect component:</p>
+
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            <th>Variable</th>
+            <th>Description</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr><td><code>--ms-primary-color</code></td><td>Primary accent color for selections and borders</td></tr>
+        <tr><td><code>--ms-card-bg</code></td><td>Background color for option cards</td></tr>
+        <tr><td><code>--ms-surface-bg</code></td><td>Background color on hover states</td></tr>
+        <tr><td><code>--ms-input-border</code></td><td>Border color for option cards</td></tr>
+        <tr><td><code>--ms-focus-border</code></td><td>Border color when focused</td></tr>
+        <tr><td><code>--ms-focus-shadow</code></td><td>Box shadow for focus states</td></tr>
+        <tr><td><code>--ms-option-pill-color</code></td><td>Text color for option labels</td></tr>
+        <tr><td><code>--ms-option-pill-active-bg</code></td><td>Background color when checked</td></tr>
+        <tr><td><code>--ms-option-pill-active-color</code></td><td>Text color when checked</td></tr>
+        <tr><td><code>--ms-grid-gap</code></td><td>Gap between grid items</td></tr>
+        <tr><td><code>--ms-border-radius</code></td><td>Border radius for option cards</td></tr>
+        <tr><td><code>--ms-font-size</code></td><td>Font size for pill text</td></tr>
+        <tr><td><code>--ms-transition-duration</code></td><td>Duration for hover/state transitions</td></tr>
+    </tbody>
+</table>
+
+<h3>Example Theme Definition</h3>
+<pre><code>.my-custom-theme {
+    --ms-primary-color: #7c3aed;
+    --ms-card-bg: #faf5ff;
+    --ms-surface-bg: #f3e8ff;
+    --ms-input-border: #c4b5fd;
+    --ms-focus-border: #a78bfa;
+    --ms-focus-shadow: 0 0 0 0.25rem rgba(124, 58, 237, 0.25);
+    --ms-option-pill-color: #5b21b6;
+    --ms-option-pill-active-bg: rgba(124, 58, 237, 0.15);
+    --ms-option-pill-active-color: #7c3aed;
+}
+
+/* Usage: wrap the component */
+&lt;div class="my-custom-theme"&gt;
+    &lt;multiselect-checkbox ... /&gt;
+&lt;/div&gt;</code></pre>
+
+<p class="mt-3">
+    <a asp-page="CustomStyling" class="btn btn-secondary">← Custom Styling</a>
+    <a asp-page="BasicUsage" class="btn btn-primary">Basic Usage →</a>
+</p>

@@ -1,0 +1,274 @@
+/* ==========================================================================
+   Multiselect Component Theme Variables
+   ==========================================================================
+   Override these CSS custom properties to theme the multiselect component.
+   Variables can be set at :root level for global theming, or scoped to a
+   container element for localized theming.
+   ========================================================================== */
+
+:root {
+    /* Primary colors */
+    --ms-primary-color: #0d6efd;
+    --ms-primary-color-hover: #0a58ca;
+    --ms-primary-color-active: #0a53be;
+
+    /* Background colors */
+    --ms-card-bg: #ffffff;
+    --ms-surface-bg: #f8f9fa;
+    --ms-form-bg: #e9ecef;
+
+    /* Text colors */
+    --ms-text-color: #212529;
+    --ms-text-light: #ffffff;
+    --ms-text-muted: #6c757d;
+
+    /* Border colors */
+    --ms-input-border: #ced4da;
+    --ms-input-border-hover: #86b7fe;
+
+    /* Focus styles */
+    --ms-focus-border: #86b7fe;
+    --ms-focus-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+
+    /* Option/pill styles */
+    --ms-option-pill-color: #212529;
+    --ms-option-pill-active-bg: rgba(13, 110, 253, 0.15);
+    --ms-option-pill-active-color: #0d6efd;
+
+    /* Spacing */
+    --ms-grid-gap: 1rem;
+    --ms-grid-min-width: 200px;
+    --ms-grid-min-width-md: 220px;
+    --ms-grid-min-width-lg: 240px;
+    --ms-border-radius: 0.375rem;
+    --ms-border-radius-sm: 0.25rem;
+    --ms-label-padding: 0.75rem;
+    --ms-pill-padding-y: 0.375rem;
+    --ms-pill-padding-x: 0.75rem;
+
+    /* Typography */
+    --ms-font-size: 0.9375rem;
+    --ms-font-size-sm: 0.875rem;
+    --ms-font-weight: 500;
+
+    /* Transitions */
+    --ms-transition-duration: 0.2s;
+    --ms-transition-timing: ease-in-out;
+}
+
+/* Dark theme support */
+@media (prefers-color-scheme: dark) {
+    :root {
+        --ms-primary-color: #3d8bfd;
+        --ms-primary-color-hover: #6ea8fe;
+        --ms-primary-color-active: #8bb9fe;
+
+        --ms-card-bg: #212529;
+        --ms-surface-bg: #2b3035;
+        --ms-form-bg: #343a40;
+
+        --ms-text-color: #e9ecef;
+        --ms-text-light: #ffffff;
+        --ms-text-muted: #adb5bd;
+
+        --ms-input-border: #495057;
+        --ms-input-border-hover: #6ea8fe;
+
+        --ms-focus-border: #6ea8fe;
+        --ms-focus-shadow: 0 0 0 0.25rem rgba(61, 139, 253, 0.25);
+
+        --ms-option-pill-color: #e9ecef;
+        --ms-option-pill-active-bg: rgba(61, 139, 253, 0.2);
+        --ms-option-pill-active-color: #6ea8fe;
+    }
+}
+
+/* ==========================================================================
+   Component Styles
+   ========================================================================== */
+
+.multiselect-fieldset {
+    border: none;
+    padding: 0;
+    margin: 0;
+}
+
+.multiselect-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(var(--ms-grid-min-width), 1fr));
+    gap: var(--ms-grid-gap);
+    margin: var(--ms-grid-gap) 0;
+}
+
+@media (min-width: 768px) {
+    .multiselect-grid {
+        grid-template-columns: repeat(auto-fill, minmax(var(--ms-grid-min-width-md), 1fr));
+    }
+}
+
+@media (min-width: 1024px) {
+    .multiselect-grid {
+        grid-template-columns: repeat(auto-fill, minmax(var(--ms-grid-min-width-lg), 1fr));
+    }
+}
+
+@media (max-width: 575.98px) {
+    .multiselect-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+.multiselect-option {
+    display: flex;
+    align-items: center;
+    border: 1px solid var(--ms-input-border);
+    border-radius: var(--ms-border-radius);
+    background-color: var(--ms-card-bg);
+    transition: all var(--ms-transition-duration) var(--ms-transition-timing);
+}
+
+.multiselect-option:hover {
+    border-color: var(--ms-primary-color);
+    background-color: var(--ms-surface-bg);
+}
+
+.multiselect-option:focus-within {
+    outline: 2px solid var(--ms-focus-border);
+    outline-offset: 2px;
+}
+
+.multiselect-option:has(.multiselect-input:checked) {
+    background-color: var(--ms-option-pill-active-bg);
+    border-color: var(--ms-primary-color);
+}
+
+.multiselect-option:has(.multiselect-input:checked) .multiselect-pill {
+    color: var(--ms-option-pill-active-color);
+}
+
+@media (prefers-contrast: more) {
+    .multiselect-option {
+        border-width: 2px;
+    }
+}
+
+@media print {
+    .multiselect-option {
+        page-break-inside: avoid;
+        margin-bottom: 0.5rem;
+    }
+}
+
+.multiselect-input {
+    appearance: none;
+    -webkit-appearance: none;
+    position: absolute;
+    opacity: 0;
+    width: 1.25rem;
+    height: 1.25rem;
+    margin: 0;
+    margin-right: 0.75rem;
+    cursor: pointer;
+    border: 1px solid var(--ms-input-border);
+    border-radius: var(--ms-border-radius-sm);
+    background-color: var(--ms-card-bg);
+    transition: all var(--ms-transition-duration) var(--ms-transition-timing);
+    flex-shrink: 0;
+}
+
+.multiselect-input:checked {
+    background-color: var(--ms-primary-color);
+    border-color: var(--ms-primary-color);
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'%3e%3cpath fill='none' stroke='%23fff' stroke-linecap='round' stroke-linejoin='round' stroke-width='3' d='M6 10l3 3l6-6'/%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: 100%;
+}
+
+.multiselect-input:focus {
+    outline: 0;
+    border-color: var(--ms-focus-border);
+    box-shadow: var(--ms-focus-shadow);
+}
+
+.multiselect-input:focus-visible {
+    outline: 2px solid var(--ms-focus-border);
+    outline-offset: 2px;
+}
+
+.multiselect-input:disabled {
+    background-color: var(--ms-form-bg);
+    border-color: var(--ms-input-border);
+    cursor: not-allowed;
+    opacity: 0.65;
+}
+
+@media (max-width: 575.98px) {
+    .multiselect-input {
+        width: 1.125rem;
+        height: 1.125rem;
+        margin-right: 0.625rem;
+    }
+}
+
+@media (prefers-contrast: more) {
+    .multiselect-input {
+        border-width: 2px;
+    }
+}
+
+@media print {
+    .multiselect-input {
+        margin-right: 0.5rem;
+    }
+}
+
+.multiselect-label {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    margin: 0;
+    flex-grow: 1;
+    min-width: 0;
+    padding: var(--ms-label-padding);
+}
+
+@media (max-width: 575.98px) {
+    .multiselect-label {
+        padding: 0.625rem;
+    }
+}
+
+.multiselect-pill {
+    display: inline-block;
+    padding: var(--ms-pill-padding-y) var(--ms-pill-padding-x);
+    border-radius: var(--ms-border-radius-sm);
+    font-size: var(--ms-font-size);
+    font-weight: var(--ms-font-weight);
+    word-break: break-word;
+    overflow-wrap: break-word;
+    line-height: 1.4;
+    color: var(--ms-option-pill-color);
+}
+
+@media (max-width: 575.98px) {
+    .multiselect-pill {
+        font-size: var(--ms-font-size-sm);
+        padding: 0.3125rem 0.625rem;
+    }
+}
+
+@media (prefers-contrast: more) {
+    .multiselect-pill {
+        font-weight: 600;
+    }
+}
+
+@media print {
+    .multiselect-grid {
+        display: block;
+        page-break-inside: avoid;
+    }
+}
+
+/*# sourceMappingURL=multiselect.css.map */

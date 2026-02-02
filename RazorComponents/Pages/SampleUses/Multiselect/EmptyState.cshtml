@@ -1,0 +1,43 @@
+@page
+@model RazorComponents.Pages.SampleUses.Multiselect.EmptyStateModel
+@addTagHelper *, RazorComponents
+@{
+    ViewData["Title"] = "Multiselect Checkbox - Empty State";
+}
+
+<h1>Multiselect Checkbox - Empty State</h1>
+<p>This demonstrates how the tag helper handles an empty items collection.</p>
+
+<h3>Default Empty Message</h3>
+<div class="card p-3 mb-4">
+    <multiselect-checkbox 
+        title="Select Items"
+        description="There are no items available in this example."
+        multiselect-for="SelectedItems"
+        multiselect-items="AvailableItems"
+        id-prefix="item-checkbox" />
+</div>
+
+<h3>Custom Empty Message</h3>
+<div class="card p-3 mb-4">
+    <multiselect-checkbox 
+        title="Select Products"
+        description="Choose products from the catalog."
+        multiselect-for="SelectedItems"
+        multiselect-items="AvailableItems"
+        id-prefix="product-checkbox"
+        empty-message="No products found. Please check back later or contact support." />
+</div>
+
+<h3>Code Example</h3>
+<pre><code>&lt;multiselect-checkbox 
+    title="Select Products"
+    description="Choose products from the catalog."
+    multiselect-for="SelectedItems"
+    multiselect-items="AvailableItems"
+    empty-message="No products found. Please check back later or contact support." /&gt;</code></pre>
+
+<p class="mt-3">
+    <a asp-page="CustomStyling" class="btn btn-secondary">← Custom Styling</a>
+    <a asp-page="/Index" class="btn btn-primary">Back to Home</a>
+</p>
