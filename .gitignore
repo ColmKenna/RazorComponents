@@ -401,3 +401,6 @@ FodyWeavers.xsd
 
 # JetBrains IDE project folder
 .idea/
+
+# Coverage report folder
+coverage-report/
