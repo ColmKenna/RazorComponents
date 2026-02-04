@@ -42,6 +42,7 @@ namespace RazorComponents.TagHelpers.Multiselect;
 public class MultiselectCheckboxTagHelper : TagHelper
 {
     private static readonly HtmlEncoder Encoder = HtmlEncoder.Default;
+    private const string DefaultIdPrefix = "checkbox";
 
     #region Content Properties
 
@@ -222,7 +223,8 @@ public class MultiselectCheckboxTagHelper : TagHelper
     {
         if (!string.IsNullOrWhiteSpace(Title))
         {
-            sb.Append($"<label class=\"{Encoder.Encode(LabelClass)}\">{Encoder.Encode(Title)}</label>");
+            var labelId = GetLabelId();
+            sb.Append($"<label class=\"{Encoder.Encode(LabelClass)}\" id=\"{Encoder.Encode(labelId)}\">{Encoder.Encode(Title)}</label>");
         }
     }
 
@@ -236,15 +238,11 @@ public class MultiselectCheckboxTagHelper : TagHelper
 
     private void RenderFieldset(StringBuilder sb, List<object> availableItems, HashSet<string> selectedItems, string inputName)
     {
-        // Start fieldset with optional id
-        if (!string.IsNullOrEmpty(FieldsetId))
-        {
-            sb.Append($"<fieldset class=\"{Encoder.Encode(FieldsetClass)}\" id=\"{Encoder.Encode(FieldsetId)}\">");
-        }
-        else
-        {
-            sb.Append($"<fieldset class=\"{Encoder.Encode(FieldsetClass)}\">");
-        }
+        // Build fieldset opening tag with optional id attribute
+        var fieldsetId = !string.IsNullOrEmpty(FieldsetId) 
+            ? $" id=\"{Encoder.Encode(FieldsetId)}\"" 
+            : string.Empty;
+        sb.Append($"<fieldset class=\"{Encoder.Encode(FieldsetClass)}\"{fieldsetId}>");
 
         // Render content based on whether items exist
         if (availableItems.Count == 0)
@@ -266,11 +264,9 @@ public class MultiselectCheckboxTagHelper : TagHelper
 
     private void RenderCheckboxGrid(StringBuilder sb, List<object> availableItems, HashSet<string> selectedItems, string inputName)
     {
-        var ariaLabelledBy = !string.IsNullOrEmpty(FieldsetId) 
-            ? $"{FieldsetId}-label" 
-            : $"{IdPrefix}-label";
+        var ariaLabelledBy = GetLabelId();
 
-        sb.Append($"<div aria-labelledby=\"{Encoder.Encode(ariaLabelledBy)}\" class=\"{Encoder.Encode(GridClass)}\" role=\"group\">");
+        sb.Append($"<div aria-labelledby=\"{Encoder.Encode(ariaLabelledBy)}\" class=\"{Encoder.Encode(GridClass)}\" data-multiselect-grid role=\"group\">");
 
         for (int i = 0; i < availableItems.Count; i++)
         {
@@ -283,12 +279,13 @@ public class MultiselectCheckboxTagHelper : TagHelper
     private void RenderCheckboxOption(StringBuilder sb, object item, int index, HashSet<string> selectedItems, string inputName)
     {
         var itemValue = item?.ToString() ?? string.Empty;
-        var checkboxId = $"{IdPrefix}-{index}";
+        var safePrefix = GetSafeIdPrefix();
+        var checkboxId = $"{safePrefix}-{index}";
         var ariaDescribedBy = $"{checkboxId}-desc";
         var isChecked = selectedItems.Contains(itemValue);
 
         // Option container
-        sb.Append($"<div class=\"{Encoder.Encode(OptionClass)}\">");
+        sb.Append($"<div class=\"{Encoder.Encode(OptionClass)}\" data-multiselect-option>");
 
         // Checkbox input with attributes in alphabetical order (matching expected output)
         sb.Append($"<input aria-describedby=\"{Encoder.Encode(ariaDescribedBy)}\"");
@@ -355,7 +352,26 @@ public class MultiselectCheckboxTagHelper : TagHelper
 
     private string GetInputName()
     {
-        return For?.Name ?? IdPrefix;
+        return For?.Name ?? GetSafeIdPrefix();
+    }
+
+    /// <summary>
+    /// Gets a safe ID prefix, falling back to default if empty or whitespace.
+    /// </summary>
+    private string GetSafeIdPrefix()
+    {
+        return string.IsNullOrWhiteSpace(IdPrefix) ? DefaultIdPrefix : IdPrefix;
+    }
+
+    /// <summary>
+    /// Gets the label ID for aria-labelledby references.
+    /// Uses FieldsetId if available, otherwise uses safe IdPrefix.
+    /// </summary>
+    private string GetLabelId()
+    {
+        return !string.IsNullOrEmpty(FieldsetId)
+            ? $"{FieldsetId}-label"
+            : $"{GetSafeIdPrefix()}-label";
     }
 
     #endregion

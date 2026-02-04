@@ -177,7 +177,8 @@ public class MultiselectCheckboxTagHelperTests : TagHelperTestBase<MultiselectCh
 
         // Assert
         var content = GetOutputContent(output);
-        Assert.Contains("<label class=\"form-label\">My Title</label>", content);
+        Assert.Contains("class=\"form-label\"", content);
+        Assert.Contains(">My Title</label>", content);
     }
 
     [Fact]
@@ -244,6 +245,7 @@ public class MultiselectCheckboxTagHelperTests : TagHelperTestBase<MultiselectCh
         // Assert
         var content = GetOutputContent(output);
         Assert.Contains("class=\"multiselect-grid\"", content);
+        Assert.Contains("data-multiselect-grid", content);
         Assert.Contains("role=\"group\"", content);
     }
 
@@ -262,8 +264,8 @@ public class MultiselectCheckboxTagHelperTests : TagHelperTestBase<MultiselectCh
 
         // Assert
         var content = GetOutputContent(output);
-        // Should have two option containers
-        var count = System.Text.RegularExpressions.Regex.Matches(content, "class=\"multiselect-option\"").Count;
+        // Should have two option containers with data attributes
+        var count = System.Text.RegularExpressions.Regex.Matches(content, "data-multiselect-option").Count;
         Assert.Equal(2, count);
     }
 
@@ -803,6 +805,112 @@ public class MultiselectCheckboxTagHelperTests : TagHelperTestBase<MultiselectCh
         Assert.Contains("aria-describedby=\"checkbox-0-desc\"", content);
     }
 
+    [Fact]
+    public async Task ProcessAsync_TitleLabel_HasIdAttributeMatchingAriaLabelledBy()
+    {
+        // Arrange
+        var tagHelper = CreateTagHelper(
+            title: "Test Title",
+            availableItems: new List<string> { "item1" },
+            fieldsetId: "my-fieldset");
+        var context = CreateContext();
+        var output = CreateOutput("multiselect-checkbox");
+
+        // Act
+        await tagHelper.ProcessAsync(context, output);
+
+        // Assert
+        var content = GetOutputContent(output);
+        // The label should have id="my-fieldset-label"
+        Assert.Contains("id=\"my-fieldset-label\"", content);
+        // And aria-labelledby should reference it
+        Assert.Contains("aria-labelledby=\"my-fieldset-label\"", content);
+    }
+
+    [Fact]
+    public async Task ProcessAsync_TitleLabel_HasIdUsingIdPrefixWhenNoFieldsetId()
+    {
+        // Arrange
+        var tagHelper = CreateTagHelper(
+            title: "Test Title",
+            availableItems: new List<string> { "item1" },
+            idPrefix: "scope-cb",
+            fieldsetId: "");
+        var context = CreateContext();
+        var output = CreateOutput("multiselect-checkbox");
+
+        // Act
+        await tagHelper.ProcessAsync(context, output);
+
+        // Assert
+        var content = GetOutputContent(output);
+        // When no fieldsetId, label id should use IdPrefix
+        Assert.Contains("id=\"scope-cb-label\"", content);
+        Assert.Contains("aria-labelledby=\"scope-cb-label\"", content);
+    }
+
+    [Fact]
+    public async Task ProcessAsync_WithEmptyIdPrefix_UsesDefaultCheckboxPrefix()
+    {
+        // Arrange
+        var tagHelper = CreateTagHelper(
+            title: "Test",
+            availableItems: new List<string> { "item1" },
+            idPrefix: "");
+        var context = CreateContext();
+        var output = CreateOutput("multiselect-checkbox");
+
+        // Act
+        await tagHelper.ProcessAsync(context, output);
+
+        // Assert
+        var content = GetOutputContent(output);
+        // Should not have invalid IDs like "-0", should use fallback
+        Assert.DoesNotContain("id=\"-0\"", content);
+        Assert.Contains("id=\"checkbox-0\"", content);
+    }
+
+    [Fact]
+    public async Task ProcessAsync_WithWhitespaceIdPrefix_UsesDefaultCheckboxPrefix()
+    {
+        // Arrange
+        var tagHelper = CreateTagHelper(
+            title: "Test",
+            availableItems: new List<string> { "item1" },
+            idPrefix: "   ");
+        var context = CreateContext();
+        var output = CreateOutput("multiselect-checkbox");
+
+        // Act
+        await tagHelper.ProcessAsync(context, output);
+
+        // Assert
+        var content = GetOutputContent(output);
+        Assert.Contains("id=\"checkbox-0\"", content);
+    }
+
+    [Fact]
+    public async Task ProcessAsync_AllCheckboxIdsAreUnique()
+    {
+        // Arrange
+        var tagHelper = CreateTagHelper(
+            title: "Test",
+            availableItems: new List<string> { "item1", "item2", "item3" },
+            idPrefix: "cb");
+        var context = CreateContext();
+        var output = CreateOutput("multiselect-checkbox");
+
+        // Act
+        await tagHelper.ProcessAsync(context, output);
+
+        // Assert
+        var content = GetOutputContent(output);
+        var idMatches = System.Text.RegularExpressions.Regex.Matches(content, @"id=""cb-(\d+)""");
+        var ids = idMatches.Select(m => m.Groups[1].Value).ToList();
+        Assert.Equal(3, ids.Count);
+        Assert.Equal(ids.Distinct().Count(), ids.Count); // All unique
+    }
+
     #endregion
 
     #region Empty State Tests
@@ -874,7 +982,7 @@ public class MultiselectCheckboxTagHelperTests : TagHelperTestBase<MultiselectCh
 
         // Assert
         var content = GetOutputContent(output);
-        Assert.DoesNotContain("class=\"multiselect-grid\"", content);
+        Assert.DoesNotContain("data-multiselect-grid", content);
     }
 
     #endregion

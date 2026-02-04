@@ -137,12 +137,14 @@
     outline-offset: 2px;
 }
 
-.multiselect-option:has(.multiselect-input:checked) {
+.multiselect-option:has(.multiselect-input:checked),
+[data-multiselect-option]:has(input[type="checkbox"]:checked) {
     background-color: var(--ms-option-pill-active-bg);
     border-color: var(--ms-primary-color);
 }
 
-.multiselect-option:has(.multiselect-input:checked) .multiselect-pill {
+.multiselect-option:has(.multiselect-input:checked) .multiselect-pill,
+[data-multiselect-option]:has(input[type="checkbox"]:checked) span {
     color: var(--ms-option-pill-active-color);
 }
 
