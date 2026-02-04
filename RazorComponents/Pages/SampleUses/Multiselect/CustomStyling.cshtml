@@ -6,121 +6,136 @@
 }
 
 <style>
-    /* Theme Variables - Override these in your site's theme */
-    :root {
-        /* Gradient theme */
-        --custom-gradient-start: #667eea;
-        --custom-gradient-end: #764ba2;
-        
-        /* Colors */
-        --custom-text-color: #ffffff;
-        --custom-option-bg: rgba(255, 255, 255, 0.2);
-        --custom-option-hover-bg: rgba(255, 255, 255, 0.3);
-        --custom-option-checked-bg: rgba(255, 255, 255, 0.4);
-        --custom-option-checked-shadow: rgba(255, 255, 255, 0.6);
-        --custom-pill-bg: rgba(255, 255, 255, 0.2);
-        --custom-pill-checked-bg: rgba(255, 255, 255, 0.5);
-        
-        /* Spacing */
-        --custom-group-padding: 1.5rem;
-        --custom-group-radius: 12px;
-        --custom-option-radius: 8px;
-        --custom-grid-gap: 0.75rem;
-        --custom-option-padding: 0.75rem;
-        --custom-pill-padding: 0.25rem 0.5rem;
-        --custom-pill-radius: 4px;
-        
-        /* Typography */
-        --custom-label-size: 1.25rem;
-        --custom-pill-size: 0.875rem;
-    }
-    
+    /* Custom classes for the examples below */
     .custom-group {
-        background: linear-gradient(135deg, var(--custom-gradient-start) 0%, var(--custom-gradient-end) 100%);
-        padding: var(--custom-group-padding);
-        border-radius: var(--custom-group-radius);
-        color: var(--custom-text-color);
+        background: #f8f9fa;
+        border: 1px solid #dee2e6;
+        border-radius: 0.5rem;
+        padding: 1.5rem;
     }
-    
+
     .custom-label {
-        font-size: var(--custom-label-size);
-        font-weight: bold;
-        margin-bottom: 0.5rem;
+        font-size: 1.25rem;
+        font-weight: 700;
+        color: #495057;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
     }
-    
+
     .custom-description {
-        opacity: 0.9;
-        margin-bottom: 1rem;
+        font-style: italic;
+        color: #6c757d;
+        margin-bottom: 0.75rem;
     }
-    
+
     .custom-fieldset {
-        border: none;
-        padding: 0;
+        border: 2px dashed #adb5bd;
+        border-radius: 0.375rem;
+        padding: 1rem;
     }
-    
+
     .custom-grid {
         display: grid;
         grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
-        gap: var(--custom-grid-gap);
+        gap: 0.75rem;
     }
-    
+
     .custom-option {
-        background: var(--custom-option-bg);
-        border-radius: var(--custom-option-radius);
-        transition: all 0.2s ease;
+        background: #ffffff;
+        border: 2px solid #ced4da;
+        border-radius: 0.75rem;
+        padding: 0.5rem;
+        text-align: center;
+        transition: border-color 0.2s, box-shadow 0.2s;
     }
-    
+
     .custom-option:hover {
-        background: var(--custom-option-hover-bg);
-        transform: translateY(-2px);
+        border-color: #0d6efd;
+        box-shadow: 0 2px 8px rgba(13, 110, 253, 0.15);
     }
-    
-    .custom-option:has(.custom-input:checked) {
-        background: var(--custom-option-checked-bg);
-        box-shadow: 0 0 0 2px var(--custom-option-checked-shadow);
-    }
-    
+
     .custom-input {
-        position: absolute;
-        opacity: 0;
-        width: 0;
-        height: 0;
-        pointer-events: none;
+        accent-color: #0d6efd;
+        width: 1.25rem;
+        height: 1.25rem;
     }
-    
+
     .custom-checkbox-label {
-        display: flex;
-        align-items: center;
         cursor: pointer;
-        padding: var(--custom-option-padding);
-        margin: 0;
-        width: 100%;
+        display: block;
+        margin-top: 0.25rem;
     }
-    
+
     .custom-pill {
-        background: var(--custom-pill-bg);
-        padding: var(--custom-pill-padding);
-        border-radius: var(--custom-pill-radius);
-        font-size: var(--custom-pill-size);
-    }
-    
-    .custom-option:has(.custom-input:checked) .custom-pill {
-        background: var(--custom-pill-checked-bg);
         font-weight: 600;
+        color: #212529;
+        font-size: 0.9rem;
+    }
+
+    /* Compact inline style */
+    .compact-grid {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+    }
+
+    .compact-option {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
+        background: #e9ecef;
+        border-radius: 999px;
+        padding: 0.25rem 0.75rem;
+    }
+
+    .compact-pill {
+        font-size: 0.85rem;
+        font-weight: 500;
     }
 </style>
 
 <h1>Multiselect Checkbox - Custom Styling</h1>
-<p>This demonstrates custom CSS classes applied to the <code>&lt;multiselect-checkbox&gt;</code> tag helper.</p>
+<p>
+    The <code>&lt;multiselect-checkbox&gt;</code> tag helper exposes CSS class attributes
+    on every rendered element, allowing you to fully override the default styling without
+    writing any custom CSS variables.
+</p>
+
+<h2>Available Class Attributes</h2>
+<table class="table table-bordered table-sm mb-4">
+    <thead>
+        <tr>
+            <th>Attribute</th>
+            <th>Target Element</th>
+            <th>Default Value</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr><td><code>group-class</code></td><td>Outer container <code>&lt;div&gt;</code></td><td><code>form-group</code></td></tr>
+        <tr><td><code>label-class</code></td><td>Title <code>&lt;label&gt;</code></td><td><code>form-label</code></td></tr>
+        <tr><td><code>description-class</code></td><td>Description <code>&lt;div&gt;</code></td><td><code>form-text</code></td></tr>
+        <tr><td><code>fieldset-class</code></td><td><code>&lt;fieldset&gt;</code></td><td><code>multiselect-fieldset</code></td></tr>
+        <tr><td><code>grid-class</code></td><td>Grid container <code>&lt;div&gt;</code></td><td><code>multiselect-grid</code></td></tr>
+        <tr><td><code>option-class</code></td><td>Each option <code>&lt;div&gt;</code></td><td><code>multiselect-option</code></td></tr>
+        <tr><td><code>input-class</code></td><td>Checkbox <code>&lt;input&gt;</code></td><td><code>multiselect-input</code></td></tr>
+        <tr><td><code>checkbox-label-class</code></td><td>Checkbox <code>&lt;label&gt;</code></td><td><code>multiselect-label</code></td></tr>
+        <tr><td><code>pill-class</code></td><td>Pill <code>&lt;span&gt;</code></td><td><code>multiselect-pill</code></td></tr>
+    </tbody>
+</table>
+
+<hr />
+
+<h2>Example 1: Card-Style Grid</h2>
+<p>Overrides every class to create a card-style layout with rounded option boxes.</p>
 
 <div class="mb-4">
-    <multiselect-checkbox 
-        title="Select Your Favorite Colors"
-        description="Pick all the colors you like from the list below."
-        multiselect-for="SelectedColors"
-        multiselect-items="AvailableColors"
-        id-prefix="color-checkbox"
-        fieldset-id="colors-fieldset"
+    <multiselect-checkbox
+        title="Permissions"
+        description="Assign permissions for this role."
+        multiselect-for="SelectedPermissions"
+        multiselect-items="AvailablePermissions"
+        id-prefix="card-style"
+        fieldset-id="card-fieldset"
         group-class="custom-group"
         label-class="custom-label"
         description-class="custom-description"
@@ -132,12 +147,14 @@
         pill-class="custom-pill" />
 </div>
 
-<h3>Code Example</h3>
-<pre><code>&lt;multiselect-checkbox 
-    title="Select Your Favorite Colors"
-    description="Pick all the colors you like."
-    multiselect-for="SelectedColors"
-    multiselect-items="AvailableColors"
+<h3>Code</h3>
+<pre><code>&lt;multiselect-checkbox
+    title="Permissions"
+    description="Assign permissions for this role."
+    multiselect-for="SelectedPermissions"
+    multiselect-items="AvailablePermissions"
+    id-prefix="card-style"
+    fieldset-id="card-fieldset"
     group-class="custom-group"
     label-class="custom-label"
     description-class="custom-description"
@@ -148,7 +165,75 @@
     checkbox-label-class="custom-checkbox-label"
     pill-class="custom-pill" /&gt;</code></pre>
 
+<hr />
+
+<h2>Example 2: Compact Inline Pills</h2>
+<p>Uses a horizontal pill layout by overriding just the grid, option, and pill classes.</p>
+
+<div class="card p-3 mb-4">
+    <multiselect-checkbox
+        title="Permissions"
+        description="Select applicable permissions."
+        multiselect-for="SelectedPermissions"
+        multiselect-items="AvailablePermissions"
+        id-prefix="compact-style"
+        grid-class="compact-grid"
+        option-class="compact-option"
+        pill-class="compact-pill" />
+</div>
+
+<h3>Code</h3>
+<pre><code>&lt;multiselect-checkbox
+    title="Permissions"
+    description="Select applicable permissions."
+    multiselect-for="SelectedPermissions"
+    multiselect-items="AvailablePermissions"
+    id-prefix="compact-style"
+    grid-class="compact-grid"
+    option-class="compact-option"
+    pill-class="compact-pill" /&gt;</code></pre>
+
+<hr />
+
+<h2>Example 3: Bootstrap Utilities Only</h2>
+<p>Uses standard Bootstrap classes — no custom CSS required.</p>
+
+<div class="mb-4">
+    <multiselect-checkbox
+        title="Permissions"
+        description="Choose one or more permissions."
+        multiselect-for="SelectedPermissions"
+        multiselect-items="AvailablePermissions"
+        id-prefix="bootstrap-style"
+        group-class="card p-3"
+        label-class="h5 text-primary"
+        description-class="text-muted mb-2"
+        fieldset-class="border-0 p-0"
+        grid-class="d-flex flex-wrap gap-3"
+        option-class="form-check"
+        input-class="form-check-input"
+        checkbox-label-class="form-check-label"
+        pill-class="badge bg-light text-dark" />
+</div>
+
+<h3>Code</h3>
+<pre><code>&lt;multiselect-checkbox
+    title="Permissions"
+    description="Choose one or more permissions."
+    multiselect-for="SelectedPermissions"
+    multiselect-items="AvailablePermissions"
+    id-prefix="bootstrap-style"
+    group-class="card p-3"
+    label-class="h5 text-primary"
+    description-class="text-muted mb-2"
+    fieldset-class="border-0 p-0"
+    grid-class="d-flex flex-wrap gap-3"
+    option-class="form-check"
+    input-class="form-check-input"
+    checkbox-label-class="form-check-label"
+    pill-class="badge bg-light text-dark" /&gt;</code></pre>
+
 <p class="mt-3">
-    <a asp-page="BasicUsage" class="btn btn-secondary">← Basic Usage</a>
-    <a asp-page="Themes" class="btn btn-primary">Themes →</a>
+    <a asp-page="BasicUsage" class="btn btn-secondary">&larr; Basic Usage</a>
+    <a asp-page="Themes" class="btn btn-primary">Themes &rarr;</a>
 </p>

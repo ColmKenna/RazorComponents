@@ -4,20 +4,19 @@ namespace RazorComponents.Pages.SampleUses.Multiselect;
 
 public class CustomStylingModel : PageModel
 {
-    public List<string> AvailableColors { get; set; } = new()
+    public List<string> AvailablePermissions { get; set; } = new()
     {
-        "Red",
-        "Green",
-        "Blue",
-        "Yellow",
-        "Purple",
-        "Orange"
+        "Read",
+        "Write",
+        "Delete",
+        "Admin",
+        "Export"
     };
 
-    public List<string> SelectedColors { get; set; } = new()
+    public List<string> SelectedPermissions { get; set; } = new()
     {
-        "Blue",
-        "Green"
+        "Read",
+        "Write"
     };
 
     public void OnGet()
