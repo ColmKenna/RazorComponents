@@ -20,8 +20,9 @@ public class FlipCardFaceTagHelper : TagHelper
     var childContent = await output.GetChildContentAsync();
     var content = childContent.GetContent();
         
-    // Check which tag was used
-    var isFront = output.TagName.Equals("card-front", StringComparison.OrdinalIgnoreCase);
+    // Check which tag was used. Output.TagName can be null after SuppressOutput().
+    var tagName = context.TagName ?? output.TagName;
+    var isFront = string.Equals(tagName, "card-front", StringComparison.OrdinalIgnoreCase);
         
     if (isFront)
     {
