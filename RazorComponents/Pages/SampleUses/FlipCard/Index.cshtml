@@ -1,0 +1,77 @@
+@page
+@model RazorComponents.Pages.SampleUses.FlipCard.Index
+@{
+    ViewData["Title"] = "Flip Card Samples";
+}
+
+<div class="container mt-5">
+    <div class="row mb-5">
+        <div class="col-md-8">
+            <h1 class="mb-2">Flip Card Samples</h1>
+            <p class="lead text-muted">Explore flip direction, auto-height, and custom theming.</p>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <div class="col-md-6">
+            <div class="card h-100 shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">Basic Usage</h5>
+                </div>
+                <div class="card-body">
+                    <p class="card-text">A simple horizontal flip with fixed dimensions.</p>
+                    <ul class="small">
+                        <li>Default flip direction</li>
+                        <li>Fixed width and height</li>
+                        <li>Custom button text</li>
+                    </ul>
+                </div>
+                <div class="card-footer bg-light">
+                    <a asp-page="BasicUsage" class="btn btn-primary btn-sm">View Example</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="card h-100 shadow-sm">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0">Vertical Flip + Auto Height</h5>
+                </div>
+                <div class="card-body">
+                    <p class="card-text">Flip on the X-axis and let content drive sizing.</p>
+                    <ul class="small">
+                        <li>Vertical flip direction</li>
+                        <li>Auto-height equalization</li>
+                        <li>Resize-aware layout</li>
+                    </ul>
+                </div>
+                <div class="card-footer bg-light">
+                    <a asp-page="VerticalFlip" class="btn btn-success btn-sm">View Example</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="card h-100 shadow-sm">
+                <div class="card-header bg-warning text-dark">
+                    <h5 class="mb-0">Custom Styling</h5>
+                </div>
+                <div class="card-body">
+                    <p class="card-text">Theme the component using CSS custom properties.</p>
+                    <ul class="small">
+                        <li>Scoped CSS variables</li>
+                        <li>Custom shadows and colors</li>
+                        <li>Layout presets per card</li>
+                    </ul>
+                </div>
+                <div class="card-footer bg-light">
+                    <a asp-page="CustomStyling" class="btn btn-warning btn-sm">View Example</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <p class="mt-4">
+        <a asp-page="/Index" class="btn btn-secondary">&larr; Back to Home</a>
+    </p>
+</div>

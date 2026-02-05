@@ -1,0 +1,93 @@
+@page
+@model RazorComponents.Pages.SampleUses.FlipCard.CustomStylingModel
+@{
+    ViewData["Title"] = "Flip Card - Custom Styling";
+}
+
+<link rel="stylesheet" href="~/components/FlipCard/FlipCard.css" asp-append-version="true" />
+
+<style>
+    .flipcard-ocean {
+        --bg: #eff6ff;
+        --color: #0f172a;
+        --border-color: #93c5fd;
+        --shadow: 0 12px 30px rgba(30, 64, 175, 0.12);
+        --header-bg: #dbeafe;
+        --button-bg: #ffffff;
+        --button-bg-hover: #bfdbfe;
+        --button-color: #1e3a8a;
+        --focus-color: #1d4ed8;
+        --flip-card-width: 340px;
+        --flip-card-height: 240px;
+    }
+
+    .flipcard-amber {
+        --bg: #fffbeb;
+        --color: #78350f;
+        --border-color: #f59e0b;
+        --shadow: 0 10px 25px rgba(180, 83, 9, 0.15);
+        --header-bg: #fef3c7;
+        --button-bg: #ffffff;
+        --button-bg-hover: #fde68a;
+        --button-color: #92400e;
+        --flip-card-width: 300px;
+        --flip-card-height: 220px;
+    }
+</style>
+
+<div class="container mt-5">
+    <h1 class="mb-2">Flip Card - Custom Styling</h1>
+    <p class="lead text-muted">Theme the component using CSS custom properties.</p>
+
+    <div class="row g-4">
+        <div class="col-md-6">
+            <flip-card class="flipcard-ocean" button-text="Reveal">
+                <card-front title="Ocean Theme">
+                    <p class="mb-2">Set custom colors, shadows, and sizing.</p>
+                    <p class="mb-0">The theme uses CSS variables scoped to the container.</p>
+                </card-front>
+                <card-back title="Details">
+                    <p class="mb-2">Try combining with your design system tokens.</p>
+                    <ul class="mb-0">
+                        <li>Backgrounds</li>
+                        <li>Borders</li>
+                        <li>Focus colors</li>
+                    </ul>
+                </card-back>
+            </flip-card>
+        </div>
+        <div class="col-md-6">
+            <flip-card class="flipcard-amber" button-text="Flip">
+                <card-front title="Amber Theme">
+                    <p class="mb-2">A warmer palette with smaller dimensions.</p>
+                    <p class="mb-0">Great for compact card grids.</p>
+                </card-front>
+                <card-back title="Next Steps">
+                    <p class="mb-0">Adjust <code>--flip-card-width</code> and <code>--flip-card-height</code> for sizing.</p>
+                </card-back>
+            </flip-card>
+        </div>
+    </div>
+
+    <h3 class="mt-5">Code Example</h3>
+    <pre><code>.flipcard-ocean {
+    --bg: #eff6ff;
+    --border-color: #93c5fd;
+    --flip-card-width: 340px;
+    --flip-card-height: 240px;
+}
+
+&lt;flip-card class="flipcard-ocean" button-text="Reveal"&gt;
+    &lt;card-front title="Ocean Theme"&gt;...&lt;/card-front&gt;
+    &lt;card-back title="Details"&gt;...&lt;/card-back&gt;
+&lt;/flip-card&gt;</code></pre>
+
+    <p class="mt-3">
+        <a asp-page="VerticalFlip" class="btn btn-secondary">&larr; Vertical Flip</a>
+        <a asp-page="/Index" class="btn btn-primary">Back to Home &rarr;</a>
+    </p>
+</div>
+
+@section Scripts {
+    <script src="~/components/FlipCard/flip-card.js" asp-append-version="true"></script>
+}
