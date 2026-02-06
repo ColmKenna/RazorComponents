@@ -25,10 +25,7 @@ public class MultiselectCheckboxTagHelperTests : TagHelperTestBase<MultiselectCh
 
     protected override MultiselectCheckboxTagHelper CreateTagHelper(Action<MultiselectCheckboxTagHelper>? configure = null)
     {
-        var tagHelper = new MultiselectCheckboxTagHelper
-        {
-            ViewContext = CreateViewContext()
-        };
+        var tagHelper = new MultiselectCheckboxTagHelper();
         configure?.Invoke(tagHelper);
         return tagHelper;
     }
@@ -46,8 +43,7 @@ public class MultiselectCheckboxTagHelperTests : TagHelperTestBase<MultiselectCh
             Title = title,
             Description = description,
             IdPrefix = idPrefix,
-            FieldsetId = fieldsetId,
-            ViewContext = CreateViewContext()
+            FieldsetId = fieldsetId
         };
 
         if (availableItems != null)
@@ -165,7 +161,7 @@ public class MultiselectCheckboxTagHelperTests : TagHelperTestBase<MultiselectCh
     }
 
     [Fact]
-    public async Task ProcessAsync_GeneratesTitleLabel()
+    public async Task ProcessAsync_GeneratesTitleLegend()
     {
         // Arrange
         var tagHelper = CreateTagHelper(title: "My Title");
@@ -178,7 +174,7 @@ public class MultiselectCheckboxTagHelperTests : TagHelperTestBase<MultiselectCh
         // Assert
         var content = GetOutputContent(output);
         Assert.Contains("class=\"form-label\"", content);
-        Assert.Contains(">My Title</label>", content);
+        Assert.Contains(">My Title</legend>", content);
     }
 
     [Fact]
@@ -787,7 +783,7 @@ public class MultiselectCheckboxTagHelperTests : TagHelperTestBase<MultiselectCh
     }
 
     [Fact]
-    public async Task ProcessAsync_CheckboxHasAriaDescribedBy()
+    public async Task ProcessAsync_CheckboxDoesNotHaveAriaDescribedBy()
     {
         // Arrange
         var tagHelper = CreateTagHelper(
@@ -800,13 +796,13 @@ public class MultiselectCheckboxTagHelperTests : TagHelperTestBase<MultiselectCh
         // Act
         await tagHelper.ProcessAsync(context, output);
 
-        // Assert
+        // Assert — aria-describedby was removed because no description element exists
         var content = GetOutputContent(output);
-        Assert.Contains("aria-describedby=\"checkbox-0-desc\"", content);
+        Assert.DoesNotContain("aria-describedby", content);
     }
 
     [Fact]
-    public async Task ProcessAsync_TitleLabel_HasIdAttributeMatchingAriaLabelledBy()
+    public async Task ProcessAsync_TitleLegend_HasIdAttributeMatchingAriaLabelledBy()
     {
         // Arrange
         var tagHelper = CreateTagHelper(
@@ -821,14 +817,14 @@ public class MultiselectCheckboxTagHelperTests : TagHelperTestBase<MultiselectCh
 
         // Assert
         var content = GetOutputContent(output);
-        // The label should have id="my-fieldset-label"
+        // The legend should have id="my-fieldset-label"
         Assert.Contains("id=\"my-fieldset-label\"", content);
         // And aria-labelledby should reference it
         Assert.Contains("aria-labelledby=\"my-fieldset-label\"", content);
     }
 
     [Fact]
-    public async Task ProcessAsync_TitleLabel_HasIdUsingIdPrefixWhenNoFieldsetId()
+    public async Task ProcessAsync_TitleLegend_HasIdUsingIdPrefixWhenNoFieldsetId()
     {
         // Arrange
         var tagHelper = CreateTagHelper(
@@ -844,7 +840,7 @@ public class MultiselectCheckboxTagHelperTests : TagHelperTestBase<MultiselectCh
 
         // Assert
         var content = GetOutputContent(output);
-        // When no fieldsetId, label id should use IdPrefix
+        // When no fieldsetId, legend id should use IdPrefix
         Assert.Contains("id=\"scope-cb-label\"", content);
         Assert.Contains("aria-labelledby=\"scope-cb-label\"", content);
     }
@@ -990,7 +986,7 @@ public class MultiselectCheckboxTagHelperTests : TagHelperTestBase<MultiselectCh
     #region Edge Case Tests
 
     [Fact]
-    public async Task ProcessAsync_WithEmptyTitle_OmitsTitleLabel()
+    public async Task ProcessAsync_WithEmptyTitle_OmitsLegend()
     {
         // Arrange
         var tagHelper = CreateTagHelper(title: "");
@@ -1002,7 +998,7 @@ public class MultiselectCheckboxTagHelperTests : TagHelperTestBase<MultiselectCh
 
         // Assert
         var content = GetOutputContent(output);
-        Assert.DoesNotContain("<label class=\"form-label\"", content);
+        Assert.DoesNotContain("<legend", content);
     }
 
     [Fact]
@@ -1039,7 +1035,7 @@ public class MultiselectCheckboxTagHelperTests : TagHelperTestBase<MultiselectCh
     }
 
     [Fact]
-    public async Task ProcessAsync_WithWhitespaceOnlyTitle_OmitsTitleLabel()
+    public async Task ProcessAsync_WithWhitespaceOnlyTitle_OmitsLegend()
     {
         // Arrange
         var tagHelper = CreateTagHelper(title: "   ");
@@ -1051,7 +1047,7 @@ public class MultiselectCheckboxTagHelperTests : TagHelperTestBase<MultiselectCh
 
         // Assert
         var content = GetOutputContent(output);
-        Assert.DoesNotContain("<label class=\"form-label\"", content);
+        Assert.DoesNotContain("<legend", content);
     }
 
     [Fact]
@@ -1186,14 +1182,14 @@ public class MultiselectCheckboxTagHelperTests : TagHelperTestBase<MultiselectCh
         // Act
         await tagHelper.ProcessAsync(context, output);
 
-        // Assert
+        // Assert — description before fieldset, legend inside fieldset
         var content = GetOutputContent(output);
-        var labelIndex = content.IndexOf("<label class=\"form-label\"", StringComparison.Ordinal);
         var descIndex = content.IndexOf("<div class=\"form-text\"", StringComparison.Ordinal);
         var fieldsetIndex = content.IndexOf("<fieldset", StringComparison.Ordinal);
+        var legendIndex = content.IndexOf("<legend", StringComparison.Ordinal);
 
-        Assert.True(labelIndex < descIndex, "Label should come before description");
         Assert.True(descIndex < fieldsetIndex, "Description should come before fieldset");
+        Assert.True(legendIndex > fieldsetIndex, "Legend should be inside fieldset");
     }
 
     [Fact]
@@ -1215,6 +1211,183 @@ public class MultiselectCheckboxTagHelperTests : TagHelperTestBase<MultiselectCh
         var labelIndex = content.IndexOf("<label class=\"multiselect-label\"", StringComparison.Ordinal);
 
         Assert.True(inputIndex < labelIndex, "Input should come before label");
+    }
+
+    #endregion
+
+    #region Review Fix Tests — RED Phase
+
+    // FIX 1: aria-describedby removed (points to missing element)
+
+    [Fact]
+    public async Task ProcessAsync_Checkbox_DoesNotHaveAriaDescribedBy()
+    {
+        // Arrange
+        var tagHelper = CreateTagHelper(
+            title: "Test",
+            availableItems: new List<string> { "item1", "item2" },
+            idPrefix: "checkbox");
+        var context = CreateContext();
+        var output = CreateOutput("multiselect-checkbox");
+
+        // Act
+        await tagHelper.ProcessAsync(context, output);
+
+        // Assert - no checkbox should have aria-describedby
+        var content = GetOutputContent(output);
+        Assert.DoesNotContain("aria-describedby", content);
+    }
+
+    // FIX 2: aria-labelledby conditional on Title
+
+    [Fact]
+    public async Task ProcessAsync_WithEmptyTitle_GridOmitsAriaLabelledBy()
+    {
+        // Arrange
+        var tagHelper = CreateTagHelper(
+            title: "",
+            availableItems: new List<string> { "item1" });
+        var context = CreateContext();
+        var output = CreateOutput("multiselect-checkbox");
+
+        // Act
+        await tagHelper.ProcessAsync(context, output);
+
+        // Assert - no aria-labelledby when title is empty
+        var content = GetOutputContent(output);
+        Assert.DoesNotContain("aria-labelledby", content);
+    }
+
+    [Fact]
+    public async Task ProcessAsync_WithWhitespaceTitle_GridOmitsAriaLabelledBy()
+    {
+        // Arrange
+        var tagHelper = CreateTagHelper(
+            title: "   ",
+            availableItems: new List<string> { "item1" });
+        var context = CreateContext();
+        var output = CreateOutput("multiselect-checkbox");
+
+        // Act
+        await tagHelper.ProcessAsync(context, output);
+
+        // Assert
+        var content = GetOutputContent(output);
+        Assert.DoesNotContain("aria-labelledby", content);
+    }
+
+    // FIX 5: Title as <legend> inside <fieldset>
+
+    [Fact]
+    public async Task ProcessAsync_WithTitle_RendersLegendInsideFieldset()
+    {
+        // Arrange
+        var tagHelper = CreateTagHelper(
+            title: "My Title",
+            availableItems: new List<string> { "item1" });
+        var context = CreateContext();
+        var output = CreateOutput("multiselect-checkbox");
+
+        // Act
+        await tagHelper.ProcessAsync(context, output);
+
+        // Assert - legend should be inside fieldset, not before it
+        var content = GetOutputContent(output);
+        var fieldsetIndex = content.IndexOf("<fieldset", StringComparison.Ordinal);
+        var legendIndex = content.IndexOf("<legend", StringComparison.Ordinal);
+
+        Assert.True(legendIndex > fieldsetIndex, "Legend should be inside fieldset (after fieldset opening tag)");
+        Assert.Contains("<legend", content);
+    }
+
+    [Fact]
+    public async Task ProcessAsync_WithTitle_DoesNotRenderLabelElementForTitle()
+    {
+        // Arrange
+        var tagHelper = CreateTagHelper(
+            title: "My Title",
+            availableItems: new List<string> { "item1" });
+        var context = CreateContext();
+        var output = CreateOutput("multiselect-checkbox");
+
+        // Act
+        await tagHelper.ProcessAsync(context, output);
+
+        // Assert - no <label> with form-label class (title should be <legend>)
+        var content = GetOutputContent(output);
+        Assert.DoesNotContain("<label class=\"form-label\"", content);
+    }
+
+    [Fact]
+    public async Task ProcessAsync_WithEmptyTitle_DoesNotRenderLegend()
+    {
+        // Arrange
+        var tagHelper = CreateTagHelper(title: "");
+        var context = CreateContext();
+        var output = CreateOutput("multiselect-checkbox");
+
+        // Act
+        await tagHelper.ProcessAsync(context, output);
+
+        // Assert
+        var content = GetOutputContent(output);
+        Assert.DoesNotContain("<legend", content);
+    }
+
+    [Fact]
+    public async Task ProcessAsync_WithTitle_LegendHasCorrectClassAndId()
+    {
+        // Arrange
+        var tagHelper = CreateTagHelper(
+            title: "Test Title",
+            availableItems: new List<string> { "item1" },
+            fieldsetId: "my-fieldset");
+        var context = CreateContext();
+        var output = CreateOutput("multiselect-checkbox");
+
+        // Act
+        await tagHelper.ProcessAsync(context, output);
+
+        // Assert
+        var content = GetOutputContent(output);
+        Assert.Contains("class=\"form-label\"", content); // LabelClass on legend
+        Assert.Contains("id=\"my-fieldset-label\"", content);
+        Assert.Contains("<legend", content);
+    }
+
+    [Fact]
+    public async Task ProcessAsync_DescriptionRenderedBeforeFieldset()
+    {
+        // Arrange
+        var tagHelper = CreateTagHelper(
+            title: "Title",
+            description: "Description",
+            availableItems: new List<string> { "item1" });
+        var context = CreateContext();
+        var output = CreateOutput("multiselect-checkbox");
+
+        // Act
+        await tagHelper.ProcessAsync(context, output);
+
+        // Assert
+        var content = GetOutputContent(output);
+        var descIndex = content.IndexOf("Description", StringComparison.Ordinal);
+        var fieldsetIndex = content.IndexOf("<fieldset", StringComparison.Ordinal);
+        var legendIndex = content.IndexOf("<legend", StringComparison.Ordinal);
+
+        Assert.True(descIndex < fieldsetIndex, "Description should come before fieldset");
+        Assert.True(legendIndex > fieldsetIndex, "Legend should be inside fieldset");
+    }
+
+    // FIX 4: ViewContext removed
+
+    [Fact]
+    public void MultiselectCheckboxTagHelper_DoesNotHaveViewContextProperty()
+    {
+        // The ViewContext property should be removed as it is unused
+        var property = typeof(MultiselectCheckboxTagHelper)
+            .GetProperty("ViewContext");
+        Assert.Null(property);
     }
 
     #endregion

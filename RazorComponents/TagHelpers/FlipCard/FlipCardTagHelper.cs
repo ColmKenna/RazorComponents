@@ -1,4 +1,7 @@
 using System.Text;
+using System.Text.Encodings.Web;
+using System.Text.RegularExpressions;
+using Microsoft.AspNetCore.Html;
 using Microsoft.AspNetCore.Razor.TagHelpers;
 
 namespace RazorComponents.TagHelpers.FlipCard;
@@ -10,8 +13,11 @@ public enum FlipDirection
 }
 
 [HtmlTargetElement("flip-card")]
-public class FlipCardTagHelper : TagHelper
+public partial class FlipCardTagHelper : TagHelper
 {
+    [GeneratedRegex(@"^-?\d+(\.\d+)?(px|rem|em|%|vh|vw|vmin|vmax|ch)$", RegexOptions.IgnoreCase)]
+    private static partial Regex CssLengthPattern();
+
     /// <summary>
     /// The direction the card flips. Default is Horizontal (Y-axis rotation).
     /// </summary>
@@ -19,22 +25,16 @@ public class FlipCardTagHelper : TagHelper
     public FlipDirection FlipDirection { get; set; } = FlipDirection.Horizontal;
 
     /// <summary>
-    /// Fixed width of the card (e.g., "300px", "20rem"). 
-    /// If not specified, defaults to 300px.
+    /// Fixed dimensions of the card.
+    /// When null (default), the card auto-fits to its content.
+    /// Width and Height must be valid CSS lengths (number + px/rem/em/%/vh/vw/vmin/vmax/ch).
     /// </summary>
-    [HtmlAttributeName("width")]
-    public string? Width { get; set; }
-
-    /// <summary>
-    /// Fixed height of the card (e.g., "300px", "20rem").
-    /// If not specified, the card will auto-size to fit content.
-    /// </summary>
-    [HtmlAttributeName("height")]
-    public string? Height { get; set; }
+    [HtmlAttributeName("size")]
+    public FlipCardSize? Size { get; set; }
 
     /// <summary>
     /// When true, the card height automatically adjusts to the taller face.
-    /// Default is true when height is not specified.
+    /// Default is true when Size.Height is not specified.
     /// </summary>
     [HtmlAttributeName("auto-height")]
     public bool? AutoHeight { get; set; }
@@ -60,59 +60,91 @@ public class FlipCardTagHelper : TagHelper
         // Process child content (this triggers card-front and card-back TagHelpers)
         await output.GetChildContentAsync();
 
+        // Read width/height from Size class
+        var width = Size?.Width;
+        var height = Size?.Height;
+
         // Determine if auto-height should be applied
-        var useAutoHeight = AutoHeight ?? string.IsNullOrEmpty(Height);
+        var useAutoHeight = AutoHeight ?? string.IsNullOrEmpty(height);
 
         // Build CSS classes
         var flipClass = FlipDirection == FlipDirection.Vertical ? "flip-vertical" : "flip-horizontal";
         var autoHeightClass = useAutoHeight ? "auto-height" : "";
         var cardClasses = $"card {flipClass} {autoHeightClass}".Trim();
 
-        // Build inline styles
+        // Build CSS custom properties and validate CSS lengths
         var styleBuilder = new StringBuilder();
-        if (!string.IsNullOrEmpty(Width))
+        if (!string.IsNullOrEmpty(width))
         {
-            styleBuilder.Append($"width: {Width}; ");
+            string w = width;
+            if (!CssLengthPattern().IsMatch(w))
+                throw new InvalidOperationException(
+                    $"Invalid CSS length for width: '{w}'. Must be a number followed by a valid CSS unit (px, rem, em, %, vh, vw, vmin, vmax, ch).");
+            styleBuilder.Append("--flip-card-width: ").Append(w).Append("; ");
         }
 
-        if (!string.IsNullOrEmpty(Height))
+        if (!string.IsNullOrEmpty(height))
         {
-            styleBuilder.Append($"height: {Height}; ");
+            string h = height;
+            if (!CssLengthPattern().IsMatch(h))
+                throw new InvalidOperationException(
+                    $"Invalid CSS length for height: '{h}'. Must be a number followed by a valid CSS unit (px, rem, em, %, vh, vw, vmin, vmax, ch).");
+            styleBuilder.Append("--flip-card-height: ").Append(h).Append("; ");
         }
 
-        var inlineStyle = styleBuilder.Length > 0 ? $" style=\"{styleBuilder}\"" : "";
-
-        // Container classes
+        // Container classes with flip-card scope
         var containerClasses = string.IsNullOrEmpty(CssClass)
-            ? "card-container"
-            : $"card-container {CssClass}";
+            ? "card-container flip-card"
+            : $"card-container flip-card {CssClass}";
+
+        // HTML-encode titles and button text
+        var encoder = HtmlEncoder.Default;
+        var frontTitle = encoder.Encode(cardContext.FrontTitle ?? "Front");
+        var backTitle = encoder.Encode(cardContext.BackTitle ?? "Back");
+        var buttonText = encoder.Encode(ButtonText ?? "Flip");
+
+        // Convert IHtmlContent to string for template
+        var frontContentHtml = GetHtmlString(cardContext.FrontContent);
+        var backContentHtml = GetHtmlString(cardContext.BackContent);
 
         // Build the output HTML
         output.TagName = "div";
         output.Attributes.SetAttribute("class", containerClasses);
+        if (styleBuilder.Length > 0)
+        {
+            output.Attributes.SetAttribute("style", styleBuilder.ToString().TrimEnd());
+        }
 
         var html = $@"
-<div class=""{cardClasses}""{inlineStyle}>
-    <div class=""card-front"">
+<div class=""{cardClasses}"">
+    <div class=""card-front"" aria-hidden=""false"">
         <div class=""card-front-header"">
-            <h2>{cardContext.FrontTitle}</h2>
-            <button type=""button"" class=""rotate-button"">{ButtonText}</button>
+            <h2>{frontTitle}</h2>
+            <button type=""button"" class=""rotate-button"" data-flip-card-button aria-pressed=""false"">{buttonText}</button>
         </div>
         <div class=""card-front-content"">
-            {cardContext.FrontContent}
+            {frontContentHtml}
         </div>
     </div>
-    <div class=""card-back"">
+    <div class=""card-back"" aria-hidden=""true"">
         <div class=""card-back-header"">
-            <h2>{cardContext.BackTitle}</h2>
-            <button type=""button"" class=""rotate-button"">{ButtonText}</button>
+            <h2>{backTitle}</h2>
+            <button type=""button"" class=""rotate-button"" data-flip-card-button aria-pressed=""false"">{buttonText}</button>
         </div>
         <div class=""card-back-content"">
-            {cardContext.BackContent}
+            {backContentHtml}
         </div>
     </div>
 </div>";
 
         output.Content.SetHtmlContent(html);
+    }
+
+    private static string GetHtmlString(IHtmlContent? content)
+    {
+        if (content == null) return string.Empty;
+        using var writer = new StringWriter();
+        content.WriteTo(writer, HtmlEncoder.Default);
+        return writer.ToString();
     }
 }

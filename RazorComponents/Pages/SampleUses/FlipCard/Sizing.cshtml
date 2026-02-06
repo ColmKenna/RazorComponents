@@ -1,0 +1,95 @@
+@page
+@model RazorComponents.Pages.SampleUses.FlipCard.SizingModel
+@{
+    ViewData["Title"] = "Flip Card - Sizing";
+}
+
+<link rel="stylesheet" href="~/components/FlipCard/FlipCard.css" asp-append-version="true" />
+
+<style>
+    .card-wide {
+        --flip-card-width: 400px;
+        --flip-card-height: 200px;
+    }
+</style>
+
+<div class="container mt-5">
+    <h1 class="mb-2">Flip Card - Sizing</h1>
+    <p class="lead text-muted">Three ways to control card dimensions, all using the same CSS custom properties.</p>
+
+    <div class="row g-4">
+        <div class="col-md-4">
+            <h5 class="mb-3">1. Auto-fit (default)</h5>
+            <flip-card button-text="Flip">
+                <card-front title="Auto-fit">
+                    <p class="mb-2">No <code>size</code> attribute set.</p>
+                    <p class="mb-0">Uses the CSS defaults from <code>--flip-card-width</code> and <code>--flip-card-height</code>.</p>
+                </card-front>
+                <card-back title="How it works">
+                    <p class="mb-0">The stylesheet sets fallback values. Auto-height equalizes both faces.</p>
+                </card-back>
+            </flip-card>
+        </div>
+
+        <div class="col-md-4">
+            <h5 class="mb-3">2. Size attribute</h5>
+            <flip-card size="@(new FlipCardSize { Width = "280px", Height = "220px" })" button-text="Flip">
+                <card-front title="Size attribute">
+                    <p class="mb-2">Set via <code>FlipCardSize</code>.</p>
+                    <p class="mb-0">Outputs <code>--flip-card-width</code> and <code>--flip-card-height</code> as inline CSS custom properties.</p>
+                </card-front>
+                <card-back title="How it works">
+                    <p class="mb-0">The TagHelper sets CSS custom properties on the container element, which the stylesheet reads.</p>
+                </card-back>
+            </flip-card>
+        </div>
+
+        <div class="col-md-4">
+            <h5 class="mb-3">3. CSS class</h5>
+            <flip-card class="card-wide" button-text="Flip">
+                <card-front title="CSS class">
+                    <p class="mb-2">Set via a CSS class.</p>
+                    <p class="mb-0">The <code>.card-wide</code> class defines <code>--flip-card-width</code> and <code>--flip-card-height</code> directly.</p>
+                </card-front>
+                <card-back title="How it works">
+                    <p class="mb-0">CSS classes set the same custom properties. Great for reusable size presets or media queries.</p>
+                </card-back>
+            </flip-card>
+        </div>
+    </div>
+
+    <div class="card p-3 mt-4">
+        <h5 class="mb-2">How sizing works</h5>
+        <p class="mb-2">All three approaches set the same CSS custom properties: <code>--flip-card-width</code> and <code>--flip-card-height</code>.</p>
+        <ul class="small mb-0">
+            <li><strong>Auto-fit:</strong> Omit <code>size</code> entirely. The stylesheet defaults apply.</li>
+            <li><strong>Size attribute:</strong> <code>size="@@(new FlipCardSize { Width = "280px", Height = "220px" })"</code> sets the custom properties inline.</li>
+            <li><strong>CSS class:</strong> Define <code>--flip-card-width</code> / <code>--flip-card-height</code> in a CSS rule for reusable presets.</li>
+        </ul>
+    </div>
+
+    <h3 class="mt-5">Code Examples</h3>
+    <pre><code>@* 1. Auto-fit — just omit the size attribute *@
+&lt;flip-card button-text="Flip"&gt;...&lt;/flip-card&gt;
+
+@* 2. Size attribute — sets CSS custom properties inline *@
+&lt;flip-card size="@@(new FlipCardSize { Width = "280px", Height = "220px" })"&gt;...&lt;/flip-card&gt;
+
+@* 3. CSS class — define your own sizing preset *@
+&lt;style&gt;
+    .card-wide {
+        --flip-card-width: 400px;
+        --flip-card-height: 200px;
+    }
+&lt;/style&gt;
+&lt;flip-card class="card-wide"&gt;...&lt;/flip-card&gt;</code></pre>
+
+    <p class="mt-3">
+        <a asp-page="VerticalFlip" class="btn btn-secondary">&larr; Vertical Flip</a>
+        <a asp-page="CustomStyling" class="btn btn-primary">Custom Styling &rarr;</a>
+    </p>
+</div>
+
+@section Scripts {
+    <script src="~/components/FlipCard/flip-card.js" asp-append-version="true"></script>
+}

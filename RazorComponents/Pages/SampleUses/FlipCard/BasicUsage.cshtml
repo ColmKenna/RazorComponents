@@ -12,7 +12,7 @@
 
     <div class="row g-4">
         <div class="col-md-6">
-            <flip-card width="320px" height="240px" button-text="Flip Me">
+            <flip-card size="@(new FlipCardSize { Width = "320px", Height = "240px" })" button-text="Flip Me">
                 <card-front title="Overview">
                     <p class="mb-2">This card flips on the Y-axis by default.</p>
                     <ul class="mb-0">
@@ -35,7 +35,7 @@
                 </p>
                 <h6 class="mt-3">Key attributes</h6>
                 <ul class="small mb-0">
-                    <li><code>width</code> and <code>height</code> for fixed sizing</li>
+                    <li><code>size</code> for fixed sizing (omit for auto-fit)</li>
                     <li><code>button-text</code> to customize the flip action label</li>
                     <li><code>flip-direction</code> for horizontal or vertical flips</li>
                 </ul>
@@ -44,14 +44,17 @@
     </div>
 
     <h3 class="mt-5">Code Example</h3>
-    <pre><code>&lt;flip-card width="320px" height="240px" button-text="Flip Me"&gt;
+    <pre><code>&lt;flip-card size="@@(new FlipCardSize { Width = "320px", Height = "240px" })" button-text="Flip Me"&gt;
     &lt;card-front title="Overview"&gt;
         &lt;p&gt;Front content...&lt;/p&gt;
     &lt;/card-front&gt;
     &lt;card-back title="Details"&gt;
         &lt;p&gt;Back content...&lt;/p&gt;
     &lt;/card-back&gt;
-&lt;/flip-card&gt;</code></pre>
+&lt;/flip-card&gt;
+
+@* Or omit size entirely for auto-fit *@
+&lt;flip-card button-text="Flip Me"&gt;...&lt;/flip-card&gt;</code></pre>
 
     <p class="mt-3">
         <a asp-page="/Index" class="btn btn-secondary">&larr; Back to Home</a>

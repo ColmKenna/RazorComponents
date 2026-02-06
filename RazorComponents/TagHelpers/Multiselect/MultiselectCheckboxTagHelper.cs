@@ -1,6 +1,4 @@
 using System.Collections;
-using System.Text;
-using System.Text.Encodings.Web;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.AspNetCore.Mvc.ViewFeatures;
 using Microsoft.AspNetCore.Razor.TagHelpers;
@@ -15,9 +13,8 @@ namespace RazorComponents.TagHelpers.Multiselect;
 /// <para>
 /// This TagHelper generates a complete multiselect UI component including:
 /// <list type="bullet">
-/// <item><description>A title label above the checkbox grid</description></item>
-/// <item><description>A description below the title</description></item>
-/// <item><description>A fieldset containing all checkbox options</description></item>
+/// <item><description>A description above the fieldset</description></item>
+/// <item><description>A fieldset containing a legend (title) and all checkbox options</description></item>
 /// <item><description>Individual checkboxes for each available item with pill-styled labels</description></item>
 /// <item><description>Empty state message when no items exist</description></item>
 /// </list>
@@ -26,10 +23,26 @@ namespace RazorComponents.TagHelpers.Multiselect;
 /// All text content is HTML-encoded to prevent XSS attacks.
 /// ARIA attributes are included for accessibility compliance.
 /// </para>
+/// <para>
+/// <strong>JavaScript Events:</strong> The companion script <c>multiselect-checkbox.js</c>
+/// dispatches two custom events on checkbox interaction:
+/// <list type="bullet">
+/// <item>
+/// <term><c>multiselectChanged</c></term>
+/// <description>Fired on the grid container when any checkbox changes.
+/// <c>event.detail</c> contains <c>{ selectedValues: string[] }</c>.</description>
+/// </item>
+/// <item>
+/// <term><c>multiselectItemToggled</c></term>
+/// <description>Fired on the individual checkbox element when it is toggled.
+/// <c>event.detail</c> contains <c>{ value: string, checked: bool, selectedValues: string[] }</c>.</description>
+/// </item>
+/// </list>
+/// </para>
 /// </remarks>
 /// <example>
 /// <code>
-/// &lt;multiselect-checkbox 
+/// &lt;multiselect-checkbox
 ///     title="Select Scopes"
 ///     description="Choose which scopes to allow"
 ///     multiselect-for="Model.SelectedScopes"
@@ -41,20 +54,19 @@ namespace RazorComponents.TagHelpers.Multiselect;
 [HtmlTargetElement("multiselect-checkbox")]
 public class MultiselectCheckboxTagHelper : TagHelper
 {
-    private static readonly HtmlEncoder Encoder = HtmlEncoder.Default;
     private const string DefaultIdPrefix = "checkbox";
 
     #region Content Properties
 
     /// <summary>
-    /// Gets or sets the title/label displayed above the checkbox grid.
+    /// Gets or sets the title displayed as a legend inside the fieldset.
     /// </summary>
-    /// <value>The title text. Default is empty string (no title rendered).</value>
+    /// <value>The title text. Default is empty string (no legend rendered).</value>
     [HtmlAttributeName("title")]
     public string Title { get; set; } = string.Empty;
 
     /// <summary>
-    /// Gets or sets the description text displayed below the title.
+    /// Gets or sets the description text displayed above the fieldset.
     /// </summary>
     /// <value>The description text. Default is empty string (no description rendered).</value>
     [HtmlAttributeName("description")]
@@ -98,7 +110,7 @@ public class MultiselectCheckboxTagHelper : TagHelper
     public string GroupClass { get; set; } = "form-group";
 
     /// <summary>
-    /// Gets or sets the CSS class for the title label.
+    /// Gets or sets the CSS class for the title legend element.
     /// </summary>
     /// <value>The CSS class name. Default is "form-label".</value>
     [HtmlAttributeName("label-class")]
@@ -176,136 +188,149 @@ public class MultiselectCheckboxTagHelper : TagHelper
 
     #endregion
 
-    #region Framework Properties
-
-    /// <summary>
-    /// Gets or sets the current ViewContext for model binding support.
-    /// </summary>
-    [HtmlAttributeNotBound]
-    [ViewContext]
-    public ViewContext ViewContext { get; set; } = null!;
-
-    #endregion
-
     /// <inheritdoc />
     public override void Process(TagHelperContext context, TagHelperOutput output)
     {
-        // Remove the original tag
         output.TagName = null;
 
-        var sb = new StringBuilder();
-
-        // Get available items and selected items from model expressions
         var availableItems = GetAvailableItems();
         var selectedItems = GetSelectedItems();
         var inputName = GetInputName();
 
-        // Render the complete component structure
-        RenderOuterContainer(sb, availableItems, selectedItems, inputName);
-
-        output.Content.SetHtmlContent(sb.ToString());
+        var container = BuildOuterContainer(availableItems, selectedItems, inputName);
+        output.Content.SetHtmlContent(container);
     }
 
     #region Private Rendering Methods
 
-    private void RenderOuterContainer(StringBuilder sb, List<object> availableItems, HashSet<string> selectedItems, string inputName)
+    private TagBuilder BuildOuterContainer(List<object> availableItems, HashSet<string> selectedItems, string inputName)
     {
-        sb.Append($"<div class=\"{Encoder.Encode(GroupClass)}\">");
+        var container = new TagBuilder("div");
+        container.AddCssClass(GroupClass);
 
-        RenderTitleLabel(sb);
-        RenderDescription(sb);
-        RenderFieldset(sb, availableItems, selectedItems, inputName);
-
-        sb.Append("</div>");
-    }
-
-    private void RenderTitleLabel(StringBuilder sb)
-    {
-        if (!string.IsNullOrWhiteSpace(Title))
-        {
-            var labelId = GetLabelId();
-            sb.Append($"<label class=\"{Encoder.Encode(LabelClass)}\" id=\"{Encoder.Encode(labelId)}\">{Encoder.Encode(Title)}</label>");
-        }
-    }
-
-    private void RenderDescription(StringBuilder sb)
-    {
         if (!string.IsNullOrWhiteSpace(Description))
         {
-            sb.Append($"<div class=\"{Encoder.Encode(DescriptionClass)}\">{Encoder.Encode(Description)}</div>");
+            container.InnerHtml.AppendHtml(BuildDescription());
         }
+
+        container.InnerHtml.AppendHtml(BuildFieldset(availableItems, selectedItems, inputName));
+
+        return container;
     }
 
-    private void RenderFieldset(StringBuilder sb, List<object> availableItems, HashSet<string> selectedItems, string inputName)
+    private TagBuilder BuildDescription()
     {
-        // Build fieldset opening tag with optional id attribute
-        var fieldsetId = !string.IsNullOrEmpty(FieldsetId) 
-            ? $" id=\"{Encoder.Encode(FieldsetId)}\"" 
-            : string.Empty;
-        sb.Append($"<fieldset class=\"{Encoder.Encode(FieldsetClass)}\"{fieldsetId}>");
+        var desc = new TagBuilder("div");
+        desc.AddCssClass(DescriptionClass);
+        desc.InnerHtml.Append(Description);
+        return desc;
+    }
 
-        // Render content based on whether items exist
+    private TagBuilder BuildFieldset(List<object> availableItems, HashSet<string> selectedItems, string inputName)
+    {
+        var fieldset = new TagBuilder("fieldset");
+        fieldset.AddCssClass(FieldsetClass);
+
+        if (!string.IsNullOrEmpty(FieldsetId))
+        {
+            fieldset.Attributes["id"] = FieldsetId;
+        }
+
+        // Legend (title) inside fieldset
+        if (!string.IsNullOrWhiteSpace(Title))
+        {
+            fieldset.InnerHtml.AppendHtml(BuildLegend());
+        }
+
         if (availableItems.Count == 0)
         {
-            RenderEmptyMessage(sb);
+            fieldset.InnerHtml.AppendHtml(BuildEmptyMessage());
         }
         else
         {
-            RenderCheckboxGrid(sb, availableItems, selectedItems, inputName);
+            fieldset.InnerHtml.AppendHtml(BuildCheckboxGrid(availableItems, selectedItems, inputName));
         }
 
-        sb.Append("</fieldset>");
+        return fieldset;
     }
 
-    private void RenderEmptyMessage(StringBuilder sb)
+    private TagBuilder BuildLegend()
     {
-        sb.Append($"<p class=\"empty-message\">{Encoder.Encode(EmptyMessage)}</p>");
+        var legend = new TagBuilder("legend");
+        legend.AddCssClass(LabelClass);
+        legend.Attributes["id"] = GetLabelId();
+        legend.InnerHtml.Append(Title);
+        return legend;
     }
 
-    private void RenderCheckboxGrid(StringBuilder sb, List<object> availableItems, HashSet<string> selectedItems, string inputName)
+    private TagBuilder BuildEmptyMessage()
     {
-        var ariaLabelledBy = GetLabelId();
+        var p = new TagBuilder("p");
+        p.AddCssClass("empty-message");
+        p.InnerHtml.Append(EmptyMessage);
+        return p;
+    }
 
-        sb.Append($"<div aria-labelledby=\"{Encoder.Encode(ariaLabelledBy)}\" class=\"{Encoder.Encode(GridClass)}\" data-multiselect-grid role=\"group\">");
+    private TagBuilder BuildCheckboxGrid(List<object> availableItems, HashSet<string> selectedItems, string inputName)
+    {
+        var grid = new TagBuilder("div");
+        grid.AddCssClass(GridClass);
+        grid.Attributes["data-multiselect-grid"] = "";
+        grid.Attributes["role"] = "group";
+
+        // Only add aria-labelledby when a title/legend is actually rendered
+        if (!string.IsNullOrWhiteSpace(Title))
+        {
+            grid.Attributes["aria-labelledby"] = GetLabelId();
+        }
 
         for (int i = 0; i < availableItems.Count; i++)
         {
-            RenderCheckboxOption(sb, availableItems[i], i, selectedItems, inputName);
+            grid.InnerHtml.AppendHtml(BuildCheckboxOption(availableItems[i], i, selectedItems, inputName));
         }
 
-        sb.Append("</div>");
+        return grid;
     }
 
-    private void RenderCheckboxOption(StringBuilder sb, object item, int index, HashSet<string> selectedItems, string inputName)
+    private TagBuilder BuildCheckboxOption(object item, int index, HashSet<string> selectedItems, string inputName)
     {
         var itemValue = item?.ToString() ?? string.Empty;
         var safePrefix = GetSafeIdPrefix();
         var checkboxId = $"{safePrefix}-{index}";
-        var ariaDescribedBy = $"{checkboxId}-desc";
         var isChecked = selectedItems.Contains(itemValue);
 
         // Option container
-        sb.Append($"<div class=\"{Encoder.Encode(OptionClass)}\" data-multiselect-option>");
+        var option = new TagBuilder("div");
+        option.AddCssClass(OptionClass);
+        option.Attributes["data-multiselect-option"] = "";
 
-        // Checkbox input with attributes in alphabetical order (matching expected output)
-        sb.Append($"<input aria-describedby=\"{Encoder.Encode(ariaDescribedBy)}\"");
+        // Checkbox input
+        var input = new TagBuilder("input");
         if (isChecked)
         {
-            sb.Append(" checked=\"checked\"");
+            input.Attributes["checked"] = "checked";
         }
-        sb.Append($" class=\"{Encoder.Encode(InputClass)}\"");
-        sb.Append($" id=\"{Encoder.Encode(checkboxId)}\"");
-        sb.Append($" name=\"{Encoder.Encode(inputName)}\"");
-        sb.Append(" type=\"checkbox\"");
-        sb.Append($" value=\"{Encoder.Encode(itemValue)}\">");
+        input.AddCssClass(InputClass);
+        input.Attributes["id"] = checkboxId;
+        input.Attributes["name"] = inputName;
+        input.Attributes["type"] = "checkbox";
+        input.Attributes["value"] = itemValue;
+        input.TagRenderMode = TagRenderMode.SelfClosing;
+        option.InnerHtml.AppendHtml(input);
 
         // Label with pill
-        sb.Append($"<label class=\"{Encoder.Encode(CheckboxLabelClass)}\" for=\"{Encoder.Encode(checkboxId)}\">");
-        sb.Append($"<span class=\"{Encoder.Encode(PillClass)}\">{Encoder.Encode(itemValue)}</span>");
-        sb.Append("</label>");
+        var label = new TagBuilder("label");
+        label.AddCssClass(CheckboxLabelClass);
+        label.Attributes["for"] = checkboxId;
 
-        // Close option container
-        sb.Append("</div>");
+        var pill = new TagBuilder("span");
+        pill.AddCssClass(PillClass);
+        pill.InnerHtml.Append(itemValue);
+        label.InnerHtml.AppendHtml(pill);
+
+        option.InnerHtml.AppendHtml(label);
+
+        return option;
     }
 
     #endregion

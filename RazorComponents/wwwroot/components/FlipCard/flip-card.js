@@ -9,7 +9,7 @@
      * Equalizes heights for auto-height cards so both faces match.
      */
     function equalizeCardHeights() {
-        document.querySelectorAll('.card.auto-height').forEach(function (card) {
+        document.querySelectorAll('.flip-card .card.auto-height').forEach(function (card) {
             var front = card.querySelector('.card-front');
             var back = card.querySelector('.card-back');
 
@@ -33,10 +33,10 @@
     }
 
     /**
-     * Initializes flip button event listeners.
+     * Initializes flip button event listeners using data attributes.
      */
     function initializeFlipButtons() {
-        document.querySelectorAll('.rotate-button').forEach(function (button) {
+        document.querySelectorAll('.flip-card [data-flip-card-button]').forEach(function (button) {
             // Prevent duplicate listeners
             if (button.dataset.initialized) return;
             button.dataset.initialized = 'true';
@@ -45,7 +45,18 @@
                 event.stopPropagation();
                 var card = this.closest('.card');
                 if (card) {
-                    card.classList.toggle('is-flipped');
+                    var isFlipped = card.classList.toggle('is-flipped');
+
+                    // Update ARIA states (WARNING-2)
+                    var front = card.querySelector('.card-front');
+                    var back = card.querySelector('.card-back');
+                    if (front) front.setAttribute('aria-hidden', isFlipped.toString());
+                    if (back) back.setAttribute('aria-hidden', (!isFlipped).toString());
+
+                    card.querySelectorAll('[data-flip-card-button]')
+                        .forEach(function (b) {
+                            b.setAttribute('aria-pressed', isFlipped.toString());
+                        });
                 }
             });
         });

@@ -1,9 +1,9 @@
 /* Flip Card Component Styles
- * 
+ *
  * Inherits from your design system:
  *   --bg, --color, --border-color, --border-width, --border-radius,
  *   --shadow, --padding, --font-size, --font-weight, --focus-color
- * 
+ *
  * Flip-card specific (optional):
  *   --flip-card-width: 300px;
  *   --flip-card-height: 300px;
@@ -11,11 +11,11 @@
  *   --flip-card-header-height: 40px;
  */
 
-.card-container {
+.flip-card.card-container {
     perspective: 1000px;
 }
 
-.card {
+.flip-card .card {
     width: var(--flip-card-width, 300px);
     height: var(--flip-card-height, 300px);
     transform-style: preserve-3d;
@@ -25,18 +25,19 @@
     border: none;
 }
 
-.card.auto-height {
+.flip-card .card.auto-height {
     height: var(--card-height, var(--flip-card-height, 300px));
     min-height: var(--flip-card-height, 300px);
 }
 
 /* Card faces */
-.card-front,
-.card-back {
+.flip-card .card-front,
+.flip-card .card-back {
     position: absolute;
     width: 100%;
     height: 100%;
     backface-visibility: hidden;
+    display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
@@ -48,17 +49,17 @@
     overflow: clip;
 }
 
-.card-back {
+.flip-card .card-back {
     transform: rotateY(180deg);
 }
 
-.card.flip-vertical .card-back {
+.flip-card .card.flip-vertical .card-back {
     transform: rotateX(180deg);
 }
 
 /* Headers */
-.card-front-header,
-.card-back-header {
+.flip-card .card-front-header,
+.flip-card .card-back-header {
     padding: var(--padding, 10px);
     border-bottom: var(--border-width, 1px) solid var(--border-color, #ccc);
     background-color: var(--header-bg, transparent);
@@ -70,8 +71,8 @@
     height: var(--flip-card-header-height, 40px);
 }
 
-.card-front-header > h2,
-.card-back-header > h2 {
+.flip-card .card-front-header > h2,
+.flip-card .card-back-header > h2 {
     margin: 0;
     font-size: var(--font-size, 1rem);
     font-weight: var(--font-weight, 600);
@@ -80,8 +81,8 @@
 }
 
 /* Content areas */
-.card-front-content,
-.card-back-content {
+.flip-card .card-front-content,
+.flip-card .card-back-content {
     padding: var(--padding, 10px);
     box-sizing: border-box;
     height: calc(100% - var(--flip-card-header-height, 40px));
@@ -90,28 +91,28 @@
 }
 
 /* Auto-height adjustments */
-.card.auto-height > .card-front,
-.card.auto-height > .card-back {
+.flip-card .card.auto-height > .card-front,
+.flip-card .card.auto-height > .card-back {
     height: var(--card-height, var(--flip-card-height, 300px));
     min-height: var(--flip-card-height, 300px);
 }
 
-.card.auto-height .card-front-content,
-.card.auto-height .card-back-content {
+.flip-card .card.auto-height .card-front-content,
+.flip-card .card.auto-height .card-back-content {
     height: calc(var(--card-height, var(--flip-card-height, 300px)) - var(--flip-card-header-height, 40px));
 }
 
 /* Flip transforms */
-.card.flip-horizontal.is-flipped {
+.flip-card .card.flip-horizontal.is-flipped {
     transform: rotateY(180deg);
 }
 
-.card.flip-vertical.is-flipped {
+.flip-card .card.flip-vertical.is-flipped {
     transform: rotateX(180deg);
 }
 
 /* Flip button */
-.rotate-button {
+.flip-card .rotate-button {
     cursor: pointer;
     border: var(--border-width, 1px) solid var(--border-color, #ccc);
     background: var(--button-bg, #fff);
@@ -122,11 +123,18 @@
     font-family: inherit;
 }
 
-.rotate-button:hover {
+.flip-card .rotate-button:hover {
     background-color: var(--button-bg-hover, #f0f0f0);
 }
 
-.rotate-button:focus {
+.flip-card .rotate-button:focus {
     outline: 2px solid var(--focus-color, #0066cc);
     outline-offset: 2px;
+}
+
+/* Respect reduced motion preference (SUGGESTION-2) */
+@media (prefers-reduced-motion: reduce) {
+    .flip-card .card {
+        transition: none;
+    }
 }
